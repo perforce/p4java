@@ -1,6 +1,6 @@
 [![Support](https://img.shields.io/badge/Support-Official-green.svg)](mailto:support@perforce.com)
 
-# P4Java Examples
+# P4Java
 
 P4Java is officially supported by Perforce.  Pull requests will be managed by Perforce's engineering teams.  We will do our best to acknowledge these in a timely manner based on available capacity.  Issues will not be managed on GitHub.  All issues should be recorded via Perforce's standard support process (https://www.perforce.com/support/request-support). 
 
