@@ -137,7 +137,7 @@ public class Stream extends StreamSummary implements IStream {
 	 * @param description      if not null, used as the new stream spec's description field;
 	 *                         if null, uses the Stream.DEFAULT_DESCRIPTION field.
 	 * @param options          flags to configure stream behavior: allsubmit/ownersubmit
-	 *                         [un]locked [no]toparent [no]fromparent.
+	 *                         [un]locked [no]toparent [no]fromparent mergedown/mergeany.
 	 * @param viewPaths        one or more lines that define file paths in the stream view.
 	 *                         Each line is of the form: <path_type> <view_path>
 	 *                         [<depot_path>]
@@ -287,9 +287,10 @@ public class Stream extends StreamSummary implements IStream {
 		 * Construct a mapping from the passed-in string, which is assumed to be
 		 * in the format.
 		 */
-		public StreamViewMapping(int order, String viewString) {
+		public StreamViewMapping(int order, String rawViewString) {
 			this.order = order;
-			if (viewString != null) {
+			if (rawViewString != null) {
+				String viewString = stripComments(rawViewString);
 				// The first part of the stream path should be the type
 				int idx = viewString.indexOf(" ");
 				if (idx != -1) {
@@ -301,6 +302,7 @@ public class Stream extends StreamSummary implements IStream {
 				this.type = EntryType.fromString(entries[0]);
 				this.left = stripTypePrefix(entries[0]);
 				this.right = entries[1];
+				this.comment = parseComments(rawViewString);
 			}
 		}
 
@@ -345,6 +347,16 @@ public class Stream extends StreamSummary implements IStream {
 		public void setDepotPath(String depotPath) {
 			this.right = depotPath;
 		}
+
+		@Override
+		public String toString(String sepString, boolean quoteBlanks) {
+			String returnedString =  super.toString(sepString, quoteBlanks);
+			if (this.getPathType() != null) {
+				return this.getPathType().getValue() + " " + returnedString;
+			}
+			return returnedString;
+		}
+
 	}
 
 	/**
@@ -503,14 +515,25 @@ public class Stream extends StreamSummary implements IStream {
 
 		if (map != null) {
 			String key = MapKeys.PATHS_KEY;
+			String commentKey = MapKeys.PATHS_KEY + "Comment";
 			for (int i = 0; ; i++) {
-				if (!map.containsKey(key + i)) {
+				if (!map.containsKey(key + i) && !map.containsKey(commentKey + i)) {
 					break;
-				} else if (map.get(key + i) != null) {
-					try {
+				}
+				StreamViewMapping viewMap = new StreamViewMapping();
+				try {
+					if (map.get(commentKey + i) != null) {
+						if (map.get(commentKey + i) != null) {
+							String comment = (String) map.get(commentKey + i);
+							comment = comment.substring(comment.indexOf("##") + 2);
+							comment = comment.trim();
+							viewMap.setComment(comment);
+						}
+					}
+
+					if (map.get(key + i) != null) {
 						PathType type = null;
 						String path = (String) map.get(key + i);
-
 						// The first part of the stream path should be the type
 						int idx = path.indexOf(" ");
 						if (idx != -1) {
@@ -520,56 +543,82 @@ public class Stream extends StreamSummary implements IStream {
 						}
 						String[] matchStrs = MapEntry
 								.parseViewMappingString(path);
-
-						this.streamView.getEntryList().add(
-								new StreamViewMapping(i, type,
-										matchStrs[0], matchStrs[1]));
-
-					} catch (Throwable thr) {
-						Log.error("Unexpected exception in Stream map-based constructor: "
-								+ thr.getLocalizedMessage());
-						Log.exception(thr);
+						viewMap.setOrder(i);
+						viewMap.setPathType(type);
+						viewMap.setLeft(matchStrs[0]);
+						viewMap.setRight(matchStrs[1]);
 					}
+				} catch (Throwable thr) {
+					Log.error("Unexpected exception in Stream map-based constructor: "
+							+ thr.getLocalizedMessage());
+					Log.exception(thr);
 				}
+				this.streamView.getEntryList().add(viewMap);
 			}
+
 			key = MapKeys.REMAPPED_KEY;
+			commentKey = MapKeys.REMAPPED_KEY + "Comment";
 			for (int i = 0; ; i++) {
-				if (!map.containsKey(key + i)) {
+				if (!map.containsKey(key + i) && !map.containsKey(commentKey + i)) {
 					break;
-				} else if (map.get(key + i) != null) {
-					try {
+				}
+				StreamRemappedMapping remappedMap = new StreamRemappedMapping();
+				try {
+					if (map.get(commentKey + i) != null) {
+						String comment = (String) map.get(commentKey + i);
+						comment = comment.substring(comment.indexOf("##") + 2);
+						comment = comment.trim();
+						remappedMap.setComment(comment);
+					}
+
+					if (map.get(key + i) != null) {
 						String path = (String) map.get(key + i);
 						String[] matchStrs = MapEntry
 								.parseViewMappingString(path);
-
-						this.remappedView.getEntryList().add(
-								new StreamRemappedMapping(i, matchStrs[0],
-										matchStrs[1]));
-
-					} catch (Throwable thr) {
-						Log.error("Unexpected exception in Stream map-based constructor: "
-								+ thr.getLocalizedMessage());
-						Log.exception(thr);
+						remappedMap.setOrder(i);
+						remappedMap.setLeft(matchStrs[0]);
+						remappedMap.setRight(matchStrs[1]);
 					}
+				}catch (Throwable thr) {
+					Log.error("Unexpected exception in Stream map-based constructor: "
+							+ thr.getLocalizedMessage());
+					Log.exception(thr);
 				}
+				this.remappedView.getEntryList().add(remappedMap);
 			}
+
+
 			key = MapKeys.IGNORED_KEY;
+			commentKey = MapKeys.IGNORED_KEY + "Comment";
 			for (int i = 0; ; i++) {
-				if (!map.containsKey(key + i)) {
+				if (!map.containsKey(key + i) && !map.containsKey(commentKey + i)) {
 					break;
-				} else if (map.get(key + i) != null) {
-					try {
-						String path = (String) map.get(key + i);
-						this.ignoredView.getEntryList().add(
-								new StreamIgnoredMapping(i, path));
-
-					} catch (Throwable thr) {
-						Log.error("Unexpected exception in Stream map-based constructor: "
-								+ thr.getLocalizedMessage());
-						Log.exception(thr);
-					}
 				}
+				StreamIgnoredMapping ignoreMap = new StreamIgnoredMapping();
+				try {
+					if (map.get(commentKey + i) != null) {
+
+						String comment = (String) map.get(commentKey + i);
+						comment = comment.substring(comment.indexOf("##") + 2);
+						comment = comment.trim();
+						ignoreMap.setComment(comment);
+					}
+
+					if (map.get(key + i) != null) {
+						String path = (String) map.get(key + i);
+						String[] matchStrs = MapEntry
+								.parseViewMappingString(path);
+						ignoreMap.setOrder(i);
+						ignoreMap.setLeft(matchStrs[0]);
+					}
+				}catch (Throwable thr) {
+					Log.error("Unexpected exception in Stream map-based constructor: "
+							+ thr.getLocalizedMessage());
+					Log.exception(thr);
+				}
+				this.ignoredView.getEntryList().add(ignoreMap);
 			}
+
 			key = MapKeys.VIEW_KEY;
 			for (int i = 0; ; i++) {
 				if (!map.containsKey(key + i)) {

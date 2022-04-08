@@ -67,6 +67,35 @@ public interface IStreamSummary extends IServerResource {
 		}
 	};
 
+    /**
+     * ParentView: 'inherit' or 'noinherit'.  Defines whether the stream
+     * inherits a view from its parent.
+     */
+    public enum ParentView {
+        INHERIT,
+        NOINHERIT;
+
+        public static ParentView fromString(String str) {
+            if (str == null) {
+                return null;
+            }
+
+            try {
+                return ParentView.valueOf(str.toUpperCase());
+            } catch (IllegalArgumentException iae) {
+                Log.error("Bad conversion attempt in ParentView.fromString; string: "
+                        + str + "; message: " + iae.getMessage());
+                Log.exception(iae);
+                return null;
+            }
+        }
+
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
+    };
+
 	/**
 	 * Stream options are flags to configure stream behavior.
 	 * <p>
@@ -102,6 +131,10 @@ public interface IStreamSummary extends IServerResource {
 		boolean isNoFromParent();
 
 		void setNoFromParent(boolean noFromParent);
+
+		boolean isMergeAny();
+
+		void setMergeAny(boolean mergeAny);
 	};
 
 	/**
@@ -143,6 +176,11 @@ public interface IStreamSummary extends IServerResource {
 	 * Get the stream type
 	 */
 	Type getType();
+
+    /**
+     * Get the stream parentView
+     */
+    ParentView getParentView();
 
 	/**
 	 * Get the stream options
@@ -242,6 +280,14 @@ public interface IStreamSummary extends IServerResource {
 	 *            new stream type.
 	 */
 	void setType(Type type);
+
+    /**
+     * Set the stream parentView. This will not change the associated stream spec on
+     * the Perforce server unless you arrange for the update to server.
+     *
+     * @param parentView new stream parentView.
+     */
+    void setParentView(ParentView parentView);
 
 	/**
 	 * Set the stream options. This will not change the associated stream spec

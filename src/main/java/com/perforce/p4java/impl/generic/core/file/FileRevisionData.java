@@ -10,8 +10,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseInt;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseLong;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
@@ -23,6 +21,8 @@ import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.REV;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TIME;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TYPE;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.USER;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 

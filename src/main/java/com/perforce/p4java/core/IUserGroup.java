@@ -40,6 +40,11 @@ public interface IUserGroup extends IServerResource {
 	 * or password timeout) is unlimited.
 	 */
 	int UNLIMITED = -1;
+
+	/**
+	 * Used as a default value in MaxOpenFiles, for backwards compatibility with old servers.
+	 */
+	int UNDEFINED = -Integer.MAX_VALUE;
 	
 	/**
 	 * Get the group's name.
@@ -86,6 +91,20 @@ public interface IUserGroup extends IServerResource {
      * @param maxLockTimeOfMilliSeconds - milliseconds
 	 */
 	void setMaxLockTime(int maxLockTimeOfMilliSeconds);
+
+	/**
+	 * Get the maximum files that can be opened by members of this group.
+	 *
+	 * @return max open files
+	 */
+	int getMaxOpenFiles();
+
+	/**
+	 * Set maximum files that can be opened by members of this group.
+	 *
+	 * @param maxOpenFiles
+	 */
+	void setMaxOpenFiles(int maxOpenFiles);
 	
 	/**
 	 * Get the timeout value for commands by members of this group.

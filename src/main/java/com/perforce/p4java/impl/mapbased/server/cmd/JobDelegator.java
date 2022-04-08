@@ -14,8 +14,8 @@ import javax.annotation.Nonnull;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.server.CmdSpec.JOB;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

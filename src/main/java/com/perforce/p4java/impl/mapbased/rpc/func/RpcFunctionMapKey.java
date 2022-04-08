@@ -134,7 +134,8 @@ public class RpcFunctionMapKey {
 	public static final String NOBASE = "noBase";
 	public static final String NOCASE = "nocase";
 	public static final String NOCLOBBER = "noclobber";
-	public static final String NOECHO = "noecho";
+    public static final String NOECHO = "noecho";
+    public static final String NOPROMPT = "noprompt";
 	public static final String OFFSET = "offset";
 	public static final String OLD_PASSWORD = "oldPassword";
 	public static final String OPEN = "open";
@@ -236,7 +237,8 @@ public class RpcFunctionMapKey {
 	public static final String TICKET = "ticket";
 	public static final String TIME = "time";
 	public static final String TO_FILE = "toFile";
-	public static final String TOKEN = "token";
+    public static final String TOKEN = "token";
+    public static final String TOKEN2 = "token2";
 	public static final String TOTALFILECOUNT = "totalFileCount";
 	public static final String TOTALFILESIZE = "totalFileSize";
 	public static final String TRANS = "trans";

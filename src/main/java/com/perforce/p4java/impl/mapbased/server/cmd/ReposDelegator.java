@@ -16,8 +16,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.server.CmdSpec.REPOS;
+import static java.util.Objects.nonNull;
 
 public class ReposDelegator extends BaseDelegator implements IReposDelegator {
 

@@ -19,7 +19,7 @@ public class EditFilesOptions extends Options {
 	/**
 	 * Options: -n, -k, -c[changelist], -t[filetype], -Q[charset]
 	 */
-	public static final String OPTIONS_SPECS = "b:n b:k i:c:gtz s:t s:Q";
+	public static final String OPTIONS_SPECS = "b:n b:k i:c:gtz s:t s:Q b:So";
 	
 	/**
 	 * If true, don't actually do the edit, just return the files that
@@ -58,6 +58,12 @@ public class EditFilesOptions extends Options {
 	 * unicode files along with the filetype.
 	 */
 	protected String charset = null;
+
+	/**
+	 * If true, can be used with '-c change' to open the client's stream
+	 * spec for edit.  (See 'p4 help streamcmds'.)
+	 */
+	protected boolean editStreamSpec = false;
 
 	/**
 	 * Default constructor.
@@ -109,7 +115,8 @@ public class EditFilesOptions extends Options {
 								this.bypassClientUpdate,
 								this.changelistId,
 								this.fileType,
-								this.charset);
+								this.charset,
+								this.editStreamSpec);
 		return this.optionList;
 	}
 
@@ -155,6 +162,15 @@ public class EditFilesOptions extends Options {
 
 	public EditFilesOptions setCharset(String charset) {
 		this.charset = charset;
+		return this;
+	}
+
+	public boolean isEditStreamSpec() {
+		return editStreamSpec;
+	}
+
+	public EditFilesOptions setEditStreamSpec(boolean editStreamSpec) {
+		this.editStreamSpec = editStreamSpec;
 		return this;
 	}
 }

@@ -1,6 +1,17 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import com.perforce.p4java.Log;
+import com.perforce.p4java.admin.ILogTail;
+import com.perforce.p4java.exception.P4JavaException;
+import com.perforce.p4java.impl.generic.admin.LogTail;
+import com.perforce.p4java.option.server.LogTailOptions;
+import com.perforce.p4java.server.IOptionsServer;
+import com.perforce.p4java.server.delegator.ILogTailDelegator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwRequestExceptionIfConditionFails;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseLong;
@@ -10,20 +21,9 @@ import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.FILE;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.OFFSET;
 import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
 import static com.perforce.p4java.server.CmdSpec.LOGTAIL;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
-import com.perforce.p4java.Log;
-import com.perforce.p4java.admin.ILogTail;
-import com.perforce.p4java.exception.P4JavaException;
-import com.perforce.p4java.impl.generic.admin.LogTail;
-import com.perforce.p4java.option.server.LogTailOptions;
-import com.perforce.p4java.server.IOptionsServer;
-import com.perforce.p4java.server.delegator.ILogTailDelegator;
 
 /**
  * Implementation for logtail.

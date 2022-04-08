@@ -1,19 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.handleErrorStr;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.isExistClientOrLabelOrUser;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.isInfoMessage;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.parseCommandResultMapAsString;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.parseCommandResultMapIfIsInfoMessageAsString;
-import static com.perforce.p4java.server.CmdSpec.USER;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-
 import com.perforce.p4java.core.IUser;
 import com.perforce.p4java.exception.AccessException;
 import com.perforce.p4java.exception.ConnectionException;
@@ -25,6 +11,20 @@ import com.perforce.p4java.option.server.UpdateUserOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IUserDelegator;
 import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.handleErrorStr;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.isExistClientOrLabelOrUser;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.isInfoMessage;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.parseCommandResultMapAsString;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.parseCommandResultMapIfIsInfoMessageAsString;
+import static com.perforce.p4java.server.CmdSpec.USER;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Implementation to handle the User command.

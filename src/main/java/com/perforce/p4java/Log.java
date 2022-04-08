@@ -1,10 +1,10 @@
 package com.perforce.p4java;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.StringHelper.format;
-
 import com.perforce.p4java.server.callback.ILogCallback;
 import com.perforce.p4java.server.callback.ILogCallback.LogTraceLevel;
+
+import static com.perforce.p4java.common.base.StringHelper.format;
+import static java.util.Objects.nonNull;
 
 /**
  * Simple P4Java-wide logger class based on the ILogCallback callback

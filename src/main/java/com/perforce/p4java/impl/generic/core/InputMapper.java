@@ -17,13 +17,16 @@ import com.perforce.p4java.core.IBranchMapping;
 import com.perforce.p4java.core.IBranchSpec;
 import com.perforce.p4java.core.IChangelist;
 import com.perforce.p4java.core.IDepot;
+import com.perforce.p4java.core.IExtension;
 import com.perforce.p4java.core.ILabel;
 import com.perforce.p4java.core.ILabelMapping;
+import com.perforce.p4java.core.ILicense;
 import com.perforce.p4java.core.IMapEntry;
 import com.perforce.p4java.core.IReviewSubscription;
 import com.perforce.p4java.core.IStream;
 import com.perforce.p4java.core.IStreamIgnoredMapping;
 import com.perforce.p4java.core.IStreamRemappedMapping;
+import com.perforce.p4java.core.IStreamSummary;
 import com.perforce.p4java.core.IStreamViewMapping;
 import com.perforce.p4java.core.IUser;
 import com.perforce.p4java.core.IUserGroup;
@@ -103,6 +106,9 @@ public class InputMapper {
 			}
 			if (change.getStatus() != null) {
 				changeMap.put("Status", change.getStatus().toString().toLowerCase());
+			}
+			if (change.getChangelistStream() != null) {
+				changeMap.put("Stream", change.getChangelistStream());
 			}
 
 			try {
@@ -281,10 +287,8 @@ public class InputMapper {
 			List<ILabelMapping> viewMaps = label.getViewMapping().getEntryList();
 
 			if (viewMaps != null) {
-				int i = 0;
 				for (IMapEntry mapping : viewMaps) {
-					labelMap.put(MapKeys.VIEW_KEY + i, mapping.getLeft());
-					i++;
+					labelMap.put(MapKeys.VIEW_KEY + mapping.getOrder(), mapping.toString(" ", true));
 				}
 			}
 		}
@@ -342,6 +346,9 @@ public class InputMapper {
 			groupMap.put(MapKeys.TIMEOUT_KEY, getUGValue(group.getTimeout()));
 			groupMap.put(MapKeys.MAXSCANROWS_KEY, getUGValue(group.getMaxScanRows()));
 			groupMap.put(MapKeys.MAXLOCKTIME_KEY, getUGValue(group.getMaxLockTime()));
+			if (group.getMaxOpenFiles() != -Integer.MAX_VALUE){
+				groupMap.put(MapKeys.MAXOPENFILES_KEY, getUGValue(group.getMaxOpenFiles()));
+			}
 			groupMap.put(MapKeys.PASSWORD_TIMEOUT_KEY, getUGValue(group.getPasswordTimeout()));
 			if (group.getSubgroups() != null) {
 				int i = 0;
@@ -486,7 +493,7 @@ public class InputMapper {
 	 * @return non-null map suitable for use with execMapCmd
 	 */
 
-	public static Map<String, Object> map(IStream stream, IServer server) {
+	public static Map<String, Object> map(IStream stream, IServer server) throws P4JavaException {
 		Map<String, Object> streamMap = new HashMap<String, Object>();
 		if (stream == null) {
 			return streamMap;
@@ -497,34 +504,30 @@ public class InputMapper {
 
 		streamMap.putAll(stream.getRawFields());
 
-		ViewMap<IStreamViewMapping> viewMap = stream.getStreamView();
-		if (viewMap != null) {
-			for (IStreamViewMapping mapping : viewMap.getEntryList()) {
-				if (mapping != null) {
-					streamMap.put(MapKeys.PATHS_KEY + mapping.getOrder(),
-							mapping.getPathType().getValue() + " " + mapping.toString(" ", true));
-				}
-			}
+		streamMap.putAll(parseMap(stream.getStreamView(), MapKeys.PATHS_KEY));
+		streamMap.putAll(parseMap(stream.getRemappedView(), MapKeys.REMAPPED_KEY));
+		streamMap.putAll(parseMap(stream.getIgnoredView(), MapKeys.IGNORED_KEY));
+
+		// For pre 21.1 servers without ParentView.
+		IStreamSummary.ParentView parentView;
+
+		// task and Virtual streams have always parentView = inherit
+		if (stream.getType() == IStreamSummary.Type.TASK || stream.getType() == IStreamSummary.Type.VIRTUAL) {
+			parentView = IStreamSummary.ParentView.INHERIT;
+		} else {
+			String streamPath = stream.getStream();
+			IStream tempStream = server.getStream(streamPath);
+			parentView = tempStream.getParentView();
 		}
 
-		ViewMap<IStreamRemappedMapping> remappedViewMap = stream.getRemappedView();
-		if (remappedViewMap != null) {
-			for (IStreamRemappedMapping mapping : remappedViewMap.getEntryList()) {
-				if (mapping != null) {
-					streamMap.put(MapKeys.REMAPPED_KEY + mapping.getOrder(),
-							mapping.toString(" ", true));
-				}
-			}
+		// If server returned it, and it was not provided, use one based on dm.stream.parentview.
+		if (stream.getParentView() == null && parentView != null) {
+			streamMap.put(MapKeys.PARENT_VIEW_KEY, parentView.toString());
 		}
 
-		ViewMap<IStreamIgnoredMapping> ignoredViewMap = stream.getIgnoredView();
-		if (ignoredViewMap != null) {
-			for (IStreamIgnoredMapping mapping : ignoredViewMap.getEntryList()) {
-				if (mapping != null) {
-					streamMap.put(MapKeys.IGNORED_KEY + mapping.getOrder(),
-							mapping.toString(" ", true));
-				}
-			}
+		// If server doesn't support ParentView, remove it.'
+		if (server.getServerVersion() < 20211) {
+			streamMap.remove(MapKeys.PARENT_VIEW_KEY);
 		}
 
 		return streamMap;
@@ -562,13 +565,86 @@ public class InputMapper {
 		return triggersMap;
 	}
 
+	public static Map<String, Object> map(ILicense licenseSpec) {
+		Map<String, Object> licenseMap = new HashMap<String, Object>();
+
+		if (licenseSpec != null) {
+			licenseMap.put(MapKeys.LICENSE_KEY, licenseSpec.getLicense());
+			licenseMap.put(MapKeys.LICENSE_EXPIRES_KEY, licenseSpec.getLicenseExpires());
+			licenseMap.put(MapKeys.LICENSE_SUPPORT_KEY, licenseSpec.getSupportExpires());
+			licenseMap.put(MapKeys.LICENSE_CUSTOMER_KEY, licenseSpec.getCustomer());
+			licenseMap.put(MapKeys.LICENSE_APPLICATION_KEY, licenseSpec.getApplication());
+			licenseMap.put(MapKeys.LICENSE_IPADDRESS_KEY, licenseSpec.getIpaddress());
+			licenseMap.put(MapKeys.LICENSE_PLATFORM_KEY, licenseSpec.getPlatform());
+			licenseMap.put(MapKeys.LICENSE_CLIENTS_KEY, String.valueOf(licenseSpec.getClients()));
+			licenseMap.put(MapKeys.LICENSE_USERS_KEY, String.valueOf(licenseSpec.getUsers()));
+
+			if (licenseSpec.getCapabilities() != null) {
+				for (int i = 0; i < licenseSpec.getCapabilities().size(); i++) {
+					licenseMap.put(MapKeys.LICENSE_CAPABILITIES_KEY + i, licenseSpec.getCapabilities().get(i));
+				}
+			}
+		}
+
+		return licenseMap;
+	}
+
+	public static Map<String, Object> map(IExtension extensionSpec) {
+		Map<String, Object> extensionMap = new HashMap<String, Object>();
+
+		if (extensionSpec != null) {
+			//TODO null checks?
+			extensionMap.put(MapKeys.EXTENSION_NAME_KEY, extensionSpec.getExtName());
+			extensionMap.put(MapKeys.EXTENSION_DESCRIPTION_KEY, extensionSpec.getDescription());
+			extensionMap.put(MapKeys.EXTENSION_VERSION_KEY, extensionSpec.getExtVersion());
+			extensionMap.put(MapKeys.EXTENSION_UUID_KEY, extensionSpec.getExtUUID());
+			extensionMap.put(MapKeys.EXTENSION_REV_KEY, extensionSpec.getExtRev());
+			extensionMap.put(MapKeys.EXTENSION_SCRIPT_TIME_KEY, extensionSpec.getExtMaxScriptTime());
+			extensionMap.put(MapKeys.EXTENSION_SCRIPT_MEMORY_KEY, extensionSpec.getExtMaxScriptMem());
+			extensionMap.put(MapKeys.EXTENSION_ENABLED_KEY, extensionSpec.getExtEnabled());
+			extensionMap.put(MapKeys.EXTENSION_NAME_SPACE_KEY, extensionSpec.getNameSpace());
+			extensionMap.put(MapKeys.EXTENSION_OWNER_KEY, extensionSpec.getOwner());
+			extensionMap.put(MapKeys.EXTENSION_UPDATE_KEY, extensionSpec.getUpdate());
+			extensionMap.put(MapKeys.EXTENSION_DESCRIPTION_KEY, extensionSpec.getDescription());
+			extensionMap.put(MapKeys.EXTENSION_CONFIG_KEY, extensionSpec.getExtConfig());
+			extensionMap.put(MapKeys.EXTENSION_GROUPS_KEY, extensionSpec.getExtAllowedGroups());
+			extensionMap.put(MapKeys.EXTENSION_P4USER_KEY, extensionSpec.getExtP4USER());
+			extensionMap.put(MapKeys.EXTENSION_DEBUG, extensionSpec.getExtDebug());
+		}
+
+		return extensionMap;
+
+	}
+
 	private static String getUGValue(int val) {
 		if (val == IUserGroup.UNLIMITED) {
 			return "unlimited";
 		} else if (val == IUserGroup.UNSET) {
 			return "unset";
+		} else if (val == IUserGroup.UNDEFINED) {
+			return String.valueOf(IUserGroup.UNDEFINED);
 		} else {
 			return "" + val;
 		}
 	}
+
+	private static Map<String, Object> parseMap(ViewMap<?> viewMap, String type) {
+		Map<String, Object> returnMap = new HashMap<>();
+
+		if (viewMap == null) {
+			return returnMap;
+		}
+
+		for (IMapEntry mapping : viewMap.getEntryList()) {
+			if (mapping == null) {
+				continue;
+			}
+
+			String value = mapping.toString(" ", true);
+			returnMap.put(type + mapping.getOrder(), value);
+		}
+
+		return returnMap;
+	}
+
 }

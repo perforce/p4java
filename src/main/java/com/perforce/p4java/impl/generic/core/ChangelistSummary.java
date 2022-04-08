@@ -12,6 +12,7 @@ import com.perforce.p4java.Log;
 import com.perforce.p4java.core.ChangelistStatus;
 import com.perforce.p4java.core.IChangelist;
 import com.perforce.p4java.core.IChangelistSummary;
+import com.perforce.p4java.impl.mapbased.MapKeys;
 import com.perforce.p4java.server.IServer;
 
 /**
@@ -19,15 +20,7 @@ import com.perforce.p4java.server.IServer;
  */
 
 public class ChangelistSummary extends ServerResource implements IChangelistSummary {
-	
-	protected static final String CHANGE_KEY = "Change";
-	protected static final String NEW_KEY = "new";
-	protected static final String CLIENT_KEY = "Client";
-	protected static final String USER_KEY = "User";
-	protected static final String STATUS_KEY = "Status";
-	protected static final String DATE_KEY = "Date";
-	protected static final String DESCRIPTION_KEY = "Description";
-	protected static final String JOBS_KEY = "Jobs";
+
 	protected static final String DATE_FORMAT = "yyyy/MM/dd HH:mm:ss";
 	
 	protected int id = IChangelist.UNKNOWN;
@@ -38,7 +31,8 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 	protected String description = null;
 	protected boolean shelved = false;
 	protected Visibility visibility = null;
-	
+	protected String changelistStream = null;
+
 	/**
 	 * Default constructor -- sets all fields to false or null, id to
 	 * IChangelist.UNKNOWN, and calls the default ServerResource constructor.
@@ -138,9 +132,9 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 				this.updateable = true;
 				
 				try {
-					String idString = (String) map.get(CHANGE_KEY);
+					String idString = (String) map.get(MapKeys.CHANGE_KEY);
 
-					if ((idString != null) && (idString.equalsIgnoreCase(NEW_KEY))) {
+					if ((idString != null) && (idString.equalsIgnoreCase(MapKeys.NEW_CHANGELIST_KEY))) {
 						this.id = IChangelist.DEFAULT;
 					} else {
 						try {
@@ -150,15 +144,15 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 							this.id = IChangelist.UNKNOWN;
 						}
 					}
-					this.clientId = (String) map.get(CLIENT_KEY);
-					this.username = (String) map.get(USER_KEY);
-					this.status = ChangelistStatus.fromString((String) map.get(STATUS_KEY));
+					this.clientId = (String) map.get(MapKeys.CLIENT_KEY);
+					this.username = (String) map.get(MapKeys.USER_KEY);
+					this.status = ChangelistStatus.fromString((String) map.get(MapKeys.STATUS_KEY));
 					
 					// Note that this is about the only place that Perforce sends
 					// an actual formatted date string back; everywhere else it's
 					// a long; here it's in the yyyy/mm/dd hh:mm:ss format -- HR.
 					
-					String dateStr = (String) map.get(DATE_KEY);
+					String dateStr = (String) map.get(MapKeys.DATE_KEY);
 					if (dateStr == null) {
 						this.date = new Date();
 					} else {
@@ -170,9 +164,13 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 						}
 					}
 					
-					this.description = (String) map.get(DESCRIPTION_KEY);
+					this.description = (String) map.get(MapKeys.DESCRIPTION_KEY);
 					if (map.containsKey("Type")) {
 						this.visibility = Visibility.fromString(((String) map.get("Type")).toUpperCase());
+					}
+
+					if (map.containsKey(MapKeys.STREAM_KEY)) {
+						this.changelistStream = (String) map.get(MapKeys.STREAM_KEY);
 					}
 				} catch (Throwable thr) {
 					Log.error("Unexpected exception in ChangelistSummary constructor: "
@@ -280,11 +278,22 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 		this.shelved = shelved;
 	}
 
-	public Visibility getVisibility() {
-		return visibility;
-	}
+	/**
+	 * @see com.perforce.p4java.core.IChangelistSummary#getVisibility()
+	 */
+	public Visibility getVisibility() {	return visibility; }
 
+	/**
+	 * @see com.perforce.p4java.core.IChangelistSummary#setVisibility(com.perforce.p4java.core.IChangelistSummary.Visibility)
+	 */
 	public void setVisibility(Visibility visibility) {
 		this.visibility = visibility;
 	}
+
+	/**
+	// * @see com.perforce.p4java.core.IChangelistSummary#getChangelistStream()
+	 */
+	public String getChangelistStream() { return changelistStream; }
 }
+
+

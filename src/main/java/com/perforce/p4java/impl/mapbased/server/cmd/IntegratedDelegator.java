@@ -1,13 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.server.CmdSpec.INTEGRATED;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.core.file.IFileSpec;
 import com.perforce.p4java.exception.AccessException;
 import com.perforce.p4java.exception.ConnectionException;
@@ -16,6 +8,14 @@ import com.perforce.p4java.exception.RequestException;
 import com.perforce.p4java.option.server.GetSubmittedIntegrationsOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IIntegratedDelegator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.server.CmdSpec.INTEGRATED;
+import static java.util.Objects.nonNull;
 
 /**
  * Implementation for integrated delegator.

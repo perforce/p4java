@@ -1,13 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.server.CmdSpec.FIX;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-
 import com.perforce.p4java.core.IChangelist;
 import com.perforce.p4java.core.IFix;
 import com.perforce.p4java.exception.AccessException;
@@ -20,6 +12,14 @@ import com.perforce.p4java.option.server.FixJobsOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IFixDelegator;
 import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.server.CmdSpec.FIX;
+import static java.util.Objects.nonNull;
 
 /**
  * Implementation for 'p4 fix'.

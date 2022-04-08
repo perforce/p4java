@@ -1,16 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.FUNCTION;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder.buildNonNullObjectListFromCommandResultMaps;
-import static com.perforce.p4java.server.CmdSpec.EXPORT;
-
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-
 import com.perforce.p4java.common.function.Function;
 import com.perforce.p4java.exception.AccessException;
 import com.perforce.p4java.exception.ConnectionException;
@@ -21,6 +10,17 @@ import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.callback.IStreamingCallback;
 import com.perforce.p4java.server.delegator.IExportDelegator;
 import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.FUNCTION;
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder.buildNonNullObjectListFromCommandResultMaps;
+import static com.perforce.p4java.server.CmdSpec.EXPORT;
+import static java.util.Objects.nonNull;
 
 /**
  * Implementation to handle the Export command.

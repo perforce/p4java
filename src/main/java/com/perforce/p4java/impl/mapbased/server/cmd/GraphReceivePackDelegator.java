@@ -9,8 +9,8 @@ import com.perforce.p4java.server.delegator.IGraphReceivePackDelegator;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.server.CmdSpec.GRAPH;
+import static java.util.Objects.nonNull;
 
 /**
  * Delegator class that delegates receive-pack command execution to the server.

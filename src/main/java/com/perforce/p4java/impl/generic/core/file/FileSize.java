@@ -3,7 +3,11 @@
  */
 package com.perforce.p4java.impl.generic.core.file;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import com.perforce.p4java.core.IChangelist;
+import com.perforce.p4java.core.file.IFileSize;
+
+import java.util.Map;
+
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseLong;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.CHANGE;
@@ -11,11 +15,7 @@ import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.FILESIZE;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.PATH;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.REV;
-
-import java.util.Map;
-
-import com.perforce.p4java.core.IChangelist;
-import com.perforce.p4java.core.file.IFileSize;
+import static java.util.Objects.nonNull;
 
 /**
  * Default implementation for the IFileSize interface.

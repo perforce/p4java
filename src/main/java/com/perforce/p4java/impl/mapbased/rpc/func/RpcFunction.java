@@ -89,6 +89,7 @@ public class RpcFunction {
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_DIFF2, RpcFunctionType.USER, "user-diff2"),
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_DIRS, RpcFunctionType.USER, "user-dirs"),
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_EDIT, RpcFunctionType.USER, "user-edit"),
+			new RpcFunctionMetadata(RpcFunctionSpec.USER_EXTENSION, RpcFunctionType.USER, "user-extension"),
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_FAILOVER, RpcFunctionType.USER, "user-failover"),
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_FETCH, RpcFunctionType.USER, "user-fetch"),
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_FILELOG, RpcFunctionType.USER, "user-filelog"),
@@ -191,6 +192,13 @@ public class RpcFunction {
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_TRANSMIT, RpcFunctionType.USER, "user-transmit"),
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_LIST, RpcFunctionType.USER, "user-list"),
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_RETYPE, RpcFunctionType.USER, "user-retype"),
+			new RpcFunctionMetadata(RpcFunctionSpec.USER_LICENSE, RpcFunctionType.USER, "user-license"),
+			new RpcFunctionMetadata(RpcFunctionSpec.USER_STREAMLOG, RpcFunctionType.USER, "user-streamlog"),
+			new RpcFunctionMetadata(RpcFunctionSpec.USER_TOPOLOGY, RpcFunctionType.USER, "user-topology"),
+			new RpcFunctionMetadata(RpcFunctionSpec.USER_REPO, RpcFunctionType.USER, "user-repo"),
+			new RpcFunctionMetadata(RpcFunctionSpec.USER_STORAGE, RpcFunctionType.USER, "user-storage"),
+			new RpcFunctionMetadata(RpcFunctionSpec.USER_UPGRADES, RpcFunctionType.USER, "user-upgrades"),
+
 
 
 

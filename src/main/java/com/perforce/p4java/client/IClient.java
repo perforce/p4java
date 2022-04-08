@@ -6,6 +6,7 @@ package com.perforce.p4java.client;
 import com.perforce.p4java.client.delegator.IWhereDelegator;
 import com.perforce.p4java.core.IChangelist;
 import com.perforce.p4java.core.IRepo;
+import com.perforce.p4java.core.IStreamSummary;
 import com.perforce.p4java.core.file.IFileSpec;
 import com.perforce.p4java.core.file.IntegrationOptions;
 import com.perforce.p4java.exception.AccessException;
@@ -37,6 +38,7 @@ import com.perforce.p4java.option.client.UnlockFilesOptions;
 import com.perforce.p4java.option.client.UnshelveFilesOptions;
 import com.perforce.p4java.option.server.ListOptions;
 import com.perforce.p4java.option.server.OpenedFilesOptions;
+import com.perforce.p4java.option.client.UndoFilesOptions;
 import com.perforce.p4java.server.IServer;
 import com.perforce.p4java.server.callback.IStreamingCallback;
 
@@ -412,6 +414,55 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 */
 
 	List<IFileSpec> revertFiles(List<IFileSpec> fileSpecs, RevertFilesOptions opts) throws P4JavaException;
+
+    /**
+     * Undo one or more previously submitted files. The 'undone' changes remain a
+     * part of the history, but the new revisions submitted after 'p4 undo' will
+     * reverse their effect.
+     * <p>
+     * If a single revision is specified, the specified revision is undone.
+     * If a revision range is specified, the entire range is undone.
+     * <p>
+     *
+     * @param fileSpecs    if non-empty, undo the specified files;
+     *                     otherwise undo all qualifying files
+     * @param changelistId - if not IChangelist.UNKNOWN, the files are opened
+     *                     in the numbered pending changelist instead of the
+     *                     'default' changelist.
+     * @param listOnly     – if true, don't actually perform the move, just
+     *                     return what would happen if the move was performed
+     * @return list of IFileSpec objects representing the results of this undo
+     * @throws ConnectionException - if the Perforce server is unreachable or
+     *                             is not connected.
+     * @throws RequestException    – if the Perforce server encounters an error
+     *                             during its processing of the request
+     * @throws AccessException     – if the Perforce server denies access to the
+     *                             caller
+     */
+    List<IFileSpec> undoFiles(List<IFileSpec> fileSpecs, int changelistId, boolean listOnly)
+            throws ConnectionException, RequestException, AccessException;
+
+    /**
+     * Undo one or more previously submitted files. The 'undone' changes remain a
+     * part of the history, but the new revisions submitted after 'p4 undo' will
+     * reverse their effect.
+     * <p>
+     * If a single revision is specified, the specified revision is undone.
+     * If a revision range is specified, the entire range is undone.
+     * <p>
+     *
+     * @param fileSpecs if non-empty, undo the specified files;
+     *                  otherwise undo all qualifying files
+     * @param opts      possibly-null UndoFilesOptions object object specifying
+     *                  method options.
+     * @return non-null but possibly-empty list of qualifying files to undo. Not
+     * all fields in individual file specs will be valid or make sense
+     * to be accessed.
+     * @throws P4JavaException if an error occurs processing this method and its
+     *                         parameters.
+     */
+    List<IFileSpec> undoFiles(List<IFileSpec> fileSpecs, UndoFilesOptions opts)
+            throws P4JavaException;
 
 	/**
 	 * Open Perforce client workspace files for deletion from a Perforce depot.
@@ -803,6 +854,32 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	IFileSpec resolveFile(IFileSpec targetFile, InputStream sourceStream, boolean useTextualMerge,
 	                      int startFromRev, int endFromRev)
 			throws ConnectionException, RequestException, AccessException;
+
+	/**
+	 * Automatically resolve the results of a previous Perforce file integration.<p>
+	 * Allows for resolving Streams.
+	 * <p>
+	 * Note that this is currently a very limited version of the full Perforce resolve feature,
+	 * corresponding only to (some of) the various auto-resolve features, meaning this method
+	 * will never invoke (or need to invoke) end user interaction. More extensive versions
+	 * of the resolve command will be surfaced as needed.<p>
+	 *
+	 * Note: results and behavior are undefined if clashing or inconsistent options
+	 * are used with this method. In general, the behavior of (e.g.) setting both
+	 * acceptYours and acceptTheirs true will be whatever the Perforce server makes
+	 * of it (usually an error), but that's not guaranteed....
+	 * <p>
+	 * Note also that having safeMerge, acceptTheirs, acceptYours, and forceResolve
+	 * all set to false in the associated ResolveFilesAutoOptions object results in
+	 * "-am" behavior.
+	 *
+	 * @param opts possibly-null ResolveFilesAutoOptions object specifying method option
+	 * @return Resolve Status
+	 * @throws P4JavaException if an error occurs processing this method and its parameters
+	 * @since 2021.2
+	 */
+	String resolveStreamAuto(ResolveFilesAutoOptions opts)
+			throws P4JavaException;
 
 	/**
 	 * Return a list of files resolved but not submitted for this client. Note that
@@ -1278,4 +1355,17 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @since 2017.2
 	 */
 	ListData getListData(List<IFileSpec> fileSpecs, ListOptions options) throws P4JavaException;
+
+	/**
+	 * Changes the parent view of clients, current stream. It will change the stream state to opened,
+	 * and add it to the default change.
+	 *
+	 * @param parentView NOINHERIT or INHERIT
+	 * @param sourceComments If true add inline source comments to ViewMaps when changing the ParentView field
+	 * from inherit to noinherit.
+	 * @return
+	 * @throws P4JavaException
+	 * @since 2021.2
+	 */
+	String setStreamParentView(IStreamSummary.ParentView parentView, boolean sourceComments) throws P4JavaException ;
 }

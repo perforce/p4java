@@ -24,10 +24,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.TimeUnit;
 
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwIOException;
 import static com.perforce.p4java.common.base.StringHelper.format;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.indexOf;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

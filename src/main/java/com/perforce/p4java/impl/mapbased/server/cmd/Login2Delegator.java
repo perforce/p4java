@@ -11,13 +11,13 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DESC;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.ID;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.PASSWORD;
 import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
 import static com.perforce.p4java.server.CmdSpec.LOGIN2;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

@@ -14,28 +14,55 @@ import com.perforce.p4java.core.IMapEntry;
 public interface ITriggerEntry extends IMapEntry {
 	
 	public enum TriggerType {
+
 		ARCHIVE("archive"),
 		AUTH_CHECK("auth-check"),
+		AUTH_CHECK_2FA("auth-check-2fa"),
 		AUTH_CHECK_SSO("auth-check-sso"),
+		AUTH_INIT_2FA("auth-init-2fa"),
+		AUTH_INVALIDATE("auth-invalidate"),
+		AUTH_PRE_2FA("auth-pre-2fa"),
+		AUTH_PRE_SSO("auth-pre-sso"),
 		AUTH_SET("auth-set"),
-		CHANGE_SUBMIT("change-submit"),
-		CHANGE_CONTENT("change-content"),
+		BGTASK("bgtask"),
 		CHANGE_COMMIT("change-commit"),
-		EDGE_SUBMIT("edge-submit"),
+		CHANGE_CONTENT("change-content"),
+		CHANGE_FAILED("change-failed"),
+		CHANGE_SUBMIT("change-submit"),
+		COMMAND("command"),
 		EDGE_CONTENT("edge-content"),
+		EDGE_SUBMIT("edge-submit"),
+		EXTENSION_RUN("extension-run"),
+		FAILED_OVER("failed-over"),
 		FIX_ADD("fix-add"),
 		FIX_DELETE("fix-delete"),
+		FORM_COMMIT("form-commit"),
+		FORM_DELETE("form-delete"),
 		FORM_IN("form-in"),
 		FORM_OUT("form-out"),
 		FORM_SAVE("form-save"),
-		FORM_COMMIT("form-commit"),
-		FORM_DELETE("form-delete"),
+		GLOBAL_EXTCFG("global-extcfg"),
+		GRAPH_FORK_REPO("graph-fork-repo"),
+		GRAPH_LFS_PUSH("graph-lfs-push"),
+		GRAPH_PUSH_COMPLETE("graph-push-complete"),
+		GRAPH_PUSH_REFERENCE("graph-push-reference"),
+		GRAPH_PUSH_REFERENCE_COMPLETE("graph-push-reference-complete"),
+		GRAPH_PUSH_START("graph-push-start"),
+		HEARTBEAT_DEAD("heartbeat-dead"),
+		HEARTBEAT_MISSING("heartbeat-missing"),
+		HEARTBEAT_RESUMED("heartbeat-resumed"),
+		JOURNAL_ROTATE("journal-rotate"),
+		JOURNAL_ROTATE_LOCK("journal-rotate-lock"),
+		PULL_ARCHIVE("pull-archive"),
+		PUSH_COMMIT("push-commit"),
+		PUSH_CONTENT("push-content"),
+		PUSH_SUBMIT("push-submit"),
 		SERVICE_CHECK("service-check"),
-		SHELVE_SUBMIT("shelve-submit"),
 		SHELVE_COMMIT("shelve-commit"),
-		SHELVE_DELETE("shelve-delete");
-		
-	    private final String triggerType;       
+		SHELVE_DELETE("shelve-delete"),
+		SHELVE_SUBMIT("shelve-submit");
+
+		private final String triggerType;
 
 	    private TriggerType(String triggerType) {
 	        this.triggerType = triggerType;

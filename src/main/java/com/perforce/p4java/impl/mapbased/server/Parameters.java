@@ -1,19 +1,19 @@
 package com.perforce.p4java.impl.mapbased.server;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.core.file.FileSpecOpStatus.VALID;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.perforce.p4java.core.file.IFileSpec;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+
+import static com.perforce.p4java.core.file.FileSpecOpStatus.VALID;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Internal helper class for Server parameter processing using the Options class

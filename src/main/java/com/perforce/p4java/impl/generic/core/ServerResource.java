@@ -202,4 +202,19 @@ public abstract class ServerResource implements IServerResource {
 		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
 		return simpleDateFormat.format(date);
 	}
+    /*
+    protected String parseComment(String line){
+        if (!line.contains("##")){
+            return line;
+        }
+
+        String[] parts = line.split("##");
+        for (String part :parts){
+
+        }
+
+
+    }
+    */
+     
 }

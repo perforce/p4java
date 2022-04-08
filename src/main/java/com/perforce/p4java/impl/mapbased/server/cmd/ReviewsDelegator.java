@@ -1,15 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.handleErrorStr;
-import static com.perforce.p4java.server.CmdSpec.REVIEWS;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.IUserSummary;
 import com.perforce.p4java.core.file.IFileSpec;
@@ -21,6 +11,16 @@ import com.perforce.p4java.impl.generic.core.UserSummary;
 import com.perforce.p4java.option.server.GetReviewsOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IReviewsDelegator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.handleErrorStr;
+import static com.perforce.p4java.server.CmdSpec.REVIEWS;
+import static java.util.Objects.nonNull;
 
 /**
  * Implementation to handle the Reviews command.

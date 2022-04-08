@@ -1,19 +1,19 @@
 package com.perforce.p4java.option;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import com.perforce.p4java.exception.OptionsException;
+import com.perforce.p4java.server.IServer;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwOptionsException;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwOptionsExceptionIfConditionFails;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import com.perforce.p4java.exception.OptionsException;
-import com.perforce.p4java.server.IServer;
 
 /**
  * Abstract P4Java method options superclass. Supplies the very basic plumbing

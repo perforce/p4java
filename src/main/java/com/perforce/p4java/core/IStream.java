@@ -53,6 +53,7 @@ public interface IStream extends IStreamSummary {
 	 */
 	void setStreamView(ViewMap<IStreamViewMapping> streamView);
 
+
 	/**
 	 * Return the remapped view map associated with this stream. Optional; one
 	 * or more mappings that define how stream view paths are to be remapped in

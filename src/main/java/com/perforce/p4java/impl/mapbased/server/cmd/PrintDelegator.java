@@ -1,12 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.server.CmdSpec.PRINT;
-
-import java.io.InputStream;
-import java.util.List;
-
 import com.perforce.p4java.core.file.IFileSpec;
 import com.perforce.p4java.exception.AccessException;
 import com.perforce.p4java.exception.ConnectionException;
@@ -15,6 +8,13 @@ import com.perforce.p4java.exception.RequestException;
 import com.perforce.p4java.option.server.GetFileContentsOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IPrintDelegator;
+
+import java.io.InputStream;
+import java.util.List;
+
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.server.CmdSpec.PRINT;
+import static java.util.Objects.isNull;
 
 /**
  * Implementation to handle the Print command.

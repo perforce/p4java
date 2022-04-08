@@ -1,18 +1,18 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder.buildNonNullObjectListFromCommandResultMaps;
-import static com.perforce.p4java.server.CmdSpec.DISKSPACE;
-
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.admin.IDiskSpace;
 import com.perforce.p4java.common.function.Function;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.impl.generic.admin.DiskSpace;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IDiskspaceDelegator;
+
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder.buildNonNullObjectListFromCommandResultMaps;
+import static com.perforce.p4java.server.CmdSpec.DISKSPACE;
+import static java.util.Objects.nonNull;
 
 /**
  * Implementation to handle the Diskspace command.

@@ -3,13 +3,13 @@
  */
 package com.perforce.p4java.option.client;
 
-import java.util.Iterator;
-import java.util.List;
-
 import com.perforce.p4java.core.IChangelist;
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
+
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Options class for IClient.resolveFilesAuto.<p>
@@ -22,9 +22,9 @@ import com.perforce.p4java.server.IServer;
 public class ResolveFilesAutoOptions extends Options {
 
     /**
-     * Options: -n, -s, -af, -at, -ay, -as, -Aa, -Ab, -Ac, -Ad, -Am, -At, -c[changelist], -t, -db, -dw, -dl, -o
+     * Options: -n, -s, -af, -at, -ay, -as, -Aa, -Ab, -Ac, -Ad, -Am, -At, -c[changelist], -t, -db, -dw, -dl, -o, -So
      */
-    public static final String OPTIONS_SPECS = "b:n b:s b:af b:as b:at b:ay b:Aa b:Ab b:Ac b:Ad b:Am b:At i:c:cl b:t b:db b:dw b:dl b:o";
+    public static final String OPTIONS_SPECS = "b:n b:s b:af b:as b:at b:ay b:Aa b:Ab b:Ac b:Ad b:Am b:At i:c:cl b:t b:db b:dw b:dl b:o b:So";
 
     /** If true, only do "safe" resolves, as documented for the p4 "-as" option. */
     protected boolean safeMerge = false;
@@ -112,6 +112,13 @@ public class ResolveFilesAutoOptions extends Options {
      * Corresponds to the '-o' option.
      */
     protected boolean showBase = false;
+
+	/**
+	 * If true, resolves changes that have been submitted to the
+	 * stream spec since you opened it.  You may not submit changes to the
+	 * stream spec until newer changes have been resolved.
+	 */
+	protected boolean resolveStreamSpec = false;
     
     /**
      * Default constructor.
@@ -221,7 +228,8 @@ public class ResolveFilesAutoOptions extends Options {
                 this.isResolveFiletypeChanges(), this.getChangelistId(),
                 this.isForceTextualMerge(), this.isIgnoreWhitespaceChanges(),
                 this.isIgnoreWhitespace(), this.isIgnoreLineEndings(),
-                this.isShowBase());
+                this.isShowBase(),
+				this.isResolveStreamSpec());
 
         // Combine the -A flags, if more than one is set
         StringBuilder sb = new StringBuilder();
@@ -293,6 +301,10 @@ public class ResolveFilesAutoOptions extends Options {
     public boolean isForceResolve() {
         return forceResolve;
     }
+
+	public boolean isResolveStreamSpec() {
+		return resolveStreamSpec;
+	}
 
     public ResolveFilesAutoOptions setForceResolve(boolean forceResolve) {
         this.forceResolve = forceResolve;
@@ -427,4 +439,9 @@ public class ResolveFilesAutoOptions extends Options {
     	this.showBase = showBase;
     	return this;
     }
+
+	public ResolveFilesAutoOptions setResolveStreamSpec(boolean resolveStreamSpec) {
+		this.resolveStreamSpec = resolveStreamSpec;
+		return this;
+	}
 }

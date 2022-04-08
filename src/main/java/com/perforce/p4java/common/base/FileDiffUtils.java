@@ -1,9 +1,9 @@
 package com.perforce.p4java.common.base;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-
 import com.perforce.p4java.core.file.DiffType;
 import com.perforce.p4java.option.server.DiffsOptions;
+
+import static java.util.Objects.nonNull;
 
 /**
  * @author Sean Shou

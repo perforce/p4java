@@ -1,6 +1,23 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import com.perforce.p4java.Log;
+import com.perforce.p4java.common.function.Function;
+import com.perforce.p4java.core.file.IFileSpec;
+import com.perforce.p4java.core.file.IObliterateResult;
+import com.perforce.p4java.exception.P4JavaException;
+import com.perforce.p4java.exception.RequestException;
+import com.perforce.p4java.impl.generic.core.file.FileSpec;
+import com.perforce.p4java.impl.generic.core.file.ObliterateResult;
+import com.perforce.p4java.option.server.ObliterateFilesOptions;
+import com.perforce.p4java.server.IOptionsServer;
+import com.perforce.p4java.server.delegator.IObliterateDelegator;
+import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseInt;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.core.file.FileSpecOpStatus.ERROR;
@@ -18,25 +35,8 @@ import static com.perforce.p4java.impl.mapbased.server.Parameters.processParamet
 import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.handleFileErrorStr;
 import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.isInfoMessage;
 import static com.perforce.p4java.server.CmdSpec.OBLITERATE;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-
-import com.perforce.p4java.Log;
-import com.perforce.p4java.common.function.Function;
-import com.perforce.p4java.core.file.IFileSpec;
-import com.perforce.p4java.core.file.IObliterateResult;
-import com.perforce.p4java.exception.P4JavaException;
-import com.perforce.p4java.exception.RequestException;
-import com.perforce.p4java.impl.generic.core.file.FileSpec;
-import com.perforce.p4java.impl.generic.core.file.ObliterateResult;
-import com.perforce.p4java.option.server.ObliterateFilesOptions;
-import com.perforce.p4java.server.IOptionsServer;
-import com.perforce.p4java.server.delegator.IObliterateDelegator;
-import org.apache.commons.lang3.Validate;
 
 /**
  * Implementation to handle the Obliterate command.

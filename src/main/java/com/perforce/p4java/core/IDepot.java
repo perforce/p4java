@@ -28,6 +28,7 @@ public interface IDepot extends IServerResource {
 		ARCHIVE,
 		UNLOAD,
 		TANGENT,
+		EXTENSION,
 		GRAPH,
 		UNKNOWN;
 		

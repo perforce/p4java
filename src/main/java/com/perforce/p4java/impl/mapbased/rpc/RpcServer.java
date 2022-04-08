@@ -12,7 +12,6 @@ import com.perforce.p4java.exception.ConnectionException;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.exception.RequestException;
 import com.perforce.p4java.exception.TrustException;
-import com.perforce.p4java.impl.generic.core.InputMapper;
 import com.perforce.p4java.impl.mapbased.rpc.connection.RpcConnection;
 import com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust;
 import com.perforce.p4java.impl.mapbased.rpc.func.proto.PerformanceMonitor;
@@ -51,8 +50,18 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
-import static com.perforce.p4java.PropertyDefs.*;
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import static com.perforce.p4java.PropertyDefs.AUTH_FILE_LOCK_DELAY_KEY;
+import static com.perforce.p4java.PropertyDefs.AUTH_FILE_LOCK_DELAY_KEY_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.AUTH_FILE_LOCK_TRY_KEY;
+import static com.perforce.p4java.PropertyDefs.AUTH_FILE_LOCK_TRY_KEY_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.AUTH_FILE_LOCK_WAIT_KEY;
+import static com.perforce.p4java.PropertyDefs.AUTH_FILE_LOCK_WAIT_KEY_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.TICKET_PATH_KEY;
+import static com.perforce.p4java.PropertyDefs.TICKET_PATH_KEY_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.TRUST_PATH_KEY;
+import static com.perforce.p4java.PropertyDefs.TRUST_PATH_KEY_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.WRITE_IN_PLACE_KEY;
+import static com.perforce.p4java.PropertyDefs.WRITE_IN_PLACE_SHORT_FORM;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwConnectionExceptionIfConditionFails;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
 import static com.perforce.p4java.common.base.StringHelper.firstConditionIsTrue;
@@ -66,7 +75,18 @@ import static com.perforce.p4java.exception.TrustException.Type.NEW_KEY;
 import static com.perforce.p4java.impl.mapbased.rpc.RpcPropertyDefs.RPC_APPLICATION_NAME_NICK;
 import static com.perforce.p4java.impl.mapbased.rpc.RpcPropertyDefs.RPC_RELAX_CMD_NAME_CHECKS_NICK;
 import static com.perforce.p4java.impl.mapbased.rpc.RpcPropertyDefs.getPropertyAsBoolean;
-import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.*;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.CLIENT_TRUST_ADDED;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.CLIENT_TRUST_ADD_EXCEPTION_NEW_CONNECTION;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.CLIENT_TRUST_ADD_EXCEPTION_NEW_KEY;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.CLIENT_TRUST_ALREADY_ESTABLISHED;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.CLIENT_TRUST_EXCEPTION_NEW_CONNECTION;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.CLIENT_TRUST_EXCEPTION_NEW_KEY;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.CLIENT_TRUST_REMOVED;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.CLIENT_TRUST_WARNING_NEW_CONNECTION;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.CLIENT_TRUST_WARNING_NEW_KEY;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.CLIENT_TRUST_WARNING_NOT_ESTABLISHED;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.FINGERPRINT_REPLACEMENT_USER_NAME;
+import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientTrust.FINGERPRINT_USER_NAME;
 import static com.perforce.p4java.impl.mapbased.rpc.msg.RpcMessage.getGeneric;
 import static com.perforce.p4java.impl.mapbased.rpc.msg.RpcMessage.getSeverity;
 import static com.perforce.p4java.server.CmdSpec.LOGIN;
@@ -75,6 +95,7 @@ import static com.perforce.p4java.server.CmdSpec.getValidP4JCmdSpec;
 import static com.perforce.p4java.util.PropertiesHelper.getPropertyAsInt;
 import static com.perforce.p4java.util.PropertiesHelper.getPropertyAsLong;
 import static com.perforce.p4java.util.PropertiesHelper.getPropertyByKeys;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.indexOf;
@@ -110,7 +131,7 @@ public abstract class RpcServer extends Server {
 	 * default for most commands; some commands dynamically bump up the level
 	 * for the command's duration.
 	 */
-	public static final int DEFAULT_CLIENT_API_LEVEL = 88; // 2020.1
+    public static final int DEFAULT_CLIENT_API_LEVEL = 91; // 2021.2
 
 	// p4/msgs/p4tagl.cc
 	// p4/client/client.cc
@@ -229,6 +250,8 @@ public abstract class RpcServer extends Server {
 	protected String serverId = null;
 
 	protected Map<String, String> secretKeys = new HashMap<>();
+
+	protected Map<String, String> pBufs = new HashMap<>();
 
 	protected ClientTrust clientTrust = null;
 
@@ -411,6 +434,7 @@ public abstract class RpcServer extends Server {
 	/**
 	 * @deprecated use {@link com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser#isAuthFail(String)}
 	 */
+	@Deprecated
 	@Override
 	public boolean isAuthFail(final String errStr) {
 		return ResultMapParser.isAuthFail(errStr);
@@ -419,6 +443,7 @@ public abstract class RpcServer extends Server {
 	/**
 	 * @deprecated use {@link com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser#getInfoStr(Map)}
 	 */
+	@Deprecated
 	@Override
 	public String getInfoStr(final Map<String, Object> map) {
 		return ResultMapParser.getInfoStr(map);
@@ -441,8 +466,17 @@ public abstract class RpcServer extends Server {
 		return ResultMapParser.getErrorStr(map);
 	}
 
+	/**
+	 * @deprecated use {@link com.perforce.p4java.impl.mapbased.rpc.RpcServer#setAuthTicket(String, String, String)}
+	 */
+	@Deprecated
 	@Override
 	public void setAuthTicket(final String userName, final String authTicket) {
+		setAuthTicket(userName, null, authTicket);
+	}
+
+	@Override
+	public void setAuthTicket(final String userName, final String serverId, final String authTicket) {
 
 		Validate.notBlank(userName, "Null or empty userName passed to the setAuthTicket method.");
 		String lowerCaseableUserName = userName;
@@ -451,12 +485,16 @@ public abstract class RpcServer extends Server {
 		if (!isCaseSensitive() && isNotBlank(userName)) {
 			lowerCaseableUserName = userName.toLowerCase();
 		}
-		String serverAddress = firstNonBlank(getServerId(), getServerAddress());
-		// Handling 'serverCluster'
-		if (isClusterMember()) {
-			serverAddress = serverInfo.getServerCluster();
+
+		String serverAddress = serverId;
+		if (isBlank(serverAddress)) {
+			serverAddress = firstNonBlank(getServerId(), getServerAddress());
+			// Handling 'serverCluster'
+			if (isClusterMember()) {
+				serverAddress = serverInfo.getServerCluster();
+			}
+			Validate.notBlank(serverAddress, "Null serverAddress in the setAuthTicket method.");
 		}
-		Validate.notBlank(serverAddress, "Null serverAddress in the setAuthTicket method.");
 		if (isBlank(authTicket)) {
 			authTickets.remove(composeAuthTicketEntryKey(lowerCaseableUserName, serverAddress));
 		} else {
@@ -676,18 +714,30 @@ public abstract class RpcServer extends Server {
 		authCounter.clearCount();
 	}
 
+	/**
+	 * @deprecated use {@link com.perforce.p4java.impl.mapbased.rpc.RpcServer#getAuthTicket(String, String)}
+	 */
+	@Deprecated
 	@Override
 	public String getAuthTicket(final String userName) {
+		return getAuthTicket(userName, null);
+	}
+
+	@Override
+	public String getAuthTicket(final String userName, final String serverId) {
 		// Must downcase the username to find or save a ticket when
 		// connected to a case insensitive server.
 		String lowerCaseableUserName = userName;
 		if (!isCaseSensitive() && isNotBlank(userName)) {
 			lowerCaseableUserName = userName.toLowerCase();
 		}
-		String serverAddress = firstNonBlank(getServerId(), getServerAddress());
-		// Handling 'serverCluster'
-		if (isClusterMember()) {
-			serverAddress = serverInfo.getServerCluster();
+		String serverAddress = serverId;
+		if (isBlank(serverAddress)) {
+			serverAddress = firstNonBlank(getServerId(), getServerAddress());
+			// Handling 'serverCluster'
+			if (isClusterMember()) {
+				serverAddress = serverInfo.getServerCluster();
+			}
 		}
 		if (isNotBlank(lowerCaseableUserName) && isNotBlank(serverAddress)) {
 			return authTickets.get(composeAuthTicketEntryKey(lowerCaseableUserName, serverAddress));
@@ -976,6 +1026,13 @@ public abstract class RpcServer extends Server {
 		return null;
 	}
 
+	public String getPBuf(String userName) {
+		if (isNotBlank(userName)) {
+			return pBufs.get(userName);
+		}
+		return null;
+	}
+
 	protected String getUserForEnv() {
 		if (isNotBlank(userName)) {
 			return userName;
@@ -1171,6 +1228,7 @@ public abstract class RpcServer extends Server {
 	/**
 	 * @deprecated use {@link com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser#getErrorOrInfoStr(Map)}
 	 */
+	@Deprecated
 	@Override
 	public String getErrorOrInfoStr(Map<String, Object> map) {
 		return ResultMapParser.getErrorOrInfoStr(map);
@@ -1213,7 +1271,9 @@ public abstract class RpcServer extends Server {
 
 	/**
 	 * Save current ticket returned from {@link #getAuthTicket()}.
+	 * @deprecated use {@link com.perforce.p4java.impl.mapbased.rpc.RpcServer#saveTicket(String, String, String)}
 	 */
+	@Deprecated
 	public void saveCurrentTicket() throws P4JavaException {
 		saveTicket(getAuthTicket());
 	}
@@ -1224,9 +1284,11 @@ public abstract class RpcServer extends Server {
 	 * attempt to write an entry to the p4tickets file either specified as the
 	 * P4TICKETS environment variable or at the OS specific default location. If
 	 * the ticket value is null then the current entry in the will be cleared.
+	 * @deprecated use {@link com.perforce.p4java.impl.mapbased.rpc.RpcServer#saveTicket(String, String, String)}
 	 */
+	@Deprecated
 	public void saveTicket(String ticketValue) throws ConfigException {
-		saveTicket(getUserName(), ticketValue);
+		saveTicket(getUserName(), null, ticketValue);
 	}
 
 	/**
@@ -1259,17 +1321,17 @@ public abstract class RpcServer extends Server {
 	 * variable or at the OS specific default location. If the ticket value is
 	 * null then the current entry will be cleared.
 	 */
-	public void saveTicket(final String userName, final String ticketValue) throws ConfigException {
+	public void saveTicket(final String userName, final String serverId, final String ticketValue) throws ConfigException {
 		String lowerCaseableUserName = getLowerCaseableUserName(userName);
-		String serverId = getServerId();
+		String serId = isNotBlank(serverId) ? serverId : getServerId();
 		// Try to save the ticket by server id first if set
-		ConfigException exception = quietSaveTicket(serverId, lowerCaseableUserName, ticketValue,
+		ConfigException exception = quietSaveTicket(serId, lowerCaseableUserName, ticketValue,
 				null);
 
 		// If id is null try to use configured server address
 		// If ticket value is null try to clear out any old values by the
 		// configured server address
-		if (isBlank(ticketValue) || isBlank(serverId)) {
+		if (isBlank(ticketValue) || isBlank(serId)) {
 			// Try to save the ticket by server address
 			String server = getServerHostPort();
 			exception = quietSaveTicket(server, lowerCaseableUserName, ticketValue, exception);
@@ -1322,6 +1384,16 @@ public abstract class RpcServer extends Server {
 				secretKeys.remove(userName);
 			} else {
 				secretKeys.put(userName, secretKey);
+			}
+		}
+	}
+
+	public void setPbuf(final String userName, final String pBuf) {
+		if (isNotBlank(userName)) {
+			if (isBlank(pBuf)) {
+				pBufs.remove(userName);
+			} else {
+				pBufs.put(userName, pBuf);
 			}
 		}
 	}

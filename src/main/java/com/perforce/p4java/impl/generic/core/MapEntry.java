@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.impl.generic.core;
 
@@ -21,15 +21,16 @@ public class MapEntry implements IMapEntry {
 	protected EntryType type = null;
 	protected String left = null;
 	protected String right = null;
-	
+	protected String comment = null;
+
 	/**
 	 * Default constructor. Sets all fields to null, and order
 	 * to ORDER_UNKNOWN.
 	 */
 	public MapEntry() {
 	}
-	
-	
+
+
 	/**
 	 * Construct a suitable MapEntry from the passed-in arguments, inferring
 	 * the entry type from any suitable prefixes on the passed-in left string.
@@ -39,13 +40,15 @@ public class MapEntry implements IMapEntry {
 		this.order = order;
 		if (right != null) {
 			this.right = stripTypePrefix(right);
+			this.comment = parseComments(right);
 		}
 		if (left != null) {
 			this.type = EntryType.fromString(left);
 			this.left = stripTypePrefix(left);
+			this.comment = parseComments(left);
 		}
 	}
-	
+
 	/**
 	 * Explicit-value constructor. Left and right strings have any type
 	 * prefixes stripped from them before being assigned to the new entry.
@@ -55,12 +58,14 @@ public class MapEntry implements IMapEntry {
 		this.type = type;
 		if (left != null) {
 			this.left = stripTypePrefix(left);
+			this.comment = parseComments(left);
 		}
 		if (right != null) {
 			this.right = stripTypePrefix(right);
+			this.comment = parseComments(right);
 		}
 	}
-	
+
 	/**
 	 * Attempts to construct a new MapEntry by parsing the passed-in string
 	 * into type, left, and right components; assumes that the passed-in string
@@ -75,9 +80,10 @@ public class MapEntry implements IMapEntry {
 			this.type = EntryType.fromString(entries[0]);
 			this.left = stripTypePrefix(entries[0]);
 			this.right = entries[1];
+			this.comment = parseComments(mappingStr);
 		}
 	}
-	
+
 	/**
 	 * Copy constructor. Constructs a new MapEntry from the passed-in version.
 	 * If entry is null, this is equivalent to calling the default constructor.
@@ -88,19 +94,21 @@ public class MapEntry implements IMapEntry {
 			this.type = entry.getType();
 			this.left = entry.getLeft();
 			this.right = entry.getRight();
+			this.comment = entry.getComment();
 		}
 	}
-	
+
+
 	/**
 	 * @see com.perforce.p4java.core.IMapEntry#getOrder()
 	 */
 	public int getOrder() {
 		return this.order;
 	}
-	
+
 	/**
 	 * NOTE: does not affect actual order in the list on its own...
-	 * 
+	 *
 	 * @see com.perforce.p4java.core.IMapEntry#setOrder(int)
 	 */
 	public void setOrder(int position) {
@@ -127,7 +135,7 @@ public class MapEntry implements IMapEntry {
 	public String getLeft() {
 		return getLeft(false);
 	}
-	
+
 	/**
 	 * @see com.perforce.p4java.core.IMapEntry#getLeft(boolean)
 	 */
@@ -151,7 +159,7 @@ public class MapEntry implements IMapEntry {
 	public String getRight() {
 		return getRight(false);
 	}
-	
+
 	/**
 	 * @see com.perforce.p4java.core.IMapEntry#getRight(boolean)
 	 */
@@ -161,12 +169,36 @@ public class MapEntry implements IMapEntry {
 		}
 		return right;
 	}
-	
+
 	/**
 	 * @see com.perforce.p4java.core.IMapEntry#setRight(java.lang.String)
 	 */
 	public void setRight(String right) {
 		this.right = right;
+	}
+
+	/**
+	 * @see com.perforce.p4java.core.IMapEntry#getComment()
+	 */
+	public String getComment() {
+		return getComment(false);
+	}
+
+	/**
+	 * @see com.perforce.p4java.core.IMapEntry#getComment(boolean)
+	 */
+	public String getComment(boolean quoteBlanks) {
+		if (quoteBlanks && (comment != null) && (comment.contains(" ") || comment.contains("\t"))) {
+			return "\"" + comment + "\"";
+		}
+		return comment;
+	}
+
+	/**
+	 * @see com.perforce.p4java.core.IMapEntry#setComment(java.lang.String)
+	 */
+	public void setComment(String comment) {
+		this.comment = comment;
 	}
 
 	/**
@@ -176,7 +208,7 @@ public class MapEntry implements IMapEntry {
 		StringBuilder retVal = new StringBuilder();
 		boolean quoteLeft = false;
 		boolean quoteRight = false;
-		
+
 		if (quoteBlanks) {
 			if (this.left != null && this.left.contains(" ")) {
 				quoteLeft = true;
@@ -200,49 +232,78 @@ public class MapEntry implements IMapEntry {
 		if (this.right != null) {
 			if (quoteRight) retVal.append("\"");
 			retVal.append(this.right);
-			if (quoteRight)retVal.append("\"");
+			if (quoteRight) retVal.append("\"");
+		}
+		if (this.comment != null) {
+			retVal.append(" ## ");
+			retVal.append(this.comment);
 		}
 		return retVal.toString();
 	}
-	
+
 	/**
 	 * An alias for this.toString(" ", true).
-	 * 
+	 *
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
 		return toString(" ", true);
 	}
-	
+
 	/**
 	 * Strip any Perforce entry type prefix from the passed-in string. If the
 	 * string is null, this returns null; if there's no such prefix, the original
 	 * string is returned.
 	 */
-	public static String stripTypePrefix(String str) {
+	public static String stripTypePrefix(final String str) {
 		if (str == null) {
 			return null;
 		}
-
-		for(IMapEntry.EntryType type : IMapEntry.EntryType.values()) {
+		String stripped = stripComments(str);
+		for (IMapEntry.EntryType type : IMapEntry.EntryType.values()) {
 			// skip over the INCLUDE type as there is no symbol to match
-			if(type.equals(EntryType.INCLUDE)) {
+			if (type.equals(EntryType.INCLUDE)) {
 				continue;
 			}
-			if(str.startsWith(type.getSymbol())) {
-				return str.substring(type.getSymbol().length());
+			if (stripped.startsWith(type.getSymbol())) {
+				return stripped.substring(type.getSymbol().length());
 			}
 		}
 
 		// No match, return original string
+		return stripped;
+	}
+
+	public static String parseComments(String str) {
+		if (str == null) {
+			return null;
+		}
+
+		if (!str.contains("##")) {
+			return null;
+		}
+
+		String retVal = str.substring(str.indexOf("##") + 2);
+		return retVal.trim();
+	}
+
+	public static String stripComments(String str) {
+		if (str == null) {
+			return null;
+		}
+
+		if (str.contains("##")) {
+			return str.substring(0, str.indexOf("##"));
+		}
+
 		return str;
 	}
-	
+
 	/**
 	 * Attempt to parse a string to get left and right view mapping
 	 * elements out of it along with the optional EntryType spec
 	 * on any left view strings.<p>
-	 * 
+	 *
 	 * The incoming string format is described semi-formally as follows:
 	 * <pre>
 	 * [whitespace] leftentry [whitespace rightentry] [whitespace]
@@ -253,53 +314,55 @@ public class MapEntry implements IMapEntry {
 	 * it should be quoted with a double quote character; any left-entry entry
 	 * type character must be <i>within</i> the quotes if they exist. The quotes
 	 * are always stripped from the associated element before being returned.<p>
-	 * 
+	 *
 	 * The left string is returned as the first element of the returned
 	 * array; the right (if it exists) is the second. Either or both can
 	 * be null, but the array itself will never be null. The left string
 	 * will still contain any entry type spec prepended (if it exists),
 	 * and will need further processing to get the entry type (and or remove
 	 * the entry type character).
-	 * 
-	 * @param str if not null, string to be parsed; if null, this method returns
+	 *
+	 * @param rawStr if not null, string to be parsed; if null, this method returns
 	 * 			an empty (but not null) array
 	 * @return non-null two-element string array; element 0 contains the left
 	 * 			element, element 1 contains the right. Either or both can be null,
 	 * 			but except in pathological cases, it's unusual for the left to be
 	 * 			null and the right to be non-null.
 	 */
-	public static String[] parseViewMappingString(String str) {
-		String[] retVal = new String[] { null, null };
-		
-		if (str != null) {
-			Matcher mat = elementPattern.matcher(str);
-			
-			int fields = 0;
-			while (mat.find()) {
-				if (mat.groupCount() > 0) {
-					if (mat.group(1) != null) {
-						if (mat.group(1).startsWith("\"")) { // strip the quotes
-							retVal[fields] = mat.group(1).replaceAll("^\"|\"$", "");
-						} else {
-							retVal[fields] = mat.group(1);
-						}
-						fields++;
+	public static String[] parseViewMappingString(String rawStr) {
+		String[] retVal = new String[]{null, null};
+
+		if (rawStr == null) {
+			return retVal;
+		}
+
+		String str = stripComments(rawStr);
+		Matcher mat = elementPattern.matcher(str);
+
+		int fields = 0;
+		while (mat.find()) {
+			if (mat.groupCount() > 0) {
+				if (mat.group(1) != null) {
+					if (mat.group(1).startsWith("\"")) { // strip the quotes
+						retVal[fields] = mat.group(1).replaceAll("^\"|\"$", "");
+					} else {
+						retVal[fields] = mat.group(1);
 					}
+					fields++;
 				}
 			}
-			if ((fields < 1) || (fields > 3)) {
-				Log.warn("Bad view map field count in MapEntry.parseViewString: '"
-						+ str + "' (" + fields + ")");
-			} 
 		}
-		
+		if (fields > 3) {
+			Log.warn("Bad view map field count in MapEntry.parseViewString: '"
+					+ str + "' (" + fields + ")");
+		}
 		return retVal;
 	}
 
 	/**
 	 * Put double quotes around file path with whitespace. If quotes exist,
 	 * don't quoted again.
-	 * 
+	 *
 	 * @param str with whitespace
 	 * @return quoted str with whitespace
 	 */

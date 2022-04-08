@@ -3,7 +3,11 @@
  */
 package com.perforce.p4java.impl.generic.admin;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import com.perforce.p4java.admin.IProtectionEntry;
+import com.perforce.p4java.impl.generic.core.MapEntry;
+
+import java.util.Map;
+
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT_FILE;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.HOST;
@@ -11,13 +15,9 @@ import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.IS_GR
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.PERM;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.UNMAP;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.USER;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.Map;
-
-import com.perforce.p4java.admin.IProtectionEntry;
-import com.perforce.p4java.impl.generic.core.MapEntry;
 
 /**
  * Default IProtectionEntry implementation class.

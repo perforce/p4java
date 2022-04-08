@@ -189,4 +189,14 @@ public interface IChangelistSummary {
 	 * @param visibility
 	 */
 	void setVisibility(Visibility visibility);
+
+
+	/**
+	 * Return the Stream spec mark for edit in changelist.
+	 * Return the Stream path marked for edit in changelist.
+	 *
+	 * @return Stream path, or null if no such description.
+	 * @since 2021.2
+	 */
+	String getChangelistStream();
 }

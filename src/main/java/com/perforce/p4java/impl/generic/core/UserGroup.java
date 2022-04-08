@@ -3,15 +3,6 @@
  */
 package com.perforce.p4java.impl.generic.core;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.IUserGroup;
 import com.perforce.p4java.exception.AccessException;
@@ -20,6 +11,15 @@ import com.perforce.p4java.exception.RequestException;
 import com.perforce.p4java.impl.mapbased.MapKeys;
 import com.perforce.p4java.server.IServer;
 import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Simple generic implementation class for the IUserGroup interface.
@@ -49,8 +49,10 @@ public class UserGroup extends ServerResource implements IUserGroup {
     private List<String> subgroups = new ArrayList<>();
     private List<String> owners = new ArrayList<>();
     private List<String> users = new ArrayList<>();
+	private int maxOpenFiles = UNDEFINED;
 
-    /**
+
+	/**
      * Simple convenience factory method to return a new local UserGroup object.
      * <p>
      *
@@ -112,6 +114,9 @@ public class UserGroup extends ServerResource implements IUserGroup {
                 maxLockTime = parseGroupIntValue((String) map.get(MapKeys.MAXLOCKTIME_KEY));
                 maxResults = parseGroupIntValue((String) map.get(MapKeys.MAXRESULTS_KEY));
                 maxScanRows = parseGroupIntValue((String) map.get(MapKeys.MAXSCANROWS_KEY));
+				if (map.containsKey(MapKeys.MAXOPENFILES_KEY)) {
+					maxOpenFiles = parseGroupIntValue((String) map.get(MapKeys.MAXOPENFILES_KEY));
+				}
                 timeout = parseGroupIntValue((String) map.get(MapKeys.TIMEOUT_KEY));
                 passwordTimeout = parseGroupIntValue(
                         (String) map.get(MapKeys.PASSWORD_TIMEOUT_KEY));
@@ -222,6 +227,14 @@ public class UserGroup extends ServerResource implements IUserGroup {
     public void setSubGroup(boolean subGroup) {
         this.subGroup = subGroup;
     }
+
+	public int getMaxOpenFiles() {
+		return this.maxOpenFiles;
+	}
+
+	public void setMaxOpenFiles(int maxOpenFiles) {
+		this.maxOpenFiles = maxOpenFiles;
+	}
 
     @Override
     public void refresh() throws ConnectionException, RequestException, AccessException {

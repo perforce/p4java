@@ -3,17 +3,6 @@
  */
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.isContainsValidRevisionSpecificInformation;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
-import static com.perforce.p4java.core.file.FileSpecOpStatus.ERROR;
-import static com.perforce.p4java.core.file.FileSpecOpStatus.INFO;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.common.function.Function;
 import com.perforce.p4java.core.file.FileSpecOpStatus;
 import com.perforce.p4java.core.file.IExtendedFileSpec;
@@ -26,6 +15,17 @@ import com.perforce.p4java.impl.generic.core.file.ExtendedFileSpec;
 import com.perforce.p4java.impl.generic.core.file.FileSpec;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.IServer;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.common.base.P4ResultMapUtils.isContainsValidRevisionSpecificInformation;
+import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
+import static com.perforce.p4java.core.file.FileSpecOpStatus.ERROR;
+import static com.perforce.p4java.core.file.FileSpecOpStatus.INFO;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class ResultListBuilder {
     public static <T> List<T> buildNonNullObjectListFromCommandResultMaps(

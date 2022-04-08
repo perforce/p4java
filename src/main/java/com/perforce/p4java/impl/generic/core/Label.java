@@ -3,11 +3,6 @@
  */
 package com.perforce.p4java.impl.generic.core;
 
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.ILabel;
 import com.perforce.p4java.core.ILabelMapping;
@@ -20,94 +15,100 @@ import com.perforce.p4java.exception.RequestException;
 import com.perforce.p4java.impl.mapbased.MapKeys;
 import com.perforce.p4java.server.IServer;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+
 /**
  * Default implementation class for the ILabel interface.
  */
 
 public class Label extends LabelSummary implements ILabel {
 
-	private static final String DATE_FORMAT = "yyyy/MM/dd HH:mm:ss";	
+	private static final String DATE_FORMAT = "yyyy/MM/dd HH:mm:ss";
 	protected ViewMap<ILabelMapping> viewMapping = null;
-	
+
 	/**
 	 * The description string used if no description field is passed to
 	 * Label.newLabel().
 	 */
 	public static final String DEFAULT_DESCRIPTION = "New label created by P4Java";
-	
+
 	/**
 	 * The default mapping used if a null mapping parameter is passed to
 	 * Label.newLabel().
 	 */
 	public static final String DEFAULT_MAPPING = "//depot/...";
-	
+
 	/**
 	 * Create a new local Label object with the given name, description, and
-	 * view mapping. The new object is local only (i.e. it does not exist as 
+	 * view mapping. The new object is local only (i.e. it does not exist as
 	 * a "real" Perforce label on the server) and is not locked, has no
 	 * revision spec, and has its owner name field set to the current user.
 	 * Other defaults are as given for the Label and LabelSummary default constructors.
-	 * 
-	 * @param server non-null server to be associated with this label.
-	 * @param name non-null label name.
+	 *
+	 * @param server      non-null server to be associated with this label.
+	 * @param name        non-null label name.
 	 * @param description if not null, the new label's description field; if null,
-	 * 				Label.DEFAULT_DESCRIPTION is used instead.
-	 * @param mapping if not null, defines the left hand sides of the label's
-	 * 				view map; if null, defaults to a single mapping as defined
-	 * 				in Label.DEFAULT_MAPPING.
+	 *                    Label.DEFAULT_DESCRIPTION is used instead.
+	 * @param mapping     if not null, defines the left hand sides of the label's
+	 *                    view map; if null, defaults to a single mapping as defined
+	 *                    in Label.DEFAULT_MAPPING.
 	 * @return new local Label object.
 	 */
-	
+
 	public static Label newLabel(IServer server, String name, String description,
-													String[] mapping) {		
+								 String[] mapping) {
 		ViewMap<ILabelMapping> viewMapping = new ViewMap<ILabelMapping>();
-		
+
 		if (server == null) {
 			throw new NullPointerError("null server in Label,newLabel()");
 		}
 		if (name == null) {
 			throw new NullPointerError("null label name in Label.newLabel()");
 		}
-		
+
 		if (mapping == null) {
-			mapping = new String[] {DEFAULT_MAPPING};
+			mapping = new String[]{DEFAULT_MAPPING};
 		}
-		
+
+		int i = 0;
 		for (String map : mapping) {
 			if (map == null) {
 				throw new NullPointerError("null mapping element in Label.newLabel()");
 			}
-			Label.LabelMapping entry = new Label.LabelMapping();
-			entry.setLeft(map);
+			Label.LabelMapping entry = new Label.LabelMapping(i, map);
 			viewMapping.addEntry(entry);
+			i++;
 		}
-		
+
 		Label label = new Label(
-					name,
-					server.getUserName(),
-					null,
-					null,
-					description == null ? DEFAULT_DESCRIPTION : description,
-					null,
-					false,
-					viewMapping
-				);
-		
+				name,
+				server.getUserName(),
+				null,
+				null,
+				description == null ? DEFAULT_DESCRIPTION : description,
+				null,
+				false,
+				viewMapping
+		);
+
 		// Make sure to attach the IServer to the label
 		label.setServer(server);
-		
+
 		return label;
 	}
-	
+
 	public static class LabelMapping extends MapEntry implements ILabelMapping {
-		
+
 		/**
 		 * Default constructor -- calls super() only.
 		 */
 		public LabelMapping() {
 			super();
 		}
-		
+
 		/**
 		 * Explicit value constructor -- calls super(order, labelMapping).
 		 * Note that this probably won't do what you expect it to if
@@ -116,7 +117,7 @@ public class Label extends LabelSummary implements ILabel {
 		public LabelMapping(int order, String labelMapping) {
 			super(order, labelMapping);
 		}
-		
+
 		/**
 		 * @see com.perforce.p4java.core.ILabelMapping#getViewMapping()
 		 */
@@ -130,8 +131,10 @@ public class Label extends LabelSummary implements ILabel {
 		public void setViewMapping(String entry) {
 			this.left = entry;
 		}
-	};
-	
+	}
+
+	;
+
 	/**
 	 * Default constructor; sets all inherited and local fields to null or false;
 	 * calls super(false).
@@ -139,15 +142,15 @@ public class Label extends LabelSummary implements ILabel {
 	public Label() {
 		super(false);
 	}
-	
+
 	/**
 	 * Explicit-value constructor. Generally useful for constructing new
 	 * label implementations.
 	 */
-	
+
 	public Label(String name, String ownerName, Date lastAccess,
-				Date lastUpdate, String description, String revisionSpec,
-				boolean locked, ViewMap<ILabelMapping> viewMapping) {
+				 Date lastUpdate, String description, String revisionSpec,
+				 boolean locked, ViewMap<ILabelMapping> viewMapping) {
 		super(false);
 		this.name = name;
 		this.ownerName = ownerName;
@@ -158,20 +161,20 @@ public class Label extends LabelSummary implements ILabel {
 		this.locked = locked;
 		this.viewMapping = viewMapping;
 	}
-	
+
 	/**
 	 * Construct a new Label from the map passed back from the
 	 * IServer's getLabel method or from a similar map, and the current
 	 * server object (if any). Will not work properly  with the map returned
 	 * from the server getLabelSummaryList method.<p>
-	 * 
+	 * <p>
 	 * If the map is null, this is equivalent to calling the default constructor.
 	 */
-	
+
 	public Label(Map<String, Object> map, IServer server) {
 		super(false);
 
-		this.server = server;		
+		this.server = server;
 
 		try {
 			this.name = (String) map.get(MapKeys.LABEL_KEY);
@@ -215,12 +218,12 @@ public class Label extends LabelSummary implements ILabel {
 					}
 				}
 			}
-			
+
 			// Note: only the left (depot) side is given for label views
 
 			this.viewMapping = new ViewMap<ILabelMapping>();
 
-			for (int i = 0;; i++) {
+			for (int i = 0; ; i++) {
 				String mappingStr = (String) map.get(MapKeys.VIEW_KEY
 						+ i);
 
@@ -234,25 +237,25 @@ public class Label extends LabelSummary implements ILabel {
 
 		} catch (Throwable thr) {
 			Log.error("Unexpected exception in Label constructor: "
-							+ thr.getLocalizedMessage());
+					+ thr.getLocalizedMessage());
 			Log.exception(thr);
 		}
 	}
-	
+
 	/**
 	 * Given an ILabelSummary object, construct a new Label object from it. This
 	 * implementation simply gets the label on the Perforce server with the same
 	 * name as the labelSummary's name by using the Label.refresh() object.<p>
-	 * 
+	 * <p>
 	 * If labelSummary is null this is equivalent to calling the default constructor;
 	 * otherwise all LabelSummary fields are copied, and if labelSummary.getName() is
 	 * not null, the refresh() is performed.
-	 * 
+	 *
 	 * @param labelSummary possibly-null ILabelSummary object.
 	 */
-	
+
 	public Label(ILabelSummary labelSummary)
-							throws ConnectionException, RequestException, AccessException {
+			throws ConnectionException, RequestException, AccessException {
 		super(false);
 		this.viewMapping = new ViewMap<ILabelMapping>();
 		if (labelSummary != null) {
@@ -263,7 +266,7 @@ public class Label extends LabelSummary implements ILabel {
 			this.description = labelSummary.getDescription();
 			this.revisionSpec = labelSummary.getRevisionSpec();
 			this.locked = labelSummary.isLocked();
-			
+
 			if (this.name != null) {
 				this.refresh();
 			}
@@ -273,7 +276,7 @@ public class Label extends LabelSummary implements ILabel {
 	/**
 	 * This method will refresh by getting the complete label model. If this
 	 * refresh is successful then this label will be marked as complete.
-	 * 
+	 *
 	 * @see com.perforce.p4java.impl.generic.core.ServerResource#refresh()
 	 */
 	public void refresh() throws ConnectionException, RequestException,
@@ -298,20 +301,20 @@ public class Label extends LabelSummary implements ILabel {
 	 * @see com.perforce.p4java.core.ILabel#updateOnServer()
 	 */
 	public String updateOnServer()
-						throws ConnectionException, RequestException, AccessException {
-		
+			throws ConnectionException, RequestException, AccessException {
+
 		if (this.server == null) {
 			throw new RequestException("label not associated with any Perforce server");
 		}
-		
+
 		return this.server.updateLabel(this);
 	}
-	
+
 	/**
 	 * @see com.perforce.p4java.impl.generic.core.ServerResource#update()
 	 */
-	public void update() 
-						throws ConnectionException, RequestException, AccessException {
+	public void update()
+			throws ConnectionException, RequestException, AccessException {
 		this.server.updateLabel(this);
 	}
 
@@ -321,7 +324,7 @@ public class Label extends LabelSummary implements ILabel {
 	public void setViewMapping(ViewMap<ILabelMapping> viewMapping) {
 		this.viewMapping = viewMapping;
 	}
-	
+
 	/**
 	 * @see com.perforce.p4java.core.ILabel#getViewMapping()
 	 */

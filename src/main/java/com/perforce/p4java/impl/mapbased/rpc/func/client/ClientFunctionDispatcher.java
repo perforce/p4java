@@ -108,6 +108,11 @@ public static final String TRACE_PREFIX = "ClientFunctionDispatcher";
 				
 				// Quiet mode - suppress all info level messages
                 cmdEnv.clearLastResultMap();
+                if( server.getSeverityCode(resultsMap) > 1 ) {
+					server.setSecretKey(server.getUserName(), null);
+					server.setPbuf(server.getUserName(), null);
+				}
+
 				if (cmdEnv.getProtocolSpecs().isQuietMode()) {
 					result = RpcPacketDispatcherResult.CONTINUE;
 					break;
@@ -277,6 +282,8 @@ public static final String TRACE_PREFIX = "ClientFunctionDispatcher";
 				resultsMap.put(RpcMessage.CODE + 0, String.valueOf(code));
 				resultsMap.put(RpcMessage.FMT + 0, msg);
 				cmdEnv.handleResult(resultsMap);
+				server.setSecretKey(server.getUserName(), null);
+				server.setPbuf(server.getUserName(), null);
 				result = RpcPacketDispatcherResult.STOP_NORMAL;
 				break;
 				

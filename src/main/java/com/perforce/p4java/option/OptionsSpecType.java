@@ -1,11 +1,6 @@
 package com.perforce.p4java.option;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.P4JavaExceptions.throwOptionsExceptionIfConditionFails;
-import static com.perforce.p4java.option.server.OptionsHelper.applyRule;
-import static com.perforce.p4java.option.server.OptionsHelper.objectToBoolean;
-import static org.apache.commons.lang3.StringUtils.EMPTY;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import com.perforce.p4java.exception.OptionsException;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -13,7 +8,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.perforce.p4java.exception.OptionsException;
+import static com.perforce.p4java.common.base.P4JavaExceptions.throwOptionsExceptionIfConditionFails;
+import static com.perforce.p4java.option.server.OptionsHelper.applyRule;
+import static com.perforce.p4java.option.server.OptionsHelper.objectToBoolean;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.EMPTY;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author Sean Shou

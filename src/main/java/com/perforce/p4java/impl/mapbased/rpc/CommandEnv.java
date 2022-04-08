@@ -11,6 +11,7 @@ import java.util.Map;
 import com.perforce.p4java.Log;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.impl.mapbased.rpc.connection.RpcConnection;
+import com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey;
 import com.perforce.p4java.impl.mapbased.rpc.func.proto.ProtocolCommand;
 import com.perforce.p4java.impl.mapbased.rpc.packet.helper.RpcPacketFieldRule;
 import com.perforce.p4java.server.callback.IFilterCallback;
@@ -322,6 +323,19 @@ public class CommandEnv {
 	public ProtocolCommand getProtocolSpecs() {
 		return this.protocolSpecs;
 	}
+
+    public int getServerProtocolLevel() {
+		if (serverProtocolSpecsMap == null) {
+			return -1;
+		}
+		if (serverProtocolSpecsMap.containsKey(RpcFunctionMapKey.SERVER2)) {
+			return Integer.parseInt((String) serverProtocolSpecsMap.get(RpcFunctionMapKey.SERVER2));
+		}
+		if (serverProtocolSpecsMap.containsKey(RpcFunctionMapKey.SERVER)) {
+			return Integer.parseInt((String) serverProtocolSpecsMap.get(RpcFunctionMapKey.SERVER));
+		}
+		return -1;
+    }
 
 	public void setProtocolSpecs(ProtocolCommand protocolSpecs) {
 		this.protocolSpecs = protocolSpecs;

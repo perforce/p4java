@@ -3,18 +3,18 @@
  */
 package com.perforce.p4java.impl.generic.core;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import com.perforce.p4java.Log;
+import com.perforce.p4java.core.IFileLineMatch;
+import com.perforce.p4java.impl.generic.core.file.FileSpec;
+
+import java.util.Map;
+
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseInt;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT_FILE;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.REV;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TYPE;
-
-import java.util.Map;
-
-import com.perforce.p4java.Log;
-import com.perforce.p4java.core.IFileLineMatch;
-import com.perforce.p4java.impl.generic.core.file.FileSpec;
+import static java.util.Objects.nonNull;
 
 /**
  * Implementation class of the {@link IFileLineMatch} interface

@@ -23,6 +23,7 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 		private boolean locked = false;
 		private boolean noToParent = false;
 		private boolean noFromParent = false;
+		private boolean mergeAny = false;
 
 		/**
 		 * Default constructor; sets all fields to false.
@@ -34,10 +35,18 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 		 * Explicit-value constructor.
 		 */
 		public Options(boolean ownerSubmit, boolean locked, boolean noToParent, boolean noFromParent) {
+			this(ownerSubmit, locked, noToParent, noFromParent, false);
+		}
+
+		/**
+		 * Explicit-value constructor.
+		 */
+		public Options(boolean ownerSubmit, boolean locked, boolean noToParent, boolean noFromParent, boolean mergeAny) {
 			setOwnerSubmit(ownerSubmit);
 			setLocked(locked);
 			setNoToParent(noToParent);
 			setNoFromParent(noFromParent);
+			setMergeAny(mergeAny);
 		}
 
 		/**
@@ -61,6 +70,8 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 					setNoToParent(true);
 				} else if (str.equalsIgnoreCase("nofromparent")) {
 					setNoFromParent(true);
+				} else if (str.equalsIgnoreCase("mergeany")) {
+					setMergeAny(true);
 				}
 			}
 		}
@@ -74,7 +85,8 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 			return (isOwnerSubmit() ? "ownersubmit" : "allsubmit")
 					+ (isLocked() ? " locked" : " unlocked")
 					+ (isNoToParent() ? " notoparent" : " toparent")
-					+ (isNoFromParent() ? " nofromparent" : " fromparent");
+					+ (isNoFromParent() ? " nofromparent" : " fromparent")
+					+ (isMergeAny() ? " mergeany" : " mergedown");
 		}
 
 		public boolean isOwnerSubmit() {
@@ -107,6 +119,14 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 
 		public void setNoFromParent(boolean noFromParent) {
 			this.noFromParent = noFromParent;
+		}
+
+		public boolean isMergeAny() {
+			return mergeAny;
+		}
+
+		public void setMergeAny(boolean mergeAny) {
+			this.mergeAny = mergeAny;
 		}
 	}
 
@@ -298,6 +318,17 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 	}
 
 	/**
+	 * @see com.perforce.p4java.core.IStreamSummary#getParentView()
+	 */
+	public ParentView getParentView() {
+		String parentView = (String) getRawField(MapKeys.PARENT_VIEW_KEY);
+		if (parentView == null) {
+			return null;
+		}
+		return IStreamSummary.ParentView.fromString(parentView.toUpperCase());
+	}
+
+	/**
 	 * @see com.perforce.p4java.core.IStreamSummary#setType(com.perforce.p4java.core.IStreamSummary.Type)
 	 */
 	public void setType(Type type) {
@@ -305,6 +336,16 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 			return;
 		}
 		setRawField(MapKeys.TYPE_KEY, type.toString().toLowerCase());
+	}
+
+	/**
+	 * @see com.perforce.p4java.core.IStreamSummary#setParentView(com.perforce.p4java.core.IStreamSummary.ParentView)
+	 */
+	public void setParentView(ParentView parentView) {
+		if (parentView == null) {
+			return;
+		}
+		setRawField(MapKeys.PARENT_VIEW_KEY, parentView.toString().toLowerCase());
 	}
 
 	/**

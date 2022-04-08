@@ -19,14 +19,26 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwRequestExceptionIfConditionFails;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseDataList;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseLong;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
-import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.*;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.ACTION;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.AUTHOR;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.AUTHOR_EMAIL;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.COMMIT;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.COMMITTER;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.COMMITTER_DATE;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.COMMITTER_EMAIL;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DATE;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.GRAPH_DESC;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.PARENT;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.SHA;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TREE;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TYPE;
 import static com.perforce.p4java.server.CmdSpec.GRAPH;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class CommitDelegator extends BaseDelegator implements ICommitDelegator {

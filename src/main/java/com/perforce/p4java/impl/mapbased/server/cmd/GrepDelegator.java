@@ -1,18 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.P4JavaExceptions.throwRequestExceptionIfConditionFails;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.server.CmdSpec.GREP;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.perforce.p4java.core.IFileLineMatch;
 import com.perforce.p4java.core.file.IFileSpec;
 import com.perforce.p4java.exception.P4JavaException;
@@ -21,6 +8,19 @@ import com.perforce.p4java.option.server.MatchingLinesOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IGrepDelegator;
 import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.common.base.P4JavaExceptions.throwRequestExceptionIfConditionFails;
+import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.server.CmdSpec.GREP;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Implementation of 'p4 grep'.

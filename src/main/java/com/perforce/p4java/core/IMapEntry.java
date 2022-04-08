@@ -184,7 +184,37 @@ public interface IMapEntry {
      * @param right possibly-null new right mapping entry
      */
     void setRight(String right);
-    
+
+
+    /**
+     * Get the "comment" entry for this mapping; equivalent to
+     * getComment(false).
+     *
+     * @return possibly-null comment mapping entry.
+     */
+    String getComment();
+
+    /**
+     * Get the "comment" entry for this mapping. Will not include
+     * any prefixes. If quoteBlanks is true and the comment string
+     * contains spaces or tabs the entire string is returned
+     * surrounded by quote characters.
+     *
+     * @param quoteBlanks if true, and the comment string
+     * 			contains spaces or tabs the entire string is returned
+     * 			surrounded by quote characters.
+     * @return possibly-null comment mapping entry.
+     */
+    String getComment(boolean quoteBlanks);
+
+    /**
+     * Set the "comment" entry for this mapping. Will strip off
+     * any exclude (etc.) prefix before assigning it.
+     *
+     * @param comment possibly-null new comment mapping entry
+     */
+    void setComment(String comment);
+
     /**
      * Alias for toString(" ", false).
      */

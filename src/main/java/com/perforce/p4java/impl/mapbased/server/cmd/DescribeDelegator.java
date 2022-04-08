@@ -17,10 +17,10 @@ import java.util.List;
 import java.util.Map;
 
 import static com.perforce.p4java.common.base.FileDiffUtils.setFileDiffsOptionsByDiffType;
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwRequestExceptionIfPerforceServerVersionOldThanExpected;
 import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
 import static com.perforce.p4java.server.CmdSpec.DESCRIBE;
+import static java.util.Objects.nonNull;
 
 /**
  * @author Sean Shou

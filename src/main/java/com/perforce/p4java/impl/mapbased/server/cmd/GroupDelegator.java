@@ -1,13 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.server.CmdSpec.GROUP;
-
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.perforce.p4java.core.IUserGroup;
 import com.perforce.p4java.exception.AccessException;
 import com.perforce.p4java.exception.ConnectionException;
@@ -20,6 +12,14 @@ import com.perforce.p4java.option.server.UpdateUserGroupOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IGroupDelegator;
 import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.server.CmdSpec.GROUP;
+import static java.util.Objects.nonNull;
 
 /**
  * @author Sean Shou

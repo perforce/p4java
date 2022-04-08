@@ -31,7 +31,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import static java.util.Objects.nonNull;
 import static java.util.Objects.requireNonNull;
 
 /**
@@ -152,7 +152,7 @@ public class MD5Digester {
 	 */
 	@Nullable
 	public String digestFileAs32ByteHex(@Nonnull File file, @Nullable Charset charset,
-	                                    boolean doesNeedConvertLineEndings) {
+										boolean doesNeedConvertLineEndings) {
 
 		return digestFileAs32ByteHex(file, charset, doesNeedConvertLineEndings, null);
 	}
@@ -168,7 +168,7 @@ public class MD5Digester {
 	 */
 	@Nullable
 	public String digestFileAs32ByteHex(@Nonnull File file, @Nullable Charset charset,
-	                                    boolean isRequireLineEndingConvert, @Nullable ClientLineEnding clientLineEnding) {
+										boolean isRequireLineEndingConvert, @Nullable ClientLineEnding clientLineEnding) {
 
 		requireNonNull(file, "Null file passed to MD5Digester.digestFileAs32ByteHex()");
 		if (Files.isReadable(file.toPath())) {
@@ -191,15 +191,20 @@ public class MD5Digester {
 	}
 
 	private void digestEncodedStreamToUtf8(@Nonnull InputStream inStream, @Nonnull Charset charset,
-	                                       boolean isRequireLineEndingConvert, @Nullable ClientLineEnding clientLineEnding)
+										   boolean isRequireLineEndingConvert, @Nullable ClientLineEnding clientLineEnding)
 			throws IOException {
 
 		try (BOMInputStream unicodeInputStream = new BOMInputStream(inStream, false,
 				ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
-				ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE);
+				ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE)) {
 
-		     InputStreamReader encodedStreamReader = new InputStreamReader(unicodeInputStream,
-				     charset)) {
+			if (unicodeInputStream.hasBOM() && (charset.name() == "UTF-16")) {
+				charset = Charset.forName(unicodeInputStream.getBOMCharsetName());
+			}
+
+			InputStreamReader encodedStreamReader = new InputStreamReader(unicodeInputStream,
+					charset);
+
 			CharsetEncoder utf8CharsetEncoder = CharsetDefs.UTF8.newEncoder()
 					.onMalformedInput(CodingErrorAction.REPORT)
 					.onUnmappableCharacter(CodingErrorAction.REPORT);
@@ -284,7 +289,7 @@ public class MD5Digester {
 	}
 
 	private ByteBuffer convertToP4dServerEndingsIfRequired(@Nonnull byte[] sourceBytes,
-	                                                       final int start, final int length, @Nullable ClientLineEnding clientLineEnding) {
+														   final int start, final int length, @Nullable ClientLineEnding clientLineEnding) {
 		ByteBuffer convertedByteBuffer;
 		if (isRequireConvertClientOrLocalLineEndingToServerFormat(clientLineEnding)) {
 			convertedByteBuffer = ByteBuffer.allocate(length);
@@ -307,7 +312,7 @@ public class MD5Digester {
 	}
 
 	private boolean doesSourceBytesUseSameClientLineEnding(@Nonnull byte[] sourceBytes,
-	                                                       final int indexOfSourceBytes, final int length, byte[] clientLineEndBytes) {
+														   final int indexOfSourceBytes, final int length, byte[] clientLineEndBytes) {
 
 		boolean isSame = false;
 		int potentialLastIndex = indexOfSourceBytes + clientLineEndBytes.length - 1;
@@ -321,7 +326,7 @@ public class MD5Digester {
 	}
 
 	private void digestStream(@Nonnull InputStream inStream, boolean isRequireLineEndingConvert,
-	                          @Nullable ClientLineEnding clientLineEnding) throws IOException {
+							  @Nullable ClientLineEnding clientLineEnding) throws IOException {
 
 		byte[] buffer = new byte[bufferSize];
 		int read;

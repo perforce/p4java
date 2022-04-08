@@ -1,17 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
-import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT_FILE;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.server.CmdSpec.INTERCHANGES;
-import static org.apache.commons.lang3.StringUtils.contains;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.core.IChangelist;
 import com.perforce.p4java.core.file.IFileSpec;
 import com.perforce.p4java.exception.AccessException;
@@ -24,6 +12,18 @@ import com.perforce.p4java.impl.generic.core.file.FileSpec;
 import com.perforce.p4java.option.server.GetInterchangesOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IInterchangesDelegator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT_FILE;
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.server.CmdSpec.INTERCHANGES;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.contains;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author Sean Shou

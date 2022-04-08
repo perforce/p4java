@@ -3,18 +3,6 @@
  */
 package com.perforce.p4java.impl.mapbased.rpc.func.client;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FilenameFilter;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
-import java.util.concurrent.atomic.AtomicInteger;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.PropertyDefs;
 import com.perforce.p4java.exception.ConnectionException;
@@ -42,6 +30,18 @@ import com.perforce.p4java.mapapi.MapFlag;
 import com.perforce.p4java.mapapi.MapTable;
 import com.perforce.p4java.mapapi.MapTableT;
 import com.perforce.p4java.mapapi.MapWrap;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FilenameFilter;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Implements the simpler lower-level file commands that typically
@@ -520,6 +520,7 @@ public class ClientSystemFileMatchCommands {
 
 		for (int i = 0; resultsMap.get(RpcFunctionMapKey.MAP_TABLE + i) != null; i++) {
 			String entry = (String)resultsMap.get(RpcFunctionMapKey.MAP_TABLE + i);
+			entry = new File(entry).getAbsolutePath();
 			if (entry != null) {
 				MapFlag flag = MapFlag.MfMap;
 				if( entry.startsWith( "-" ) ) {

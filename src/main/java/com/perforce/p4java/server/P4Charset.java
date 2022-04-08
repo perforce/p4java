@@ -7,10 +7,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.IllegalCharsetNameException;
 import java.nio.charset.UnsupportedCharsetException;
 
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
 import static com.perforce.p4java.server.PerforceCharsets.getJavaCharsetName;
 import static com.perforce.p4java.server.PerforceCharsets.hasClientBOM;
 import static com.perforce.p4java.server.PerforceCharsets.isSupported;
+import static java.util.Objects.isNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class P4Charset {

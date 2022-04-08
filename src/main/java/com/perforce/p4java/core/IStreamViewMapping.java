@@ -126,4 +126,20 @@ public interface IStreamViewMapping extends IMapEntry {
 	 * right entry of the associated mapping.
 	 */
 	void setDepotPath(String depotPath);
+
+	/**
+	 * Return a canonical String representation of this entry. This
+	 * is in the form [type prefix]leftpath[specstring]rightpath, e.g.
+	 * "-//depot/dev/test/... //clientname/newpath/..."<p>
+	 *
+	 * If the passed-in string is null, the left and right strings
+	 * (if they exist) will be concatenated into one long separator-less
+	 * string.<p>
+	 *
+	 * If the quoteBlanks parameter is true, if either or both the left
+	 * or right entries contain spaces, the entries are quoted in full, i.e.
+	 * the mapping //depot/test/space test 01/... //depot/test/space test 02/...
+	 * becomes "//depot/test/space test 01/..." "//depot/test/space test 02/...".
+	 */
+	String toString(String sepString, boolean quoteBlanks);
 };

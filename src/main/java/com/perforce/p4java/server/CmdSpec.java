@@ -109,7 +109,12 @@ public enum CmdSpec {
 	TRANSMIT,
 	LIST,
 	RETYPE,
-	HEARTBEAT;
+	HEARTBEAT,
+    UNDO,
+    LICENSE,
+	EXTENSION,
+	TOPOLOGY,
+	STREAMLOG;
 
 	/**
 	 * Return true iff the passed-in string can be decoded as a valid

@@ -304,7 +304,7 @@ public interface IOptionsServer extends IServer {
      * Set the server's Perforce authentication ticket for the specified user to
      * the passed-in string.
      * <p>
-     * 
+     *
      * @param userName
      *            non-null Perforce user name
      * @param authTicket
@@ -312,6 +312,21 @@ public interface IOptionsServer extends IServer {
      * @since 2011.2
      */
     void setAuthTicket(String userName, String authTicket);
+
+    /**
+     * Set the server's Perforce authentication ticket for the specified user to
+     * the passed-in string.
+     * <p>
+     * 
+     * @param userName
+     *            non-null Perforce user name
+     * @param serverId
+     *            possibly-null Perforce server's auth.id/IP:port
+     * @param authTicket
+     *            possibly-null Perforce authentication ticket
+     * @since 2021.2
+     */
+    void setAuthTicket(String userName, String serverId, String authTicket);
 
     /**
      * Return the Perforce Server's authId.

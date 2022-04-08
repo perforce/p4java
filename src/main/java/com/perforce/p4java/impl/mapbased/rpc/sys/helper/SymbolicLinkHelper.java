@@ -1,18 +1,18 @@
 package com.perforce.p4java.impl.mapbased.rpc.sys.helper;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import com.perforce.p4java.Log;
+import com.perforce.p4java.impl.generic.sys.ISystemFileCommandsHelper;
 
+import javax.annotation.Nonnull;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.LinkOption;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
-import javax.annotation.Nonnull;
 
-import com.perforce.p4java.Log;
-import com.perforce.p4java.impl.generic.sys.ISystemFileCommandsHelper;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Abstract helper class for dynamically determine and use symbolic link support

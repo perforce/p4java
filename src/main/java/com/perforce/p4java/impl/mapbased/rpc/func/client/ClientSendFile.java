@@ -33,9 +33,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.impl.mapbased.rpc.func.client.ClientHelper.sendBackWrittenDataBytes;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * Implements some specialised file methods for sending file data back to the

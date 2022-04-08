@@ -22,6 +22,7 @@ import com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey;
 import com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionSpec;
 import com.perforce.p4java.impl.mapbased.rpc.func.helper.MD5Digester;
 import com.perforce.p4java.impl.mapbased.rpc.func.helper.MapUnmapper;
+import com.perforce.p4java.impl.mapbased.rpc.msg.RpcMessage;
 import com.perforce.p4java.impl.mapbased.rpc.packet.RpcPacket;
 import com.perforce.p4java.impl.mapbased.rpc.packet.RpcPacketDispatcher.RpcPacketDispatcherResult;
 import com.perforce.p4java.impl.mapbased.server.Server;
@@ -92,7 +93,7 @@ public class ClientUserInteraction {
 	 */
 
 	protected RpcPacketDispatcherResult clientPrompt(RpcConnection rpcConnection,
-	                                                 CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+													 CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientPrompt().");
@@ -119,6 +120,7 @@ public class ClientUserInteraction {
 		String mangle = null;
 		boolean truncate = false;
 		boolean noecho = false;
+		boolean noprompt;
 
 		MD5Digester digester = null;
 
@@ -137,8 +139,7 @@ public class ClientUserInteraction {
 			confirm = (String) resultsMap.get(RpcFunctionMapKey.CONFIRM);
 			noecho = resultsMap.containsKey(RpcFunctionMapKey.NOECHO);
 			mangle = (String) resultsMap.get(RpcFunctionMapKey.MANGLE);
-
-			//TODO npoole: Handle mashalled prompt messages
+			noprompt = resultsMap.containsKey(RpcFunctionMapKey.NOPROMPT);
 
 			if (confirm == null) {
 				throw new ProtocolError("No confirm server function in clientPrompt.");
@@ -147,6 +148,10 @@ public class ClientUserInteraction {
 			if (funcSpec == RpcFunctionSpec.NONE) {
 				throw new ProtocolError("Unable to decode confirm server function '"
 						+ confirm + "' in clientPrompt.");
+			}
+
+			if (noprompt) {
+				passwd = this.server.getPBuf(userName);
 			}
 
 			// Due to a quirk in the sibling p4 cmd server implementation,
@@ -158,37 +163,58 @@ public class ClientUserInteraction {
 				throw new NullPointerError("No input map passed to client prompt.");
 			}
 
-			// Handle confirmation to server functions dm-Login and dm-Password
-			switch (funcSpec) {
-				case SERVER_DM_LOGIN: // login password confirmation
-				case SERVER_DM_LOGIN2: // login2 auth confirmation
-					if (inMap.get(RpcFunctionMapKey.PASSWORD) != null) {
+			if (passwd == null) {
+				// Parse the prompt to get the correct return result
+				String promptText = null;
+				if (resultsMap.containsKey(RpcFunctionMapKey.DATA)) {
+					promptText = new String((byte[]) resultsMap.get(RpcFunctionMapKey.DATA), CharsetDefs.UTF8);
+				}
+				if (promptText == null && !noprompt && resultsMap.containsKey(RpcFunctionMapKey.FMT0)) {
+					promptText = RpcMessage.interpolateArgs((String) resultsMap.get(RpcFunctionMapKey.FMT0), resultsMap);
+				}
+				if (promptText != null) {
+					// Lets assume we're getting standard english prompts
+					if (promptText.contains("Enter password") && inMap.containsKey(RpcFunctionMapKey.PASSWORD)) {
 						passwd = ((String) inMap.get(RpcFunctionMapKey.PASSWORD)).replace(MapKeys.LF, MapKeys.EMPTY).replace(MapKeys.CR, MapKeys.EMPTY);
-					}
-					break;
-				case SERVER_DM_PASSWD: // change password confirmation
-					if (inMap.get(RpcFunctionMapKey.OLD_PASSWORD) != null) {
+					} else if (promptText.contains("Enter old password") && inMap.containsKey(RpcFunctionMapKey.OLD_PASSWORD)) {
 						passwd = ((String) inMap.remove(RpcFunctionMapKey.OLD_PASSWORD)).replace(MapKeys.LF, MapKeys.EMPTY).replace(MapKeys.CR, MapKeys.EMPTY);
+					} else if (promptText.contains("Enter new password") && inMap.containsKey(RpcFunctionMapKey.NEW_PASSWORD)) {
+						passwd = ((String) inMap.remove(RpcFunctionMapKey.NEW_PASSWORD)).replace(MapKeys.LF, MapKeys.EMPTY).replace(MapKeys.CR, MapKeys.EMPTY);
+					} else if (promptText.contains("Re-enter new password") && inMap.containsKey(RpcFunctionMapKey.NEW_PASSWORD2)) {
+						passwd = ((String) inMap.remove(RpcFunctionMapKey.NEW_PASSWORD2)).replace(MapKeys.LF, MapKeys.EMPTY).replace(MapKeys.CR, MapKeys.EMPTY);
 					}
-					if (passwd == null) {
-						if (inMap.get(RpcFunctionMapKey.NEW_PASSWORD) != null) {
-							passwd = ((String) inMap.remove(RpcFunctionMapKey.NEW_PASSWORD)).replace(MapKeys.LF, MapKeys.EMPTY).replace(MapKeys.CR, MapKeys.EMPTY);
+				}
+			}
+			if (passwd == null) {
+				// Handle confirmation to server functions dm-Login and dm-Password
+				// Fall back based on what we're doing and what we've got available
+				switch (funcSpec) {
+					case SERVER_DM_LOGIN: // login password confirmation
+					case SERVER_DM_LOGIN2: // login2 auth confirmation
+						if (inMap.get(RpcFunctionMapKey.PASSWORD) != null) {
+							passwd = ((String) inMap.get(RpcFunctionMapKey.PASSWORD)).replace(MapKeys.LF, MapKeys.EMPTY).replace(MapKeys.CR, MapKeys.EMPTY);
 						}
-					}
-					if (passwd == null) {
-						if (inMap.get(RpcFunctionMapKey.NEW_PASSWORD2) != null) {
+						break;
+					case SERVER_DM_PASSWD: // change password confirmation
+						if (inMap.get(RpcFunctionMapKey.OLD_PASSWORD) != null) {
+							passwd = ((String) inMap.remove(RpcFunctionMapKey.OLD_PASSWORD)).replace(MapKeys.LF, MapKeys.EMPTY).replace(MapKeys.CR, MapKeys.EMPTY);
+						} else if (inMap.get(RpcFunctionMapKey.NEW_PASSWORD) != null) {
+							passwd = ((String) inMap.remove(RpcFunctionMapKey.NEW_PASSWORD)).replace(MapKeys.LF, MapKeys.EMPTY).replace(MapKeys.CR, MapKeys.EMPTY);
+						} else if (inMap.get(RpcFunctionMapKey.NEW_PASSWORD2) != null) {
 							passwd = ((String) inMap.remove(RpcFunctionMapKey.NEW_PASSWORD2)).replace(MapKeys.LF, MapKeys.EMPTY).replace(MapKeys.CR, MapKeys.EMPTY);
 						}
-					}
-					break;
-				default:
-					throw new UnimplementedError("Unimplemented confirmation to server function '"
-							+ funcSpec.getEncoding() + "' in clientPrompt.");
+						break;
+					default:
+						throw new UnimplementedError("Unimplemented confirmation to server function '"
+								+ funcSpec.getEncoding() + "' in clientPrompt.");
+				}
 			}
 
 			if (passwd == null) {
 				throw new NullPointerError("No password passed to clientPrompt.");
 			}
+
+			server.setPbuf(userName, passwd);
 
 			if (truncate && (passwd.length() > TRUNCATE_LENGTH)) {
 				passwd = passwd.substring(0, TRUNCATE_LENGTH);
@@ -203,31 +229,44 @@ public class ClientUserInteraction {
 				// in this interaction.
 				// If this is the digest of the old password it will be used as
 				// salt for the key in mangling the new password
-				this.server.setSecretKey(userName, resp);
-				digester.reset();
-				digester.update(resp.getBytes(CharsetDefs.UTF8.name()));
-				digester.update(digest.getBytes(CharsetDefs.UTF8.name()));
+				if (cmdEnv.getServerProtocolLevel() >= 20) {
+					this.server.setSecretKey(userName, resp);
+				}
+				if (digest.length() > 0) {
+					digester.reset();
+					digester.update(resp.getBytes(CharsetDefs.UTF8.name()));
+					digester.update(digest.getBytes(CharsetDefs.UTF8.name()));
+					resp = digester.digestAs32ByteHex();
+				}
 
-				resp = digester.digestAs32ByteHex();
-			}
+				String daddr = rpcConnection.getServerIpPort();
+				if (daddr.equals("0")) {
+					daddr = null;
+				}
+				if (daddr != null) {
+					resultsMap.put(RpcFunctionMapKey.DADDR, daddr);
 
-			// Now construct a response back to the server:
-
-			Map<String, Object> respMap = new HashMap<String, Object>();
-			if (digest != null) {
-				respMap.put(RpcFunctionMapKey.DIGEST, digest);
-			}
-
-			if (mangle != null) {
-				respMap.put(RpcFunctionMapKey.MANGLE, mangle);
-
+					if (cmdEnv.getServerProtocolLevel() >= 29) {
+						digester.reset();
+						digester.update(resp.getBytes(CharsetDefs.UTF8.name()));
+						digester.update(daddr.getBytes(CharsetDefs.UTF8.name()));
+						resp = digester.digestAs32ByteHex();
+					}
+				}
+			} else if (mangle != null) {
 				// Hash mangle and username
 				MD5Digester mangleDigester = new MD5Digester();
 				mangleDigester.update(mangle);
 				mangleDigester.update(userName);
 				// Add salt (from the old password digest) to the key.
-				if (this.server.getSecretKey(userName) != null) {
-					mangleDigester.update(this.server.getSecretKey(userName));
+				if (cmdEnv.getServerProtocolLevel() >= 20) {
+					String skey = this.server.getSecretKey(userName);
+					if (skey != null && skey.length() > 0) {
+						mangleDigester.update(skey);
+					}
+					if (data2 != null) {
+						this.server.setSecretKey(userName, null);
+					}
 				}
 				Mangle jMangle = new Mangle();
 				String toMangle = resp;
@@ -237,30 +276,9 @@ public class ClientUserInteraction {
 				String digestedMangle = mangleDigester.digestAs32ByteHex();
 				resp = jMangle.encrypt(toMangle, digestedMangle);
 			}
-			respMap.put(RpcFunctionMapKey.DATA, resp);
-			if (data2 != null) {
-				respMap.put(RpcFunctionMapKey.DATA2, resp);
-			}
-			if (truncate) {
-				respMap.put(RpcFunctionMapKey.TRUNCATE, MapKeys.EMPTY);
-			}
-			respMap.put(RpcFunctionMapKey.FUNC2, func2);
-			respMap.put(RpcFunctionMapKey.STATE, state);
-			if (noecho) {
-				respMap.put(RpcFunctionMapKey.NOECHO, MapKeys.EMPTY);
-			}
-			respMap.put(RpcFunctionMapKey.USER, userName);
-			if (host != null) {
-				respMap.put(RpcFunctionMapKey.HOST, host);
-			}
-			respMap.put(RpcFunctionMapKey.CONFIRM, confirm);
+			resultsMap.put(RpcFunctionMapKey.DATA, resp);
 
-			RpcPacket respPacket = RpcPacket.constructRpcPacket(
-					confirm,
-					respMap,
-					null);
-
-			rpcConnection.putRpcPacket(respPacket);
+			return rpcConnection.clientConfirm(confirm, resultsMap);
 		} catch (Exception exc) {
 			Log.exception(exc);
 			throw new P4JavaError(
@@ -268,8 +286,6 @@ public class ClientUserInteraction {
 							+ exc.getLocalizedMessage(),
 					exc);
 		}
-
-		return RpcPacketDispatcherResult.CONTINUE;
 	}
 
 	/**
@@ -284,7 +300,7 @@ public class ClientUserInteraction {
 	 */
 
 	protected RpcPacketDispatcherResult clientSetPassword(RpcConnection rpcConnection,
-	                                                      CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+														  CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientSetPassword().");
@@ -302,6 +318,8 @@ public class ClientUserInteraction {
 			String serverId = (String) resultsMap.get(RpcFunctionMapKey.SERVERADDRESS);
 			String ticket = null;
 
+			boolean sameUser = userName == null || userName.equals(server.getUserName()) || resultsMap.containsKey("userChanged");
+
 			if (serverId != null) {
 				this.server.setServerId(serverId);
 			}
@@ -316,10 +334,10 @@ public class ClientUserInteraction {
 				// Decrement the user's login counter
 				// Remove the user's ticket from cache when the count is zero
 				if (!(this.server.getAuthCounter().decrementAndGet(key) > 0)) {
-					this.server.setAuthTicket(userName, null);
+					this.server.setAuthTicket(userName, serverId, null);
 				}
 				try {
-					this.server.saveTicket(userName, null);
+					this.server.saveTicket(userName, serverId, null);
 				} catch (ConfigException e) {
 					throw new ConnectionException(e);
 				}
@@ -333,13 +351,17 @@ public class ClientUserInteraction {
 						throw new P4JavaError("bad digest size");
 					}
 
-					String secretKey = null;
-					secretKey = this.server.getSecretKey(userName); // from the earlier clientGetPrompt() call...
+					String secretKey = sameUser ? this.server.getSecretKey(userName) : null; // from the earlier clientGetPrompt() call...
 					if (secretKey == null) {
 						secretKey = this.server.getAuthTicket(userName);
 					}
 					if (secretKey == null) {
 						secretKey = this.server.getAuthTicket();
+						if (!secretKey.matches("^[0-9A-F]{32}$")) {
+							MD5Digester md5 = new MD5Digester();
+							md5.update(secretKey);
+							secretKey = md5.digestAs32ByteHex();
+						}
 					}
 
 					ticket = new String(data);
@@ -352,11 +374,11 @@ public class ClientUserInteraction {
 					if (ticket == null) {
 						ticket = new String(data);
 					}
-					this.server.setAuthTicket(userName, ticket);
+					this.server.setAuthTicket(userName, serverId, ticket);
 					if (!cmdEnv.isDontWriteTicket() ||
 							!resultsMap.containsKey(RpcFunctionMapKey.OUTPUT)) { // skip if "login -p"
 						try {
-							this.server.saveTicket(userName, ticket);
+							this.server.saveTicket(userName, serverId, ticket);
 						} catch (ConfigException e) {
 							throw new ConnectionException(e);
 						}
@@ -372,8 +394,11 @@ public class ClientUserInteraction {
 			}
 
 			// Clear the secret key
-			// Not useful any more
 			this.server.setSecretKey(userName, null);
+
+			if (resultsMap.containsKey(RpcFunctionMapKey.NOPROMPT)) {
+				this.server.setPbuf(userName, null);
+			}
 		}
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
@@ -385,7 +410,7 @@ public class ClientUserInteraction {
 	 */
 
 	protected RpcPacketDispatcherResult clientSingleSignon(RpcConnection rpcConnection,
-	                                                       CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+														   CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientSingleSignon().");
@@ -440,7 +465,7 @@ public class ClientUserInteraction {
 	}
 
 	protected RpcPacketDispatcherResult clientReceiveFiles(RpcConnection rpcConnection,
-	                                                       CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+														   CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientReceiveFiles().");
@@ -517,7 +542,7 @@ public class ClientUserInteraction {
 	 */
 
 	protected RpcPacketDispatcherResult clientAck(RpcConnection rpcConnection,
-	                                              CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+												  CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientAck().");
@@ -541,16 +566,16 @@ public class ClientUserInteraction {
 			}
 		} else {
 
-		    // no errors, if syncTime is set, send it
+			// no errors, if syncTime is set, send it
 
-	        if( cmdEnv.getSyncTime() != 0 ) {
-	            resultsMap.put( RpcFunctionMapKey.SYNCTIME, cmdEnv.getSyncTime() );
-	        }
+			if (cmdEnv.getSyncTime() != 0) {
+				resultsMap.put(RpcFunctionMapKey.SYNCTIME, cmdEnv.getSyncTime());
+			}
 		}
 
-	    // clear syncTime
+		// clear syncTime
 
-		cmdEnv.setSyncTime( 0 );
+		cmdEnv.setSyncTime(0);
 
 		rpcConnection.clientConfirm(confirm, resultsMap);
 
@@ -568,7 +593,7 @@ public class ClientUserInteraction {
 	 */
 
 	protected RpcPacketDispatcherResult clientCrypto(RpcConnection rpcConnection,
-	                                                 CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+													 CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientCrypto().");
@@ -580,17 +605,18 @@ public class ClientUserInteraction {
 			throw new NullPointerError("Null resultsMap in clientCrypto().");
 		}
 
-		String ticketStr = cmdEnv.getCmdSpec().getCmdTicket();
+		String ticketStr = null;
+		String ticketStr2 = cmdEnv.getCmdSpec().getCmdTicket();
 		String svcTicketStr = null;
-		MD5Digester digester = null;
+		MD5Digester digester = new MD5Digester();
 
 		// We actually get token, serverAddress, confirm, truncate fields incoming,
 		// but only use the token here.
 
-		String token = null;
 		String resp = null;
 		String confirm = (String) resultsMap.get(RpcFunctionMapKey.CONFIRM);
-		Map<String, Object> respMap = null;
+		String token = (String) resultsMap.get(RpcFunctionMapKey.TOKEN);
+		Map<String, Object> respMap = new HashMap<>();
 
 		boolean proxy = props.containsKey(RpcFunctionMapKey.IPADDR) &&
 				props.containsKey(RpcFunctionMapKey.SVRNAME) &&
@@ -612,30 +638,33 @@ public class ClientUserInteraction {
 			}
 
 			if (ticketStr == null) {
+				// P4PASSWD only style
+				ticketStr = ticketStr2;
+				ticketStr2 = null;
+			}
+
+			if (ticketStr == null) {
 				ticketStr = MapKeys.EMPTY; // which should fail on the server...
 			}
 
 			String daddr = rpcConnection.getServerIpPort();
+			if (daddr.equals("0")) {
+				daddr = null;
+			}
 			String daddr0 = null;
 			if (proxy) {
 				daddr0 = daddr;
 				daddr = props.getProperty(RpcFunctionMapKey.PORT);
 			}
 
-			token = (String) resultsMap.get(RpcFunctionMapKey.TOKEN);
-
-			digester = new MD5Digester();
 			digester.reset();
-
 			digester.update(token.getBytes(CharsetDefs.UTF8.name()));
 			digester.update(ticketStr.getBytes());
 			resp = digester.digestAs32ByteHex();
 
-			respMap = new HashMap<String, Object>();
-
 			// Add 'daddr' for Perforce server configurable 'net.mimcheck=5' (or >= 4)
 			// See job081080
-			if (daddr != null) {
+			if (cmdEnv.getServerProtocolLevel() >= 29 && daddr != null) {
 				digester.reset();
 				digester.update(resp.getBytes());
 				digester.update(daddr.getBytes());
@@ -646,6 +675,25 @@ public class ClientUserInteraction {
 
 			respMap.put(RpcFunctionMapKey.TOKEN, resp);
 
+			if (ticketStr2 != null) {
+				digester.reset();
+				digester.update(token.getBytes(CharsetDefs.UTF8.name()));
+				digester.update(ticketStr2.getBytes());
+				resp = digester.digestAs32ByteHex();
+
+
+				// Add 'daddr' for Perforce server configurable 'net.mimcheck=5' (or >= 4)
+				// See job081080
+				if (cmdEnv.getServerProtocolLevel() >= 29 && daddr != null) {
+					digester.reset();
+					digester.update(resp.getBytes());
+					digester.update(daddr.getBytes());
+					resp = digester.digestAs32ByteHex();
+				}
+
+				respMap.put(RpcFunctionMapKey.TOKEN2, resp);
+			}
+
 			if (proxy) {
 				respMap.put(RpcFunctionMapKey.CADDR,
 						props.getProperty(RpcFunctionMapKey.IPADDR));
@@ -654,7 +702,9 @@ public class ClientUserInteraction {
 			if (daddr0 != null) {
 				digester.reset();
 				digester.update(svcUser.getBytes());
-				digester.update(svcTicketStr.getBytes());
+				if (svcTicketStr != null) {
+					digester.update(svcTicketStr.getBytes());
+				}
 				digester.update(token.getBytes(CharsetDefs.UTF8.name()));
 				digester.update(daddr0.getBytes());
 				resp = digester.digestAs32ByteHex();
@@ -682,26 +732,22 @@ public class ClientUserInteraction {
 	}
 
 	private String getTicketStr(String user, String serverId) {
-		String ticketStr = null;
-
 		// Get the auth ticket from cache (if it exists)
 		// Might be asking for another server address's auth ticket
 		// (in the case of a replica sitting in front of the server)
-		if (this.server.getAuthTicket(user) != null) {
-			ticketStr = this.server.getAuthTicket(user);
-		}
+		String ticketStr = this.server.getAuthTicket(user, serverId);
 
 		// Load the auth ticket from file/memory storage
-		if (ticketStr == null) {
+		if (ticketStr == null || ticketStr.isEmpty()) {
 			ticketStr = this.server.loadTicket(serverId, user);
 			// Cache the auth ticket if found
 			if (ticketStr != null) {
-				this.server.setAuthTicket(user, ticketStr);
+				this.server.setAuthTicket(user, serverId, ticketStr);
 			}
 		}
 
-		if (ticketStr == null) {
-			ticketStr = MapKeys.EMPTY;  // which should fail on the server...
+		if (ticketStr != null && ticketStr.isEmpty()) {
+			return null;
 		}
 
 		return ticketStr;
@@ -742,7 +788,7 @@ public class ClientUserInteraction {
 	 */
 
 	protected RpcPacketDispatcherResult clientInputData(RpcConnection rpcConnection,
-	                                                    CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+														CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientInputData().");
@@ -822,6 +868,12 @@ public class ClientUserInteraction {
 					case SPEC:
 						MapUnmapper.unmapSpecMap(inMap, strBuf);
 						break;
+					case LICENSE:
+						MapUnmapper.unmapLicenseMap(inMap, strBuf);
+						break;
+					case EXTENSION:
+						MapUnmapper.unmapExtensionMap(inMap, strBuf);
+						break;
 					default:
 						break;
 				}
@@ -872,76 +924,76 @@ public class ClientUserInteraction {
 		return null;
 	}
 
-    protected RpcPacketDispatcherResult clientPing(RpcConnection rpcConnection,
-            CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientPing(RpcConnection rpcConnection,
+												   CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
-        if (rpcConnection == null) {
-            throw new NullPointerError("Null rpcConnection in clientPing().");
-        }
-        if (cmdEnv == null) {
-            throw new NullPointerError("Null cmdEnv in clientPing().");
-        }
-        if (resultsMap == null) {
-            throw new NullPointerError("Null resultsMap in clientPing().");
-        }
+		if (rpcConnection == null) {
+			throw new NullPointerError("Null rpcConnection in clientPing().");
+		}
+		if (cmdEnv == null) {
+			throw new NullPointerError("Null cmdEnv in clientPing().");
+		}
+		if (resultsMap == null) {
+			throw new NullPointerError("Null resultsMap in clientPing().");
+		}
 
-        String secsBuf = (String) resultsMap.get(RpcFunctionMapKey.TOKEN);
-        String acksBuf = (String) resultsMap.get(RpcFunctionMapKey.BLOCKCOUNT);
-        String payloadSize = (String) resultsMap.get(RpcFunctionMapKey.FILESIZE);
-        String timer = (String) resultsMap.get(RpcFunctionMapKey.TIME);
-        String serverMessageBuf = (String) resultsMap.get(RpcFunctionMapKey.VALUE);
-        String taggedFlag = (String) resultsMap.get(RpcFunctionMapKey.TAG);
+		String secsBuf = (String) resultsMap.get(RpcFunctionMapKey.TOKEN);
+		String acksBuf = (String) resultsMap.get(RpcFunctionMapKey.BLOCKCOUNT);
+		String payloadSize = (String) resultsMap.get(RpcFunctionMapKey.FILESIZE);
+		String timer = (String) resultsMap.get(RpcFunctionMapKey.TIME);
+		String serverMessageBuf = (String) resultsMap.get(RpcFunctionMapKey.VALUE);
+		String taggedFlag = (String) resultsMap.get(RpcFunctionMapKey.TAG);
 
 
-        Map<String,Object> respMap = new HashMap<String, Object>();
+		Map<String, Object> respMap = new HashMap<String, Object>();
 
-	    if ( payloadSize != null ) {
-	        try {
-	            int size = Integer.parseInt(payloadSize);
+		if (payloadSize != null) {
+			try {
+				int size = Integer.parseInt(payloadSize);
 
-    	        if( size > 1000000 )
-    	            size = 1000000;
+				if (size > 1000000)
+					size = 1000000;
 
-    	        StringBuffer sbuf = new StringBuffer();
-    	        for (int i = 0; i < size; i++) {
-    	            sbuf.append('b');
-    	        }
-    	        respMap.put( RpcFunctionMapKey.DESC, sbuf.toString() );
-	        } catch (NumberFormatException nfe) {
-	            throw new RuntimeException(nfe);
-	        }
-	    }
-	    respMap.put( RpcFunctionMapKey.FILESIZE, payloadSize );
-	    respMap.put( RpcFunctionMapKey.VALUE, serverMessageBuf );
-	    respMap.put( RpcFunctionMapKey.BLOCKCOUNT, acksBuf );
-	    respMap.put( RpcFunctionMapKey.TOKEN, secsBuf );
-	    respMap.put( RpcFunctionMapKey.TAG, taggedFlag );
-	    if ( timer != null ) {
-	        respMap.put( RpcFunctionMapKey.TIME, timer );
-	    }
+				StringBuffer sbuf = new StringBuffer();
+				for (int i = 0; i < size; i++) {
+					sbuf.append('b');
+				}
+				respMap.put(RpcFunctionMapKey.DESC, sbuf.toString());
+			} catch (NumberFormatException nfe) {
+				throw new RuntimeException(nfe);
+			}
+		}
+		respMap.put(RpcFunctionMapKey.FILESIZE, payloadSize);
+		respMap.put(RpcFunctionMapKey.VALUE, serverMessageBuf);
+		respMap.put(RpcFunctionMapKey.BLOCKCOUNT, acksBuf);
+		respMap.put(RpcFunctionMapKey.TOKEN, secsBuf);
+		respMap.put(RpcFunctionMapKey.TAG, taggedFlag);
+		if (timer != null) {
+			respMap.put(RpcFunctionMapKey.TIME, timer);
+		}
 
-        RpcPacket respPacket = RpcPacket.constructRpcPacket(
-                                                        "dm-Ping",
-                                                        respMap,
-                                                        null);
+		RpcPacket respPacket = RpcPacket.constructRpcPacket(
+				"dm-Ping",
+				respMap,
+				null);
 
-        rpcConnection.putRpcPacket(respPacket);
+		rpcConnection.putRpcPacket(respPacket);
 
-        return RpcPacketDispatcherResult.CONTINUE_LOOP;
+		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
-    protected RpcPacketDispatcherResult clientErrorPause(RpcConnection rpcConnection,
-            CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientErrorPause(RpcConnection rpcConnection,
+														 CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
-        if (rpcConnection == null) {
-            throw new NullPointerError("Null rpcConnection in clientPing().");
-        }
-        if (cmdEnv == null) {
-            throw new NullPointerError("Null cmdEnv in clientPing().");
-        }
-        if (resultsMap == null) {
-            throw new NullPointerError("Null resultsMap in clientPing().");
-        }
+		if (rpcConnection == null) {
+			throw new NullPointerError("Null rpcConnection in clientPing().");
+		}
+		if (cmdEnv == null) {
+			throw new NullPointerError("Null cmdEnv in clientPing().");
+		}
+		if (resultsMap == null) {
+			throw new NullPointerError("Null resultsMap in clientPing().");
+		}
 
 		cmdEnv.resetPartialResult();
 		//TODO: still to port
@@ -955,24 +1007,24 @@ public class ClientUserInteraction {
 	    client->GetUi()->ErrorPause( data->Text(), e );
 	    */
 
-        return RpcPacketDispatcherResult.CONTINUE_LOOP;
+		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
-    protected RpcPacketDispatcherResult clientHandleError(RpcConnection rpcConnection,
-            CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientHandleError(RpcConnection rpcConnection,
+														  CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
-        if (rpcConnection == null) {
-            throw new NullPointerError("Null rpcConnection in clientPing().");
-        }
-        if (cmdEnv == null) {
-            throw new NullPointerError("Null cmdEnv in clientPing().");
-        }
-        if (resultsMap == null) {
-            throw new NullPointerError("Null resultsMap in clientPing().");
-        }
+		if (rpcConnection == null) {
+			throw new NullPointerError("Null rpcConnection in clientPing().");
+		}
+		if (cmdEnv == null) {
+			throw new NullPointerError("Null cmdEnv in clientPing().");
+		}
+		if (resultsMap == null) {
+			throw new NullPointerError("Null resultsMap in clientPing().");
+		}
 
-        cmdEnv.resetPartialResult();
-        //TODO: still to port
+		cmdEnv.resetPartialResult();
+		//TODO: still to port
         /*
 	    client->NewHandler();
 	    StrPtr *data = client->translated->GetVar( P4Tag::v_data, e );
@@ -994,63 +1046,65 @@ public class ClientUserInteraction {
 	        client->SetError();
 
 	    client->GetUi()->HandleError( &rcvErr );
-	    client->ClearPBuf();
 	    */
-        return RpcPacketDispatcherResult.CONTINUE_LOOP;
+
+		server.setSecretKey(server.getUserName(), null);
+		server.setPbuf(server.getUserName(), null);
+		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
 
-    protected RpcPacketDispatcherResult clientActionResolve(RpcConnection rpcConnection,
-            CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientActionResolve(RpcConnection rpcConnection,
+															CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
-        if (rpcConnection == null) {
-            throw new NullPointerError("Null rpcConnection in clientPing().");
-        }
-        if (cmdEnv == null) {
-            throw new NullPointerError("Null cmdEnv in clientPing().");
-        }
-        if (resultsMap == null) {
-            throw new NullPointerError("Null resultsMap in clientPing().");
-        }
-        // So as to be 100% translatable, action resolve gets
-        // all of its strings sent as Error objects from the server.
+		if (rpcConnection == null) {
+			throw new NullPointerError("Null rpcConnection in clientPing().");
+		}
+		if (cmdEnv == null) {
+			throw new NullPointerError("Null cmdEnv in clientPing().");
+		}
+		if (resultsMap == null) {
+			throw new NullPointerError("Null resultsMap in clientPing().");
+		}
+		// So as to be 100% translatable, action resolve gets
+		// all of its strings sent as Error objects from the server.
 
-        // should always get these
-        String actionType = (String) resultsMap.get( RpcFunctionMapKey.RACTIONTYPE );
-        String autoResult = (String) resultsMap.get( RpcFunctionMapKey.RAUTORESULT );
+		// should always get these
+		String actionType = (String) resultsMap.get(RpcFunctionMapKey.RACTIONTYPE);
+		String autoResult = (String) resultsMap.get(RpcFunctionMapKey.RAUTORESULT);
 
-        if (actionType == null || autoResult == null) {
-            throw new NullPointerException("Missing either rActionType or rAutoResult");
-        }
+		if (actionType == null || autoResult == null) {
+			throw new NullPointerException("Missing either rActionType or rAutoResult");
+		}
 
-        // should get preview or confirm/decline
-        String preview = (String) resultsMap.get( RpcFunctionMapKey.PREVIEW );
-        String confirm = (String) resultsMap.get( RpcFunctionMapKey.CONFIRM );
-        String decline = (String) resultsMap.get( RpcFunctionMapKey.DECLINE );
+		// should get preview or confirm/decline
+		String preview = (String) resultsMap.get(RpcFunctionMapKey.PREVIEW);
+		String confirm = (String) resultsMap.get(RpcFunctionMapKey.CONFIRM);
+		String decline = (String) resultsMap.get(RpcFunctionMapKey.DECLINE);
 
-        if ( preview == null && ( confirm == null || decline == null ) ) {
-            throw new NullPointerException("Missing either confirm ordecline");
-        }
+		if (preview == null && (confirm == null || decline == null)) {
+			throw new NullPointerException("Missing either confirm ordecline");
+		}
 
-        // should definitely get at least one of these
-        String actionMerge  = (String) resultsMap.get( RpcFunctionMapKey.RACTIONMERGE );
-        String actionTheirs = (String) resultsMap.get( RpcFunctionMapKey.RACTIONTHEIRS );
-        String actionYours  = (String) resultsMap.get( RpcFunctionMapKey.RACTIONYOURS );
+		// should definitely get at least one of these
+		String actionMerge = (String) resultsMap.get(RpcFunctionMapKey.RACTIONMERGE);
+		String actionTheirs = (String) resultsMap.get(RpcFunctionMapKey.RACTIONTHEIRS);
+		String actionYours = (String) resultsMap.get(RpcFunctionMapKey.RACTIONYOURS);
 
-        // CLI UI strings -- might not always need/get these?
-        String optAuto      = (String) resultsMap.get( RpcFunctionMapKey.ROPTAUTO );
-        String optHelp      = (String) resultsMap.get( RpcFunctionMapKey.ROPTHELP );
-        String optMerge     = (String) resultsMap.get( RpcFunctionMapKey.ROPTMERGE );
-        String optSkip      = (String) resultsMap.get( RpcFunctionMapKey.ROPTSKIP );
-        String optTheirs    = (String) resultsMap.get( RpcFunctionMapKey.ROPTTHEIRS );
-        String optYours     = (String) resultsMap.get( RpcFunctionMapKey.ROPTYOURS );
-        String promptMerge  = (String) resultsMap.get( RpcFunctionMapKey.RPROMPTMERGE );
-        String promptTheirs = (String) resultsMap.get( RpcFunctionMapKey.RPROMPTTHEIRS );
-        String promptYours  = (String) resultsMap.get( RpcFunctionMapKey.RPROMPTYOURS );
-        String promptType   = (String) resultsMap.get( RpcFunctionMapKey.RPROMPTTYPE );
-        String userError    = (String) resultsMap.get( RpcFunctionMapKey.RUSERERROR );
-        String userHelp     = (String) resultsMap.get( RpcFunctionMapKey.RUSERHELP );
-        String userPrompt   = (String) resultsMap.get( RpcFunctionMapKey.RUSERPROMPT );
+		// CLI UI strings -- might not always need/get these?
+		String optAuto = (String) resultsMap.get(RpcFunctionMapKey.ROPTAUTO);
+		String optHelp = (String) resultsMap.get(RpcFunctionMapKey.ROPTHELP);
+		String optMerge = (String) resultsMap.get(RpcFunctionMapKey.ROPTMERGE);
+		String optSkip = (String) resultsMap.get(RpcFunctionMapKey.ROPTSKIP);
+		String optTheirs = (String) resultsMap.get(RpcFunctionMapKey.ROPTTHEIRS);
+		String optYours = (String) resultsMap.get(RpcFunctionMapKey.ROPTYOURS);
+		String promptMerge = (String) resultsMap.get(RpcFunctionMapKey.RPROMPTMERGE);
+		String promptTheirs = (String) resultsMap.get(RpcFunctionMapKey.RPROMPTTHEIRS);
+		String promptYours = (String) resultsMap.get(RpcFunctionMapKey.RPROMPTYOURS);
+		String promptType = (String) resultsMap.get(RpcFunctionMapKey.RPROMPTTYPE);
+		String userError = (String) resultsMap.get(RpcFunctionMapKey.RUSERERROR);
+		String userHelp = (String) resultsMap.get(RpcFunctionMapKey.RUSERHELP);
+		String userPrompt = (String) resultsMap.get(RpcFunctionMapKey.RUSERPROMPT);
     
         /* XXX: still to port
         if ( e->Test() )
@@ -1153,36 +1207,36 @@ public class ClientUserInteraction {
         }
     
 */
-        rpcConnection.clientConfirm(confirm, resultsMap);
+		rpcConnection.clientConfirm(confirm, resultsMap);
 
-        return RpcPacketDispatcherResult.CONTINUE_LOOP;
-    }
+		return RpcPacketDispatcherResult.CONTINUE_LOOP;
+	}
 
-    protected RpcPacketDispatcherResult clientEditData(RpcConnection rpcConnection,
-            CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientEditData(RpcConnection rpcConnection,
+													   CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
-        if (rpcConnection == null) {
-            throw new NullPointerError("Null rpcConnection in clientPing().");
-        }
-        if (cmdEnv == null) {
-            throw new NullPointerError("Null cmdEnv in clientPing().");
-        }
-        if (resultsMap == null) {
-            throw new NullPointerError("Null resultsMap in clientPing().");
-        }
+		if (rpcConnection == null) {
+			throw new NullPointerError("Null rpcConnection in clientPing().");
+		}
+		if (cmdEnv == null) {
+			throw new NullPointerError("Null cmdEnv in clientPing().");
+		}
+		if (resultsMap == null) {
+			throw new NullPointerError("Null resultsMap in clientPing().");
+		}
 
-        String spec    = (String) resultsMap.get( RpcFunctionMapKey.DATA );
-        String confirm = (String) resultsMap.get( RpcFunctionMapKey.CONFIRM );
-        String decline = (String) resultsMap.get( RpcFunctionMapKey.DECLINE );
-        String compare = (String) resultsMap.get( RpcFunctionMapKey.COMPARE );
+		String spec = (String) resultsMap.get(RpcFunctionMapKey.DATA);
+		String confirm = (String) resultsMap.get(RpcFunctionMapKey.CONFIRM);
+		String decline = (String) resultsMap.get(RpcFunctionMapKey.DECLINE);
+		String compare = (String) resultsMap.get(RpcFunctionMapKey.COMPARE);
 
-        if( spec == null) {
-            throw new NullPointerException("No data value");
-        }
+		if (spec == null) {
+			throw new NullPointerException("No data value");
+		}
 
-        String newSpec = "";
+		String newSpec = "";
 
-        try {
+		try {
             /* XXX: still to port
             // this does the work of FileSys::CreateGlobalTemp but
             // uses the client user object's FileSys create method
@@ -1206,22 +1260,22 @@ public class ClientUserInteraction {
     
             delete f;
              */
-        } catch( Throwable e ) {
-            confirm = decline;
-        }
+		} catch (Throwable e) {
+			confirm = decline;
+		}
 
-        // send the confirmation
+		// send the confirmation
 
-        if( confirm != null ) {
-            // If asked to compare old vs new, do so.
-            if( compare != null  ) {
-                resultsMap.put(RpcFunctionMapKey.COMPARE, newSpec.equals( spec ) ? "same" : "diff" );
-            }
+		if (confirm != null) {
+			// If asked to compare old vs new, do so.
+			if (compare != null) {
+				resultsMap.put(RpcFunctionMapKey.COMPARE, newSpec.equals(spec) ? "same" : "diff");
+			}
 
-            resultsMap.put(RpcFunctionMapKey.DATA, newSpec );
-            rpcConnection.clientConfirm(confirm, resultsMap);
-        }
+			resultsMap.put(RpcFunctionMapKey.DATA, newSpec);
+			rpcConnection.clientConfirm(confirm, resultsMap);
+		}
 
-        return RpcPacketDispatcherResult.CONTINUE_LOOP;
-    }
+		return RpcPacketDispatcherResult.CONTINUE_LOOP;
+	}
 }

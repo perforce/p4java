@@ -1,6 +1,14 @@
 package com.perforce.p4java.impl.generic.core;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import com.perforce.p4java.Log;
+import com.perforce.p4java.core.IDepot;
+import com.perforce.p4java.core.IMapEntry;
+import com.perforce.p4java.core.ViewMap;
+import org.apache.commons.lang3.time.FastDateFormat;
+
+import java.util.Date;
+import java.util.Map;
+
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseLong;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.common.base.StringHelper.firstNonBlank;
@@ -22,19 +30,11 @@ import static com.perforce.p4java.impl.mapbased.MapKeys.SUFFIX_KEY;
 import static com.perforce.p4java.impl.mapbased.MapKeys.TIME_LC_KEY;
 import static com.perforce.p4java.impl.mapbased.MapKeys.TYPE_KEY;
 import static com.perforce.p4java.impl.mapbased.MapKeys.TYPE_LC_KEY;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.endsWith;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.substring;
 import static org.apache.commons.lang3.StringUtils.upperCase;
-
-import java.util.Date;
-import java.util.Map;
-
-import com.perforce.p4java.Log;
-import com.perforce.p4java.core.IDepot;
-import com.perforce.p4java.core.IMapEntry;
-import com.perforce.p4java.core.ViewMap;
-import org.apache.commons.lang3.time.FastDateFormat;
 /**
  * Simple default implementation class for the IDepot interface.
  *

@@ -1,22 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.P4JavaExceptions.throwRequestExceptionIfConditionFails;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.parseInt;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
-import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT_FILE;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.getErrorStr;
-import static com.perforce.p4java.server.CmdSpec.ANNOTATE;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.client.IClient;
 import com.perforce.p4java.client.IClientSummary;
@@ -31,6 +14,23 @@ import com.perforce.p4java.impl.generic.core.file.FileAnnotation;
 import com.perforce.p4java.option.server.GetFileAnnotationsOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IFileAnnotateDelegator;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.common.base.P4JavaExceptions.throwRequestExceptionIfConditionFails;
+import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
+import static com.perforce.p4java.common.base.P4ResultMapUtils.parseInt;
+import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT_FILE;
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.getErrorStr;
+import static com.perforce.p4java.server.CmdSpec.ANNOTATE;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * Implementation to handle the Annotate command.

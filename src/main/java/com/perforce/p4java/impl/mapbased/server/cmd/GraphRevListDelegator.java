@@ -13,10 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.COMMIT;
 import static com.perforce.p4java.server.CmdSpec.GRAPH;
+import static java.util.Objects.nonNull;
 
 /**
  * This class acts as a delegator that executes the command 'p4 graph rev-list'

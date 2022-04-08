@@ -27,6 +27,7 @@ public enum RpcFunctionSpec {
 	// Protocol functions -- basically RPC meta functions:
 
 	// (from: p4/msgs/p4tags.cc P4TAG::p_*)
+	// 30/11/2021 ppiorunski correct for 2021.2
 	PROTOCOL_COMPRESS1,
 	PROTOCOL_COMPRESS2,
 	PROTOCOL_ECHO,
@@ -84,7 +85,11 @@ public enum RpcFunctionSpec {
 	USER_TRANSMIT,
 	USER_LIST,
 	USER_RETYPE,
+    USER_LICENSE,
+	USER_STREAMLOG,
+	USER_TOPOLOGY,
 
+	// 30/11/2021 ppiorunski correct for 2021.2
 	// (from: p4/msgs/p4tags.cc P4TAG::u_*)
 	USER_ADD,
 	USER_ADMIN,
@@ -104,6 +109,7 @@ public enum RpcFunctionSpec {
 	USER_DIFF2,
 	USER_DIRS,
 	USER_EDIT,
+	USER_EXTENSION,
 	USER_FAILOVER,
 	USER_FETCH,
 	USER_FILELOG,
@@ -137,6 +143,7 @@ public enum RpcFunctionSpec {
 	USER_REMOTE,
 	USER_REMOTES,
 	USER_RENAME,
+	USER_REPO,
 	USER_REOPEN,
 	USER_RESOLVE,
 	USER_RESOLVED,
@@ -148,6 +155,7 @@ public enum RpcFunctionSpec {
 	USER_STREAM,
 	USER_STREAMS,
     USER_STREAMSPEC,
+	USER_STORAGE,
 	USER_SUBMIT,
 	USER_SWITCH,
 	USER_SYNC,
@@ -157,6 +165,7 @@ public enum RpcFunctionSpec {
 	USER_UNLOCK,
 	USER_UNSUBMIT,
 	USER_UNZIP,
+	USER_UPGRADES,
 	USER_USER,
 	USER_USERS,
 	USER_VERIFY,
@@ -166,6 +175,7 @@ public enum RpcFunctionSpec {
 	// Client functions -- functions the client must process in response
 	// to a server request
 
+	// 30/11/2021 ppiorunski correct for 2021.2
 	// (from: p4/msgs/p4tags.cc P4TAG::c_*)
 	CLIENT_ACK,
 	CLIENT_ACKMATCH,

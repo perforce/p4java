@@ -3,13 +3,16 @@
  */
 package com.perforce.p4java.core;
 
+import com.perforce.p4java.exception.NullPointerError;
+import com.perforce.p4java.exception.P4JavaError;
+import com.perforce.p4java.mapapi.MapFlag;
+import com.perforce.p4java.mapapi.MapTable;
+import com.perforce.p4java.mapapi.MapTableT;
+import com.perforce.p4java.mapapi.MapWrap;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
-
-import com.perforce.p4java.exception.NullPointerError;
-import com.perforce.p4java.exception.P4JavaError;
-import com.perforce.p4java.mapapi.*;
 
 /**
  * Defines the common operations to Perforce view maps. View maps are

@@ -1,14 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.server.CmdSpec.FILES;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.file.IFileSpec;
 import com.perforce.p4java.exception.AccessException;
@@ -18,6 +9,15 @@ import com.perforce.p4java.option.server.GetDepotFilesOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IFilesDelegator;
 import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.server.CmdSpec.FILES;
+import static java.util.Objects.nonNull;
 
 /**
  * Delegator for the 'p4 files' command.

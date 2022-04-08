@@ -1,16 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder.buildNonNullObjectListFromCommandResultMaps;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.parseCommandResultMapAsString;
-import static com.perforce.p4java.server.CmdSpec.PROPERTY;
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.admin.IProperty;
 import com.perforce.p4java.common.function.Function;
 import com.perforce.p4java.exception.P4JavaException;
@@ -19,6 +8,17 @@ import com.perforce.p4java.option.server.GetPropertyOptions;
 import com.perforce.p4java.option.server.PropertyOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IPropertyDelegator;
+
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder.buildNonNullObjectListFromCommandResultMaps;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.parseCommandResultMapAsString;
+import static com.perforce.p4java.server.CmdSpec.PROPERTY;
+import static java.util.Objects.isNull;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Implementation to handle the Property command.

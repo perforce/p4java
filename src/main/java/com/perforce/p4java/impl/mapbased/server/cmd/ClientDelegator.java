@@ -27,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4JavaExceptions.rethrowFunction;
 import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
 import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.handleErrorStr;
@@ -37,6 +36,7 @@ import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.isNon
 import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.parseCommandResultMapAsString;
 import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.parseCommandResultMapIfIsInfoMessageAsString;
 import static com.perforce.p4java.server.CmdSpec.CLIENT;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.commons.lang3.StringUtils.containsAny;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;

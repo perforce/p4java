@@ -1,6 +1,17 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import com.perforce.p4java.admin.ServerConfigurationValue;
+import com.perforce.p4java.common.function.Function;
+import com.perforce.p4java.exception.P4JavaException;
+import com.perforce.p4java.server.IOptionsServer;
+import com.perforce.p4java.server.delegator.IConfigureDelegator;
+import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Map;
+
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.common.base.StringHelper.format;
 import static com.perforce.p4java.impl.mapbased.MapKeys.ACTION_KEY;
@@ -10,20 +21,9 @@ import static com.perforce.p4java.impl.mapbased.MapKeys.VALUE_KEY;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.SET;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.UNSET;
 import static com.perforce.p4java.server.CmdSpec.CONFIGURE;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import com.perforce.p4java.admin.ServerConfigurationValue;
-import com.perforce.p4java.common.function.Function;
-import com.perforce.p4java.exception.P4JavaException;
-import com.perforce.p4java.server.IOptionsServer;
-import com.perforce.p4java.server.delegator.IConfigureDelegator;
-import org.apache.commons.lang3.Validate;
 
 /**
  * Handles configure commands.

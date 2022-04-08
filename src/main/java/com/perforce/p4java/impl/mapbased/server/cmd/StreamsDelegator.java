@@ -1,15 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.handleFileErrorStr;
-import static com.perforce.p4java.server.CmdSpec.STREAMS;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.IStreamSummary;
 import com.perforce.p4java.exception.P4JavaException;
@@ -17,6 +7,16 @@ import com.perforce.p4java.impl.generic.core.StreamSummary;
 import com.perforce.p4java.option.server.GetStreamsOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IStreamsDelegator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.handleFileErrorStr;
+import static com.perforce.p4java.server.CmdSpec.STREAMS;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Implementation to handle the Streams command.

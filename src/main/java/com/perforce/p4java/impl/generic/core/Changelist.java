@@ -22,6 +22,7 @@ import com.perforce.p4java.exception.RequestException;
 import com.perforce.p4java.exception.UnimplementedError;
 import com.perforce.p4java.impl.generic.core.file.ExtendedFileSpec;
 import com.perforce.p4java.impl.generic.core.file.FileSpec;
+import com.perforce.p4java.impl.mapbased.MapKeys;
 import com.perforce.p4java.impl.mapbased.server.Parameters;
 import com.perforce.p4java.impl.mapbased.server.Server;
 import com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder;
@@ -228,13 +229,13 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		this.serverImpl = serverImpl;
 
 		if (map != null) {
-			if (map.containsKey(JOBS_KEY + "0")) {
+			if (map.containsKey(MapKeys.JOBS_KEY + "0")) {
 				// Get (and cache) the associated job IDs for this changelist
 
 				this.jobIds = new ArrayList<String>();
 
 				for (int job = 0; job >= 0; job++) {
-					String jobId = (String) map.get(JOBS_KEY + job);
+					String jobId = (String) map.get(MapKeys.JOBS_KEY + job);
 
 					if (jobId == null) {
 						break;
@@ -612,6 +613,10 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		inMap.put("User", this.username);
 		inMap.put("Description", this.description);
 
+		if (this.changelistStream != null){
+			inMap.put("Stream", this.changelistStream);
+		}
+
 		// Refresh the files from the server, only if the list is null or empty,
 		// in case we only wants to submit the current files in the changelist.
 		if (this.fileSpecs == null || this.fileSpecs.isEmpty()) {
@@ -681,6 +686,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		this.description = cList.getDescription();
 		this.username = cList.getUsername();
 		this.jobIds = cList.getCachedJobIdList();
+		this.changelistStream = cList.getChangelistStream();
 		this.getFiles(true); // Updated by side-effect...
 		updateFlags();
 	}

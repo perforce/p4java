@@ -13,13 +13,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.NAME;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.REPO_NAME;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.SHA;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TYPE;
 import static com.perforce.p4java.server.CmdSpec.GRAPH;
+import static java.util.Objects.nonNull;
 
 public class GraphShowRefDelegator extends BaseDelegator implements IGraphShowRefDelegator {
 

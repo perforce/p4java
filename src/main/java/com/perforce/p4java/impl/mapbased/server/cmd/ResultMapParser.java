@@ -20,8 +20,6 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.exception.MessageSeverityCode.E_FAILED;
@@ -36,6 +34,8 @@ import static com.perforce.p4java.impl.mapbased.rpc.msg.RpcMessage.CODE;
 import static com.perforce.p4java.impl.mapbased.rpc.msg.RpcMessage.FMT;
 import static com.perforce.p4java.impl.mapbased.rpc.msg.RpcMessage.getSeverity;
 import static com.perforce.p4java.impl.mapbased.rpc.msg.RpcMessage.interpolateArgs;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.indexOf;

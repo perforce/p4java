@@ -1,14 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.P4JavaExceptions.throwP4JavaErrorIfConditionFails;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.throwRequestExceptionIfErrorMessageFound;
-import static com.perforce.p4java.server.CmdSpec.CLIENTS;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.client.IClientSummary;
 import com.perforce.p4java.exception.AccessException;
 import com.perforce.p4java.exception.ConnectionException;
@@ -19,6 +10,15 @@ import com.perforce.p4java.impl.mapbased.server.Parameters;
 import com.perforce.p4java.option.server.GetClientsOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IClientsDelegator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.common.base.P4JavaExceptions.throwP4JavaErrorIfConditionFails;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.throwRequestExceptionIfErrorMessageFound;
+import static com.perforce.p4java.server.CmdSpec.CLIENTS;
+import static java.util.Objects.nonNull;
 
 /**
  * @author Sean Shou

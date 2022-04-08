@@ -62,7 +62,8 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 		IStreamDelegator, IStreamsDelegator, ITagDelegator, ITriggersDelegator, IUnloadDelegator,
 		IUserDelegator, IUsersDelegator, IVerifyDelegator, IGraphListTreeDelegator, ICommitDelegator,
 		IGraphRevListDelegator, IGraphCommitLogDelegator, IGraphReceivePackDelegator, IListDelegator,
-		IGraphShowRefDelegator, ILogin2Delegator, ISpecDelegator {
+		IGraphShowRefDelegator, ILogin2Delegator, ISpecDelegator, ILicenseDelegator, IExtensionDelegator,
+		IStreamlogDelegator{
 
 	String ATTRIBUTE_STREAM_MAP_KEY = "attributeInstream";
 	/**
@@ -464,6 +465,16 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @since 2011.2
 	 */
 	String getAuthTicket(String userName);
+
+	/**
+	 * Return the Perforce authentication ticket for specified user.
+	 *
+     * @param userName non-null Perforce user name
+     * @param serverId non-null Perforce server's auth.id/IP:port
+	 * @return possibly-null Perforce authentication ticket
+	 * @since 2021.2
+	 */
+	String getAuthTicket(String userName, String serverId);
 
 	boolean isLoginNotRequired(String msgStr);
 

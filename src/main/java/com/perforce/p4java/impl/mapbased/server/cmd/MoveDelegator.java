@@ -30,7 +30,7 @@ import org.apache.commons.lang3.Validate;
 public class MoveDelegator extends BaseDelegator implements IMoveDelegator {
     /**
      * Instantiate a new MoveDelegator, providing the server object that will be used to
-     * execute Perforce Helix attribute commands.
+     * execute Perforce Helix move commands.
      *
      * @param server a concrete implementation of a Perforce Helix Server
      */

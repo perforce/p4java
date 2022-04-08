@@ -1,15 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder.buildNonNullObjectListFromCommandResultMaps;
-import static com.perforce.p4java.server.CmdSpec.MONITOR;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.common.function.Function;
 import com.perforce.p4java.core.IServerProcess;
 import com.perforce.p4java.exception.AccessException;
@@ -20,6 +10,16 @@ import com.perforce.p4java.impl.generic.core.ServerProcess;
 import com.perforce.p4java.option.server.GetServerProcessesOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IMonitorDelegator;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder.buildNonNullObjectListFromCommandResultMaps;
+import static com.perforce.p4java.server.CmdSpec.MONITOR;
+import static java.util.Objects.nonNull;
 
 /**
  * Implementation to handle the Monitor command.

@@ -149,6 +149,22 @@ public interface IServerAddress {
 			}
 			return false;
 		}
+
+        /**
+         * Return true if the protocol is RSH. <p>
+         *
+         * We use a pattern
+         *
+         * @return true/false
+         */
+        public boolean isRsh() {
+            if (protocol != null) {
+                if (protocol.toLowerCase().startsWith("p4jrsh")) {
+                    return true;
+                }
+            }
+            return false;
+        }
 	};
 
 	/**

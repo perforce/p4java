@@ -4,7 +4,39 @@
 
 package com.perforce.p4java.impl.generic.core.file;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import com.perforce.p4java.Log;
+import com.perforce.p4java.client.IClient;
+import com.perforce.p4java.core.IChangelist;
+import com.perforce.p4java.core.file.DiffType;
+import com.perforce.p4java.core.file.FileAction;
+import com.perforce.p4java.core.file.FileSpecBuilder;
+import com.perforce.p4java.core.file.FileSpecOpStatus;
+import com.perforce.p4java.core.file.IFileAnnotation;
+import com.perforce.p4java.core.file.IFileRevisionData;
+import com.perforce.p4java.core.file.IFileSpec;
+import com.perforce.p4java.exception.AccessException;
+import com.perforce.p4java.exception.ConnectionException;
+import com.perforce.p4java.exception.P4JavaError;
+import com.perforce.p4java.exception.P4JavaException;
+import com.perforce.p4java.exception.RequestException;
+import com.perforce.p4java.impl.generic.core.ServerResource;
+import com.perforce.p4java.impl.generic.core.file.FilePath.PathType;
+import com.perforce.p4java.option.server.GetFileAnnotationsOptions;
+import com.perforce.p4java.option.server.GetFileContentsOptions;
+import com.perforce.p4java.option.server.GetRevisionHistoryOptions;
+import com.perforce.p4java.option.server.MoveFileOptions;
+import com.perforce.p4java.server.IOptionsServer;
+import com.perforce.p4java.server.IServer;
+import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Map;
+
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseInt;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseLong;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
@@ -43,11 +75,12 @@ import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.START
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.STATUS;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TIME;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TO_FILE;
-import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TYPE;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TREE;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TYPE;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.UNMAP;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.USER;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.WORKREV;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
 import static org.apache.commons.lang3.StringUtils.SPACE;
 import static org.apache.commons.lang3.StringUtils.contains;
@@ -57,41 +90,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.apache.commons.lang3.StringUtils.length;
 import static org.apache.commons.lang3.StringUtils.startsWith;
 import static org.apache.commons.lang3.StringUtils.substring;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.Validate;
-
-import com.perforce.p4java.Log;
-import com.perforce.p4java.client.IClient;
-import com.perforce.p4java.core.IChangelist;
-import com.perforce.p4java.core.file.DiffType;
-import com.perforce.p4java.core.file.FileAction;
-import com.perforce.p4java.core.file.FileSpecBuilder;
-import com.perforce.p4java.core.file.FileSpecOpStatus;
-import com.perforce.p4java.core.file.IFileAnnotation;
-import com.perforce.p4java.core.file.IFileRevisionData;
-import com.perforce.p4java.core.file.IFileSpec;
-import com.perforce.p4java.exception.AccessException;
-import com.perforce.p4java.exception.ConnectionException;
-import com.perforce.p4java.exception.P4JavaError;
-import com.perforce.p4java.exception.P4JavaException;
-import com.perforce.p4java.exception.RequestException;
-import com.perforce.p4java.impl.generic.core.ServerResource;
-import com.perforce.p4java.impl.generic.core.file.FilePath.PathType;
-import com.perforce.p4java.option.server.GetFileAnnotationsOptions;
-import com.perforce.p4java.option.server.GetFileContentsOptions;
-import com.perforce.p4java.option.server.GetRevisionHistoryOptions;
-import com.perforce.p4java.option.server.MoveFileOptions;
-import com.perforce.p4java.server.IOptionsServer;
-import com.perforce.p4java.server.IServer;
 
 /**
  * Simple generic default implementation class for the IFileSpec interface.

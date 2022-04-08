@@ -37,6 +37,8 @@ public class MapKeys {
 	public static final String BRANCH_KEY = "Branch";
 	public static final String BRANCH_LC_KEY = "branch";
 	public static final String CHANGE_KEY = "Change";
+	public static final String CHANGE_LC_KEY = "change";
+	public static final String NEW_CHANGELIST_KEY = "new";
 	public static final String CLIENT_KEY = "Client";
 	public static final String CLIENT_LC_KEY = "client";
 	public static final String CODE_LC_KEY = "code";    // note lower-case first char
@@ -75,6 +77,7 @@ public class MapKeys {
 	public static final String MAXRESULTS_LC_KEY = "maxResults";
 	public static final String MAXSCANROWS_KEY = "MaxScanRows";
 	public static final String MAXSCANROWS_LC_KEY = "maxScanRows";
+	public static final String MAXOPENFILES_KEY = "MaxOpenFiles";
 	public static final String NAME_KEY = "Name";
 	public static final String NAME_LC_KEY = "name";
 	public static final String OPTIONS_KEY = "Options";
@@ -101,6 +104,7 @@ public class MapKeys {
 	public static final String STATUS_LC_KEY = "status";    // note lower-case first char
 	public static final String STREAM_DEPTH = "StreamDepth";
 	public static final String STREAM_KEY = "Stream";
+	public static final String STREAM_LC_KEY = "stream";
 	public static final String STREAMATCHANGE_KEY = "StreamAtChange";
 	public static final String SUBGROUPS_KEY = "Subgroups";
 	public static final String SUBMITOPTIONS_KEY = "SubmitOptions";
@@ -121,6 +125,7 @@ public class MapKeys {
 	public static final String UTF16_LC_KEY = "utf16";
 	public static final String VALUE_KEY = "Value";
 	public static final String VIEW_KEY = "View";
+	public static final String PARENT_VIEW_KEY = "ParentView";
 
 	public static final String REPO_KEY = "Repo";
 	public static final String REPO_NAME_KEY = "RepoName";
@@ -141,5 +146,77 @@ public class MapKeys {
 	public static final String FORMATS_KEY = "Formats";
 	public static final String OPENABLE_KEY = "Openable";
 	public static final String COMMENTS_KEY = "Comments";
+
+	public static final String LICENSE_KEY = "License";
+	public static final String LICENSE_EXPIRES_KEY = "License-Expires";
+	public static final String LICENSE_SUPPORT_KEY = "Support-Expires";
+	public static final String LICENSE_CUSTOMER_KEY = "Customer";
+	public static final String LICENSE_APPLICATION_KEY = "Application";
+	public static final String LICENSE_IPADDRESS_KEY = "IPaddress";
+	public static final String LICENSE_PLATFORM_KEY = "Platform";
+	public static final String LICENSE_CLIENTS_KEY = "Clients";
+	public static final String LICENSE_USERS_KEY = "Users";
+	public static final String LICENSE_CAPABILITIES_KEY = "ExtraCapabilities";
+
+	// Common to global and instance config
+	public static final String EXTENSION_NAME_KEY = "ExtName";
+	public static final String EXTENSION_EXT_DESCRIPTION_KEY = "ExtDescription";
+	public static final String EXTENSION_VERSION_KEY = "ExtVersion";
+	public static final String EXTENSION_UUID_KEY = "ExtUUID";
+	public static final String EXTENSION_REV_KEY = "ExtRev";
+	public static final String EXTENSION_SCRIPT_TIME_KEY = "ExtMaxScriptTime";
+	public static final String EXTENSION_SCRIPT_MEMORY_KEY = "ExtMaxScriptMem";
+	public static final String EXTENSION_ENABLED_KEY = "ExtEnabled";
+	public static final String EXTENSION_NAME_SPACE_KEY = "Name";
+	public static final String EXTENSION_OWNER_KEY = "Owner";
+	public static final String EXTENSION_UPDATE_KEY = "Update";
+	public static final String EXTENSION_DESCRIPTION_KEY = "Description";
+	public static final String EXTENSION_CONFIG_KEY = "ExtConfig";
+	public static final String EXTENSION_SUMMARY_NAME_KEY = "extension";
+	public static final String EXTENSION_SUMMARY_DEVELOPER_KEY = "developer";
+	public static final String EXTENSION_SUMMARY_DESCRIPTION_SNIPPET_KEY = "description-snippet";
+	public static final String EXTENSION_SUMMARY_UUID_KEY = "UUID";
+	public static final String EXTENSION_SUMMARY_REV_KEY = "rev";
+	public static final String EXTENSION_SUMMARY_VERSION_KEY = "version";
+	public static final String EXTENSION_SUMMARY_ENABLED_KEY = "enabled";
+	public static final String EXTENSION_SUMMARY_ARCH_DIR_KEY = "arch-dir";
+	public static final String EXTENSION_SUMMARY_DATA_DIR_KEY = "data-dir";
+	public static final String EXTENSION_SUMMARY_GLOBAL_CONF_KEY = "hasGlobalConfig";
+	public static final String EXTENSION_SUMMARY_INSTANCE_CONF_KEY = "hasInstanceConfig";
+
+
+	public static final String STREAMLOG_ACTION_KEY = "action";
+	public static final String STREAMLOG_ASSOCIATEDCHANGE_KEY = "associatedChange";
+
+	public static final String HOW_KEY = "how";
+	public static final String FIELD_KEY = "field";
+	public static final String START_FROM_CHANGE_KEY = "startFromChange";
+	public static final String END_FROM_CHANGE_KEY = "endFromChange";
+
+	// global config only
+	public static final String EXTENSION_GROUPS_KEY = "ExtAllowedGroups";
+	public static final String EXTENSION_P4USER_KEY = "ExtP4USER";
+
+	// instance config only
+	public static final String EXTENSION_DEBUG = "ExtDebug";
+
+	/**
+	 * 	 *         901 ExtName line 64 once
+	 * 	 *         902 ExtDescription text 128 once
+	 * 	 *         903 ExtVersion line 32 once
+	 * 	 *         904 ExtUUID line 36 once
+	 * 	 *         905 ExtRev word 20 once
+	 * 	 *         913 ExtMaxScriptTime word 12 optional
+	 * 	 *         914 ExtMaxScriptMem word 12 optional
+	 * 	 *         915 ExtAllowedGroups wlist 32 default
+	 * 	 *         916 ExtEnabled word 12 default
+	 * 	 *         917 ExtP4USER word 12 default
+	 * 	 *         906 Name line 32 default
+	 * 	 *         907 Owner word 36 default
+	 * 	 *         908 Update date 20 always
+	 * 	 *         909 Description text 128 required
+	 * 	 *         912 ExtConfig text 256 required
+	 * 	 *		   934 ExtDebug word 12 default
+	 */
 
 }

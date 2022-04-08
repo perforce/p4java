@@ -1,12 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.server.CmdSpec.JOBS;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.core.IJob;
 import com.perforce.p4java.core.file.IFileSpec;
 import com.perforce.p4java.exception.AccessException;
@@ -18,6 +11,13 @@ import com.perforce.p4java.impl.mapbased.server.Parameters;
 import com.perforce.p4java.option.server.GetJobsOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IJobsDelegator;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.server.CmdSpec.JOBS;
+import static java.util.Objects.nonNull;
 
 /**
  * Implementation for 'p4 jobs'..

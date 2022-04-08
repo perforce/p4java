@@ -1,32 +1,30 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.P4JavaExceptions.rethrowFunction;
-import static com.perforce.p4java.core.file.FileSpecOpStatus.VALID;
-import static com.perforce.p4java.impl.generic.core.file.FilePath.PathType.DEPOT;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.server.CmdSpec.ATTRIBUTE;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 import com.perforce.p4java.common.function.Function;
 import com.perforce.p4java.common.function.FunctionWithException;
 import com.perforce.p4java.core.file.IFileSpec;
-import com.perforce.p4java.exception.AccessException;
-import com.perforce.p4java.exception.ConnectionException;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.exception.RequestException;
 import com.perforce.p4java.option.server.SetFileAttributesOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IAttributeDelegator;
 import org.apache.commons.lang3.Validate;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.common.base.P4JavaExceptions.rethrowFunction;
+import static com.perforce.p4java.core.file.FileSpecOpStatus.VALID;
+import static com.perforce.p4java.impl.generic.core.file.FilePath.PathType.DEPOT;
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.server.CmdSpec.ATTRIBUTE;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * Concrete implementation of the attribute command processing.

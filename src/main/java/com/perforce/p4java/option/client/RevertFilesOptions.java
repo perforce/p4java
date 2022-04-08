@@ -3,12 +3,12 @@
  */
 package com.perforce.p4java.option.client;
 
-import java.util.List;
-
 import com.perforce.p4java.core.IChangelist;
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
+
+import java.util.List;
 
 /**
  * Options-based method options for IClient revertFiles method(s).
@@ -19,9 +19,9 @@ import com.perforce.p4java.server.IServer;
 public class RevertFilesOptions extends Options {
 
 	/**
-	 * Options: -n, -cN, -a, -k, -w
+	 * Options: -n, -cN, -a, -k, -w, -So, -Si
 	 */
-	public static final String OPTIONS_SPECS = "b:n i:c:cl b:a b:k b:w";
+	public static final String OPTIONS_SPECS = "b:n i:c:cl b:a b:k b:w b:So b:Si";
 
 	/**
 	 * If true, don't actually do the revert, just return the files that
@@ -51,6 +51,20 @@ public class RevertFilesOptions extends Options {
 	 * workspace when they are reverted. Corresponds to -w.
 	 */
 	protected boolean wipeAddFiles = false;
+
+	/**
+	 * If true flag can be used with '-c change' to revert the client's open
+	 * stream spec. Only Stream spec is reverted, no files are reverted, for
+	 * reverting files and Stream spec use revertFileList.
+	 */
+	protected boolean revertStreamSpec = false;
+
+	/**
+	 * If true the flag can be used with a file list to include an
+	 * open stream spec when reverting files. Reverts both files and
+	 * open stream spec.
+	 */
+	protected boolean revertFileList = false;
 
 	/**
 	 * Default constructor.
@@ -102,7 +116,9 @@ public class RevertFilesOptions extends Options {
 								this.changelistId,
 								this.revertOnlyUnchanged,
 								this.noClientRefresh,
-								this.wipeAddFiles);
+								this.wipeAddFiles,
+								this.revertStreamSpec,
+								this.revertFileList);
 		return this.optionList;
 	}
 
@@ -148,6 +164,24 @@ public class RevertFilesOptions extends Options {
 
 	public RevertFilesOptions setWipeAddFiles(boolean wipeAddFiles) {
 		this.wipeAddFiles = wipeAddFiles;
+		return this;
+	}
+
+	public boolean isRevertStreamSpec() {
+		return revertStreamSpec;
+	}
+
+	public RevertFilesOptions setRevertStreamSpec(boolean revertStreamSpec) {
+		this.revertStreamSpec = revertStreamSpec;
+		return this;
+	}
+
+	public boolean isRevertFileList() {
+		return revertFileList;
+	}
+
+	public RevertFilesOptions setRevertFileList(boolean revertFileList) {
+		this.revertFileList = revertFileList;
 		return this;
 	}
 }

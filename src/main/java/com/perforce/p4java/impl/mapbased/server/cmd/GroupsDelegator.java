@@ -1,15 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
-import static com.perforce.p4java.server.CmdSpec.GROUPS;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.IUserGroup;
 import com.perforce.p4java.exception.AccessException;
@@ -22,6 +12,16 @@ import com.perforce.p4java.impl.mapbased.server.Parameters;
 import com.perforce.p4java.option.server.GetUserGroupsOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IGroupsDelegator;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
+import static com.perforce.p4java.server.CmdSpec.GROUPS;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author Sean Shou

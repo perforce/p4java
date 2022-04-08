@@ -6,11 +6,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.CODE0;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT_FILE;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DESC;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 
 /**
  * @author Sean Shou

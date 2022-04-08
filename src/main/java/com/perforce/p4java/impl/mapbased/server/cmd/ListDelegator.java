@@ -11,12 +11,12 @@ import com.perforce.p4java.server.IOptionsServer;
 import java.util.List;
 import java.util.Map;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseLong;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.LABEL;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TOTALFILECOUNT;
 import static com.perforce.p4java.server.CmdSpec.LIST;
+import static java.util.Objects.nonNull;
 
 /**
  * This class acts as a delegator that executes the command 'p4 list'

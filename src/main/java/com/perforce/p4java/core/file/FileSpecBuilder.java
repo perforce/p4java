@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**

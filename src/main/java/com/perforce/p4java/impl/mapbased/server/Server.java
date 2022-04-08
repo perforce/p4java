@@ -21,6 +21,7 @@ import com.perforce.p4java.core.IChangelist;
 import com.perforce.p4java.core.IChangelist.Type;
 import com.perforce.p4java.core.IChangelistSummary;
 import com.perforce.p4java.core.IDepot;
+import com.perforce.p4java.core.IExtension;
 import com.perforce.p4java.core.IFileDiff;
 import com.perforce.p4java.core.IFileLineMatch;
 import com.perforce.p4java.core.IFix;
@@ -28,12 +29,15 @@ import com.perforce.p4java.core.IJob;
 import com.perforce.p4java.core.IJobSpec;
 import com.perforce.p4java.core.ILabel;
 import com.perforce.p4java.core.ILabelSummary;
+import com.perforce.p4java.core.ILicense;
+import com.perforce.p4java.core.ILicenseLimits;
 import com.perforce.p4java.core.IRepo;
 import com.perforce.p4java.core.IReviewChangelist;
 import com.perforce.p4java.core.IServerProcess;
 import com.perforce.p4java.core.IStream;
 import com.perforce.p4java.core.IStreamIntegrationStatus;
 import com.perforce.p4java.core.IStreamSummary;
+import com.perforce.p4java.core.IStreamlog;
 import com.perforce.p4java.core.IUser;
 import com.perforce.p4java.core.IUserGroup;
 import com.perforce.p4java.core.IUserSummary;
@@ -57,11 +61,160 @@ import com.perforce.p4java.graph.IGraphListTree;
 import com.perforce.p4java.graph.IGraphObject;
 import com.perforce.p4java.graph.IGraphRef;
 import com.perforce.p4java.graph.IRevListCommit;
+import com.perforce.p4java.impl.generic.core.Extension;
+import com.perforce.p4java.impl.generic.core.ExtensionSummary;
 import com.perforce.p4java.impl.generic.core.ListData;
 import com.perforce.p4java.impl.mapbased.rpc.RpcPropertyDefs;
-import com.perforce.p4java.impl.mapbased.server.cmd.*;
+import com.perforce.p4java.impl.mapbased.server.cmd.AttributeDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.BranchDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.BranchesDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ChangeDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ChangesDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ClientDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ClientsDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.CommitDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ConfigureDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.CounterDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.CountersDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.DBSchemaDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.DepotDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.DepotsDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.DescribeDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.Diff2Delegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.DirsDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.DiskspaceDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.DuplicateDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ExportDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ExtensionDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.FileAnnotateDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.FileLogDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.FilesDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.FixDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.FixesDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.FstatDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.GraphListTreeDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.GraphReceivePackDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.GraphRevListDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.GraphShowRefDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.GrepDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.GroupDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.GroupsDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.IListDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.InfoDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.IntegratedDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.InterchangesDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.JobDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.JobSpecDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.JobsDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.JournalWaitDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.KeyDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.KeysDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.LabelDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.LabelsDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.LicenseDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ListDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.LogTailDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.Login2Delegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.LoginDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.LogoutDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.MonitorDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.MoveDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ObliterateDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.OpenedDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.PasswdDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.PrintDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.PropertyDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ProtectDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ProtectsDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ReloadDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.RenameUserDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ReposDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder;
+import com.perforce.p4java.impl.mapbased.server.cmd.ReviewDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.ReviewsDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.SearchDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.SizesDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.SpecDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.StatDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.StreamDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.StreamlogDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.StreamsDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.TagDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.TriggersDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.UnloadDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.UserDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.UsersDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.VerifyDelegator;
 import com.perforce.p4java.option.UsageOptions;
-import com.perforce.p4java.option.server.*;
+import com.perforce.p4java.option.server.ChangelistOptions;
+import com.perforce.p4java.option.server.CounterOptions;
+import com.perforce.p4java.option.server.DeleteBranchSpecOptions;
+import com.perforce.p4java.option.server.DeleteClientOptions;
+import com.perforce.p4java.option.server.DeleteLabelOptions;
+import com.perforce.p4java.option.server.DescribeOptions;
+import com.perforce.p4java.option.server.DuplicateRevisionsOptions;
+import com.perforce.p4java.option.server.ExportRecordsOptions;
+import com.perforce.p4java.option.server.FixJobsOptions;
+import com.perforce.p4java.option.server.GetBranchSpecOptions;
+import com.perforce.p4java.option.server.GetBranchSpecsOptions;
+import com.perforce.p4java.option.server.GetChangelistDiffsOptions;
+import com.perforce.p4java.option.server.GetChangelistsOptions;
+import com.perforce.p4java.option.server.GetClientTemplateOptions;
+import com.perforce.p4java.option.server.GetClientsOptions;
+import com.perforce.p4java.option.server.GetCountersOptions;
+import com.perforce.p4java.option.server.GetDepotFilesOptions;
+import com.perforce.p4java.option.server.GetDepotsOptions;
+import com.perforce.p4java.option.server.GetDirectoriesOptions;
+import com.perforce.p4java.option.server.GetExtendedFilesOptions;
+import com.perforce.p4java.option.server.GetFileAnnotationsOptions;
+import com.perforce.p4java.option.server.GetFileContentsOptions;
+import com.perforce.p4java.option.server.GetFileDiffsOptions;
+import com.perforce.p4java.option.server.GetFileSizesOptions;
+import com.perforce.p4java.option.server.GetFixesOptions;
+import com.perforce.p4java.option.server.GetInterchangesOptions;
+import com.perforce.p4java.option.server.GetJobsOptions;
+import com.perforce.p4java.option.server.GetKeysOptions;
+import com.perforce.p4java.option.server.GetLabelsOptions;
+import com.perforce.p4java.option.server.GetPropertyOptions;
+import com.perforce.p4java.option.server.GetProtectionEntriesOptions;
+import com.perforce.p4java.option.server.GetReviewChangelistsOptions;
+import com.perforce.p4java.option.server.GetReviewsOptions;
+import com.perforce.p4java.option.server.GetRevisionHistoryOptions;
+import com.perforce.p4java.option.server.GetServerProcessesOptions;
+import com.perforce.p4java.option.server.GetStreamOptions;
+import com.perforce.p4java.option.server.GetStreamsOptions;
+import com.perforce.p4java.option.server.GetSubmittedIntegrationsOptions;
+import com.perforce.p4java.option.server.GetUserGroupsOptions;
+import com.perforce.p4java.option.server.GetUsersOptions;
+import com.perforce.p4java.option.server.GraphCommitLogOptions;
+import com.perforce.p4java.option.server.GraphReceivePackOptions;
+import com.perforce.p4java.option.server.GraphRevListOptions;
+import com.perforce.p4java.option.server.GraphShowRefOptions;
+import com.perforce.p4java.option.server.JournalWaitOptions;
+import com.perforce.p4java.option.server.KeyOptions;
+import com.perforce.p4java.option.server.ListOptions;
+import com.perforce.p4java.option.server.LogTailOptions;
+import com.perforce.p4java.option.server.Login2Options;
+import com.perforce.p4java.option.server.LoginOptions;
+import com.perforce.p4java.option.server.MatchingLinesOptions;
+import com.perforce.p4java.option.server.MoveFileOptions;
+import com.perforce.p4java.option.server.ObliterateFilesOptions;
+import com.perforce.p4java.option.server.OpenedFilesOptions;
+import com.perforce.p4java.option.server.PropertyOptions;
+import com.perforce.p4java.option.server.ReloadOptions;
+import com.perforce.p4java.option.server.ReposOptions;
+import com.perforce.p4java.option.server.SearchJobsOptions;
+import com.perforce.p4java.option.server.SetFileAttributesOptions;
+import com.perforce.p4java.option.server.StreamIntegrationStatusOptions;
+import com.perforce.p4java.option.server.StreamOptions;
+import com.perforce.p4java.option.server.StreamlogOptions;
+import com.perforce.p4java.option.server.SwitchClientViewOptions;
+import com.perforce.p4java.option.server.TagFilesOptions;
+import com.perforce.p4java.option.server.UnloadOptions;
+import com.perforce.p4java.option.server.UpdateClientOptions;
+import com.perforce.p4java.option.server.UpdateUserGroupOptions;
+import com.perforce.p4java.option.server.UpdateUserOptions;
+import com.perforce.p4java.option.server.VerifyFilesOptions;
 import com.perforce.p4java.server.CustomSpec;
 import com.perforce.p4java.server.HelixCommandExecutor;
 import com.perforce.p4java.server.IOptionsServer;
@@ -77,7 +230,79 @@ import com.perforce.p4java.server.callback.ICommandCallback;
 import com.perforce.p4java.server.callback.IProgressCallback;
 import com.perforce.p4java.server.callback.ISSOCallback;
 import com.perforce.p4java.server.callback.IStreamingCallback;
-import com.perforce.p4java.server.delegator.*;
+import com.perforce.p4java.server.delegator.IAttributeDelegator;
+import com.perforce.p4java.server.delegator.IBranchDelegator;
+import com.perforce.p4java.server.delegator.IBranchesDelegator;
+import com.perforce.p4java.server.delegator.IChangeDelegator;
+import com.perforce.p4java.server.delegator.IChangesDelegator;
+import com.perforce.p4java.server.delegator.IClientDelegator;
+import com.perforce.p4java.server.delegator.IClientsDelegator;
+import com.perforce.p4java.server.delegator.ICommitDelegator;
+import com.perforce.p4java.server.delegator.IConfigureDelegator;
+import com.perforce.p4java.server.delegator.ICounterDelegator;
+import com.perforce.p4java.server.delegator.ICountersDelegator;
+import com.perforce.p4java.server.delegator.IDBSchemaDelegator;
+import com.perforce.p4java.server.delegator.IDepotDelegator;
+import com.perforce.p4java.server.delegator.IDepotsDelegator;
+import com.perforce.p4java.server.delegator.IDiff2Delegator;
+import com.perforce.p4java.server.delegator.IDirsDelegator;
+import com.perforce.p4java.server.delegator.IDiskspaceDelegator;
+import com.perforce.p4java.server.delegator.IDuplicateDelegator;
+import com.perforce.p4java.server.delegator.IExportDelegator;
+import com.perforce.p4java.server.delegator.IExtensionDelegator;
+import com.perforce.p4java.server.delegator.IFileAnnotateDelegator;
+import com.perforce.p4java.server.delegator.IFileLogDelegator;
+import com.perforce.p4java.server.delegator.IFilesDelegator;
+import com.perforce.p4java.server.delegator.IFixDelegator;
+import com.perforce.p4java.server.delegator.IFixesDelegator;
+import com.perforce.p4java.server.delegator.IFstatDelegator;
+import com.perforce.p4java.server.delegator.IGraphListTreeDelegator;
+import com.perforce.p4java.server.delegator.IGraphReceivePackDelegator;
+import com.perforce.p4java.server.delegator.IGraphRevListDelegator;
+import com.perforce.p4java.server.delegator.IGraphShowRefDelegator;
+import com.perforce.p4java.server.delegator.IGrepDelegator;
+import com.perforce.p4java.server.delegator.IInfoDelegator;
+import com.perforce.p4java.server.delegator.IIntegratedDelegator;
+import com.perforce.p4java.server.delegator.IJobDelegator;
+import com.perforce.p4java.server.delegator.IJobSpecDelegator;
+import com.perforce.p4java.server.delegator.IJobsDelegator;
+import com.perforce.p4java.server.delegator.IJournalWaitDelegator;
+import com.perforce.p4java.server.delegator.IKeyDelegator;
+import com.perforce.p4java.server.delegator.IKeysDelegator;
+import com.perforce.p4java.server.delegator.ILabelDelegator;
+import com.perforce.p4java.server.delegator.ILabelsDelegator;
+import com.perforce.p4java.server.delegator.ILicenseDelegator;
+import com.perforce.p4java.server.delegator.ILogTailDelegator;
+import com.perforce.p4java.server.delegator.ILogin2Delegator;
+import com.perforce.p4java.server.delegator.ILoginDelegator;
+import com.perforce.p4java.server.delegator.ILogoutDelegator;
+import com.perforce.p4java.server.delegator.IMonitorDelegator;
+import com.perforce.p4java.server.delegator.IMoveDelegator;
+import com.perforce.p4java.server.delegator.IObliterateDelegator;
+import com.perforce.p4java.server.delegator.IOpenedDelegator;
+import com.perforce.p4java.server.delegator.IPasswdDelegator;
+import com.perforce.p4java.server.delegator.IPrintDelegator;
+import com.perforce.p4java.server.delegator.IPropertyDelegator;
+import com.perforce.p4java.server.delegator.IProtectDelegator;
+import com.perforce.p4java.server.delegator.IProtectsDelegator;
+import com.perforce.p4java.server.delegator.IReloadDelegator;
+import com.perforce.p4java.server.delegator.IRenameUserDelegator;
+import com.perforce.p4java.server.delegator.IReposDelegator;
+import com.perforce.p4java.server.delegator.IReviewDelegator;
+import com.perforce.p4java.server.delegator.IReviewsDelegator;
+import com.perforce.p4java.server.delegator.ISearchDelegator;
+import com.perforce.p4java.server.delegator.ISizesDelegator;
+import com.perforce.p4java.server.delegator.ISpecDelegator;
+import com.perforce.p4java.server.delegator.IStatDelegator;
+import com.perforce.p4java.server.delegator.IStreamDelegator;
+import com.perforce.p4java.server.delegator.IStreamlogDelegator;
+import com.perforce.p4java.server.delegator.IStreamsDelegator;
+import com.perforce.p4java.server.delegator.ITagDelegator;
+import com.perforce.p4java.server.delegator.ITriggersDelegator;
+import com.perforce.p4java.server.delegator.IUnloadDelegator;
+import com.perforce.p4java.server.delegator.IUserDelegator;
+import com.perforce.p4java.server.delegator.IUsersDelegator;
+import com.perforce.p4java.server.delegator.IVerifyDelegator;
 import org.apache.commons.lang3.ObjectUtils;
 
 import javax.annotation.Nonnull;
@@ -91,9 +316,38 @@ import java.util.Properties;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.perforce.p4java.PropertyDefs.*;
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import static com.perforce.p4java.PropertyDefs.AUTO_CONNECT_KEY;
+import static com.perforce.p4java.PropertyDefs.AUTO_CONNECT_KEY_SHORTFORM;
+import static com.perforce.p4java.PropertyDefs.AUTO_LOGIN_KEY;
+import static com.perforce.p4java.PropertyDefs.AUTO_LOGIN_KEY_SHORTFORM;
+import static com.perforce.p4java.PropertyDefs.CLIENT_NAME_KEY;
+import static com.perforce.p4java.PropertyDefs.CLIENT_NAME_KEY_SHORTFORM;
+import static com.perforce.p4java.PropertyDefs.CLIENT_PATH_KEY;
+import static com.perforce.p4java.PropertyDefs.CLIENT_PATH_KEY_SHORTFORM;
+import static com.perforce.p4java.PropertyDefs.CLIENT_UNSET_NAME_DEFAULT;
+import static com.perforce.p4java.PropertyDefs.ENABLE_ANDMAPS;
+import static com.perforce.p4java.PropertyDefs.ENABLE_ANDMAPS_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.ENABLE_GRAPH;
+import static com.perforce.p4java.PropertyDefs.ENABLE_GRAPH_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.ENABLE_PROGRESS;
+import static com.perforce.p4java.PropertyDefs.ENABLE_PROGRESS_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.ENABLE_STREAMS;
+import static com.perforce.p4java.PropertyDefs.ENABLE_STREAMS_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.ENABLE_TRACKING;
+import static com.perforce.p4java.PropertyDefs.ENABLE_TRACKING_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.IGNORE_FILE_NAME_KEY;
+import static com.perforce.p4java.PropertyDefs.IGNORE_FILE_NAME_KEY_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.NON_CHECKED_SYNC;
+import static com.perforce.p4java.PropertyDefs.NON_CHECKED_SYNC_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.P4JAVA_TMP_DIR_KEY;
+import static com.perforce.p4java.PropertyDefs.PASSWORD_KEY;
+import static com.perforce.p4java.PropertyDefs.PASSWORD_KEY_SHORTFORM;
+import static com.perforce.p4java.PropertyDefs.QUIET_MODE;
+import static com.perforce.p4java.PropertyDefs.QUIET_MODE_SHORT_FORM;
+import static com.perforce.p4java.PropertyDefs.USER_NAME_KEY;
+import static com.perforce.p4java.PropertyDefs.USER_NAME_KEY_SHORTFORM;
+import static com.perforce.p4java.PropertyDefs.USE_AUTH_MEMORY_STORE_KEY;
+import static com.perforce.p4java.PropertyDefs.USE_AUTH_MEMORY_STORE_KEY_SHORT_FORM;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwConnectionExceptionIfConditionFails;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwP4JavaErrorIfConditionFails;
 import static com.perforce.p4java.core.file.FileSpecOpStatus.VALID;
@@ -103,6 +357,8 @@ import static com.perforce.p4java.env.PerforceEnvironment.getP4User;
 import static com.perforce.p4java.server.PerforceCharsets.getP4CharsetName;
 import static com.perforce.p4java.util.PropertiesHelper.getPropertyByKeys;
 import static com.perforce.p4java.util.PropertiesHelper.isExistProperty;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -315,6 +571,9 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	private IListDelegator listDelegator;
 	private IGraphShowRefDelegator graphShowRefDelegator;
 	private ISpecDelegator specDelegator;
+	private ILicenseDelegator licenseDelegator;
+	private IExtensionDelegator extensionDelegator;
+	private IStreamlogDelegator streamlogDelegator;
 
 	/**
 	 * Useful source of random integers, etc.
@@ -328,12 +587,12 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	public static String[] getPreferredPathArray(final String[] preamble,
-	                                             final List<IFileSpec> specList) {
+												 final List<IFileSpec> specList) {
 		return getPreferredPathArray(preamble, specList, true);
 	}
 
 	public static String[] getPreferredPathArray(final String[] preamble,
-	                                             final List<IFileSpec> specList, final boolean annotate) {
+												 final List<IFileSpec> specList, final boolean annotate) {
 		int pathArraySize = (isNull(preamble) ? 0 : preamble.length)
 				+ (isNull(specList) ? 0 : specList.size());
 		String[] pathArray = new String[pathArraySize];
@@ -362,7 +621,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	public static String[] populatePathArray(final String[] pathArray, final int start,
-	                                         final List<IFileSpec> fileSpecList) {
+											 final List<IFileSpec> fileSpecList) {
 
 		if (isNull(pathArray)) {
 			return null;
@@ -773,7 +1032,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	@Override
 	public ServerStatus init(final String host, final int port, final Properties properties,
-	                         final UsageOptions opts, final boolean secure)
+							 final UsageOptions opts, final boolean secure)
 			throws ConfigException, ConnectionException {
 		serverHost = host;
 		serverPort = port;
@@ -900,12 +1159,15 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 		listDelegator = new ListDelegator(this);
 		graphShowRefDelegator = new GraphShowRefDelegator(this);
 		specDelegator = new SpecDelegator(this);
+		licenseDelegator = new LicenseDelegator(this);
+		extensionDelegator = new ExtensionDelegator(this);
+		streamlogDelegator = new StreamlogDelegator(this);
 		return status; // Which is UNKNOWN at this point...
 	}
 
 	@Override
 	public ServerStatus init(final String host, final int port, final Properties props,
-	                         final UsageOptions opts) throws ConfigException, ConnectionException {
+							 final UsageOptions opts) throws ConfigException, ConnectionException {
 
 		return init(host, port, props, opts, false);
 	}
@@ -1038,14 +1300,14 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	// Command delegators
 	/*
 	 * (non-Javadoc)
-     * 
-     * @see com.perforce.p4java.server.delegator.IAttributeDelegator#
-     * setFileAttributes(java.util.List, java.util.Map,
-     * com.perforce.p4java.option.server.SetFileAttributesOptions)
-     */
+	 *
+	 * @see com.perforce.p4java.server.delegator.IAttributeDelegator#
+	 * setFileAttributes(java.util.List, java.util.Map,
+	 * com.perforce.p4java.option.server.SetFileAttributesOptions)
+	 */
 	@Override
 	public List<IFileSpec> setFileAttributes(List<IFileSpec> files, Map<String, String> attributes,
-	                                         SetFileAttributesOptions opts) throws P4JavaException {
+											 SetFileAttributesOptions opts) throws P4JavaException {
 		return attributeDelegator.setFileAttributes(files, attributes, opts);
 	}
 
@@ -1086,7 +1348,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 */
 	@Override
 	public List<IBranchSpecSummary> getBranchSpecs(String userName, String nameFilter,
-	                                               int maxReturns) throws ConnectionException, RequestException, AccessException {
+												   int maxReturns) throws ConnectionException, RequestException, AccessException {
 		return branchesDelegator.getBranchSpecs(userName, nameFilter, maxReturns);
 	}
 
@@ -1226,8 +1488,8 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 */
 	@Override
 	public List<IChangelistSummary> getChangelists(final int maxMostRecent,
-	                                               final List<IFileSpec> fileSpecs, final String clientName, final String userName,
-	                                               final boolean includeIntegrated, final Type type, final boolean longDesc)
+												   final List<IFileSpec> fileSpecs, final String clientName, final String userName,
+												   final boolean includeIntegrated, final Type type, final boolean longDesc)
 			throws ConnectionException, RequestException, AccessException {
 		return changesDelegator.getChangelists(maxMostRecent, fileSpecs, clientName, userName,
 				includeIntegrated, type, longDesc);
@@ -1242,9 +1504,9 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 */
 	@Override
 	public List<IChangelistSummary> getChangelists(final int maxMostRecent,
-	                                               final List<IFileSpec> fileSpecs, final String clientName, final String userName,
-	                                               final boolean includeIntegrated, final boolean submittedOnly, final boolean pendingOnly,
-	                                               final boolean longDesc) throws ConnectionException, RequestException, AccessException {
+												   final List<IFileSpec> fileSpecs, final String clientName, final String userName,
+												   final boolean includeIntegrated, final boolean submittedOnly, final boolean pendingOnly,
+												   final boolean longDesc) throws ConnectionException, RequestException, AccessException {
 
 		return changesDelegator.getChangelists(maxMostRecent, fileSpecs, clientName, userName,
 				includeIntegrated, submittedOnly, pendingOnly, longDesc);
@@ -1258,7 +1520,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * java.util.List, com.perforce.p4java.option.server.GetChangelistsOptions)
 	 */
 	public List<IChangelistSummary> getChangelists(final List<IFileSpec> fileSpecs,
-	                                               final GetChangelistsOptions opts) throws P4JavaException {
+												   final GetChangelistsOptions opts) throws P4JavaException {
 		return changesDelegator.getChangelists(fileSpecs, opts);
 	}
 
@@ -1387,7 +1649,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 */
 	@Override
 	public String setOrUnsetServerConfigurationValue(@Nonnull final String name,
-	                                                 @Nullable final String value) throws P4JavaException {
+													 @Nullable final String value) throws P4JavaException {
 		return configureDelegator.setOrUnsetServerConfigurationValue(name, value);
 	}
 
@@ -1399,7 +1661,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 */
 	@Override
 	public List<ServerConfigurationValue> showServerConfiguration(final String serverName,
-	                                                              final String variableName) throws P4JavaException {
+																  final String variableName) throws P4JavaException {
 		return configureDelegator.showServerConfiguration(serverName, variableName);
 	}
 
@@ -1454,7 +1716,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 */
 	@Override
 	public List<IChangelist> getInterchanges(IFileSpec fromFile, IFileSpec toFile,
-	                                         GetInterchangesOptions opts) throws P4JavaException {
+											 GetInterchangesOptions opts) throws P4JavaException {
 		return interchangesDelegator.getInterchanges(fromFile, toFile, opts);
 	}
 
@@ -1468,7 +1730,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 */
 	@Override
 	public List<IChangelist> getInterchanges(String branchSpecName, List<IFileSpec> fromFileList,
-	                                         List<IFileSpec> toFileList, GetInterchangesOptions opts) throws P4JavaException {
+											 List<IFileSpec> toFileList, GetInterchangesOptions opts) throws P4JavaException {
 		return interchangesDelegator.getInterchanges(branchSpecName, fromFileList, toFileList,
 				opts);
 	}
@@ -1483,7 +1745,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 */
 	@Override
 	public List<IChangelist> getInterchanges(IFileSpec fromFile, IFileSpec toFile,
-	                                         boolean showFiles, boolean longDesc, int maxChangelistId)
+											 boolean showFiles, boolean longDesc, int maxChangelistId)
 			throws ConnectionException, RequestException, AccessException {
 		return interchangesDelegator.getInterchanges(fromFile, toFile, showFiles, longDesc,
 				maxChangelistId);
@@ -1497,8 +1759,8 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 */
 	@Override
 	public List<IChangelist> getInterchanges(String branchSpecName, List<IFileSpec> fromFileList,
-	                                         List<IFileSpec> toFileList, boolean showFiles, boolean longDesc, int maxChangelistId,
-	                                         boolean reverseMapping, boolean biDirectional)
+											 List<IFileSpec> toFileList, boolean showFiles, boolean longDesc, int maxChangelistId,
+											 boolean reverseMapping, boolean biDirectional)
 			throws ConnectionException, RequestException, AccessException {
 		return interchangesDelegator.getInterchanges(branchSpecName, fromFileList, toFileList,
 				showFiles, longDesc, maxChangelistId, reverseMapping, biDirectional);
@@ -1547,13 +1809,13 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	@Override
 	public String switchClientView(String templateClientName, String targetClientName,
-	                               SwitchClientViewOptions opts) throws P4JavaException {
+								   SwitchClientViewOptions opts) throws P4JavaException {
 		return clientDelegator.switchClientView(templateClientName, targetClientName, opts);
 	}
 
 	@Override
 	public String switchStreamView(String streamPath, String targetClientName,
-	                               SwitchClientViewOptions opts) throws P4JavaException {
+								   SwitchClientViewOptions opts) throws P4JavaException {
 		return clientDelegator.switchStreamView(streamPath, targetClientName, opts);
 	}
 
@@ -1585,14 +1847,14 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	@Override
 	public void setCounter(final String counterName, final String value,
-	                       final boolean perforceCounter)
+						   final boolean perforceCounter)
 			throws ConnectionException, RequestException, AccessException {
 		counterDelegator.setCounter(counterName, value, perforceCounter);
 	}
 
 	@Override
 	public String setCounter(final String counterName, final String value,
-	                         final CounterOptions opts) throws P4JavaException {
+							 final CounterOptions opts) throws P4JavaException {
 		return counterDelegator.setCounter(counterName, value, opts);
 	}
 
@@ -1632,7 +1894,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 */
 	@Override
 	public ServerStatus init(String host, int port, Properties props, UsageOptions opts,
-	                         boolean secure, String rsh) throws ConfigException, ConnectionException {
+							 boolean secure, String rsh) throws ConfigException, ConnectionException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1667,6 +1929,14 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	@Override
 	public List<IDepot> getDepots() throws ConnectionException, RequestException, AccessException {
 		return depotsDelegator.getDepots();
+	}
+
+	/* (non-Javadoc)
+	 * @see com.perforce.p4java.server.IServer#getDepots(GetDepotsOptions)
+	 */
+	@Override
+	public List<IDepot> getDepots(GetDepotsOptions opts) throws P4JavaException {
+		return depotsDelegator.getDepots(opts);
 	}
 
 	/* (non-Javadoc)
@@ -1854,47 +2124,47 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	@Override
 	public List<IFileSpec> getDirectories(@Nonnull final List<IFileSpec> fileSpecs,
-	                                      final boolean clientOnly, final boolean deletedOnly, final boolean haveListOnly)
+										  final boolean clientOnly, final boolean deletedOnly, final boolean haveListOnly)
 			throws ConnectionException, AccessException {
 		return dirsDelegator.getDirectories(fileSpecs, clientOnly, deletedOnly, haveListOnly);
 	}
 
 	@Override
 	public List<IFileSpec> getDirectories(final List<IFileSpec> fileSpecs,
-	                                      final GetDirectoriesOptions opts) throws P4JavaException {
+										  final GetDirectoriesOptions opts) throws P4JavaException {
 		return dirsDelegator.getDirectories(fileSpecs, opts);
 	}
 
 	@Override
 	public List<IFileSpec> getDepotFiles(@Nonnull final List<IFileSpec> fileSpecs,
-	                                     final boolean allRevs) throws ConnectionException, AccessException {
+										 final boolean allRevs) throws ConnectionException, AccessException {
 
 		return filesDelegator.getDepotFiles(fileSpecs, allRevs);
 	}
 
 	@Override
 	public List<IFileSpec> getDepotFiles(@Nonnull final List<IFileSpec> fileSpecs,
-	                                     final GetDepotFilesOptions opts) throws P4JavaException {
+										 final GetDepotFilesOptions opts) throws P4JavaException {
 
 		return filesDelegator.getDepotFiles(fileSpecs, opts);
 	}
 
 	@Override
 	public List<IFix> fixJobs(final List<String> jobIds, final int changeListId,
-	                          final String status, final boolean delete)
+							  final String status, final boolean delete)
 			throws ConnectionException, RequestException, AccessException {
 		return fixDelegator.fixJobs(jobIds, changeListId, status, delete);
 	}
 
 	@Override
 	public List<IFix> fixJobs(@Nonnull final List<String> jobIds, final int changeListId,
-	                          final FixJobsOptions opts) throws P4JavaException {
+							  final FixJobsOptions opts) throws P4JavaException {
 		return fixDelegator.fixJobs(jobIds, changeListId, opts);
 	}
 
 	@Override
 	public List<IFix> getFixList(final List<IFileSpec> fileSpecs, final int changeListId,
-	                             final String jobId, final boolean includeIntegrations, final int maxFixes)
+								 final String jobId, final boolean includeIntegrations, final int maxFixes)
 			throws ConnectionException, RequestException, AccessException {
 		return fixesDelegator.getFixList(fileSpecs, changeListId, jobId,
 				includeIntegrations, maxFixes);
@@ -1908,9 +2178,9 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	@Override
 	public List<IExtendedFileSpec> getExtendedFiles(final List<IFileSpec> fileSpecs,
-	                                                final int maxFiles, final int sinceChangelist, final int affectedByChangelist,
-	                                                final FileStatOutputOptions outputOptions,
-	                                                final FileStatAncilliaryOptions ancilliaryOptions)
+													final int maxFiles, final int sinceChangelist, final int affectedByChangelist,
+													final FileStatOutputOptions outputOptions,
+													final FileStatAncilliaryOptions ancilliaryOptions)
 			throws ConnectionException, AccessException {
 		return fstatDelegator.getExtendedFiles(fileSpecs, maxFiles, sinceChangelist,
 				affectedByChangelist, outputOptions, ancilliaryOptions);
@@ -1918,20 +2188,20 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	@Override
 	public List<IExtendedFileSpec> getExtendedFiles(final List<IFileSpec> fileSpecs,
-	                                                final GetExtendedFilesOptions opts) throws P4JavaException {
+													final GetExtendedFilesOptions opts) throws P4JavaException {
 		return fstatDelegator.getExtendedFiles(fileSpecs, opts);
 	}
 
 	@Override
 	public List<IFileLineMatch> getMatchingLines(List<IFileSpec> fileSpecs,
-	                                             String pattern, MatchingLinesOptions options) throws P4JavaException {
+												 String pattern, MatchingLinesOptions options) throws P4JavaException {
 		return grepDelegator.getMatchingLines(fileSpecs, pattern, options);
 	}
 
 	@Override
 	public List<IFileLineMatch> getMatchingLines(@Nonnull List<IFileSpec> fileSpecs,
-	                                             @Nonnull String pattern, @Nullable List<String> infoLines,
-	                                             MatchingLinesOptions options) throws P4JavaException {
+												 @Nonnull String pattern, @Nullable List<String> infoLines,
+												 MatchingLinesOptions options) throws P4JavaException {
 		return grepDelegator.getMatchingLines(fileSpecs, pattern, infoLines, options);
 	}
 
@@ -1990,26 +2260,26 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	@Override
 	public List<IUserGroup> getUserGroups(String userOrGroupName, boolean indirect,
-	                                      boolean displayValues, int maxGroups)
+										  boolean displayValues, int maxGroups)
 			throws ConnectionException, RequestException, AccessException {
 		return groupsDelegator.getUserGroups(userOrGroupName, indirect, displayValues, maxGroups);
 	}
 
 	@Override
 	public List<IFileSpec> getSubmittedIntegrations(List<IFileSpec> fileSpecs, String branchSpec,
-	                                                boolean reverseMappings) throws ConnectionException, RequestException, AccessException {
+													boolean reverseMappings) throws ConnectionException, RequestException, AccessException {
 		return integratedDelegator.getSubmittedIntegrations(fileSpecs, branchSpec, reverseMappings);
 	}
 
 	@Override
 	public List<IFileSpec> getSubmittedIntegrations(List<IFileSpec> fileSpecs,
-	                                                GetSubmittedIntegrationsOptions opts) throws P4JavaException {
+													GetSubmittedIntegrationsOptions opts) throws P4JavaException {
 		return integratedDelegator.getSubmittedIntegrations(fileSpecs, opts);
 	}
 
 	@Override
 	public IStreamIntegrationStatus getStreamIntegrationStatus(final String stream,
-	                                                           final StreamIntegrationStatusOptions opts) throws P4JavaException {
+															   final StreamIntegrationStatusOptions opts) throws P4JavaException {
 		return statDelegator.getStreamIntegrationStatus(stream, opts);
 	}
 
@@ -2037,8 +2307,8 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	@Override
 	public List<IJob> getJobs(final List<IFileSpec> fileSpecs, final int maxJobs,
-	                          final boolean longDescriptions, final boolean reverseOrder,
-	                          final boolean includeIntegrated, final String jobView)
+							  final boolean longDescriptions, final boolean reverseOrder,
+							  final boolean includeIntegrated, final String jobView)
 			throws ConnectionException, RequestException, AccessException {
 		return jobsDelegator.getJobs(fileSpecs, maxJobs, longDescriptions, reverseOrder, includeIntegrated, jobView);
 	}
@@ -2241,14 +2511,14 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	@Override
 	public List<IFileSpec> getOpenedFiles(final List<IFileSpec> fileSpecs, final boolean allClients,
-	                                      final String clientName, final int maxFiles, final int changeListId)
+										  final String clientName, final int maxFiles, final int changeListId)
 			throws ConnectionException, AccessException {
 		return openedDelegator.getOpenedFiles(fileSpecs, allClients, clientName, maxFiles, changeListId);
 	}
 
 	@Override
 	public List<IFileSpec> getOpenedFiles(final List<IFileSpec> fileSpecs,
-	                                      final OpenedFilesOptions opts) throws P4JavaException {
+										  final OpenedFilesOptions opts) throws P4JavaException {
 		return openedDelegator.getOpenedFiles(fileSpecs, opts);
 	}
 
@@ -2681,6 +2951,66 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 		return specDelegator.updateSpecString(type, spec);
 	}
 
+
+	@Override
+	public ILicenseLimits getLimits() throws P4JavaException {
+
+		return licenseDelegator.getLimits();
+	}
+
+	@Override
+	public ILicense getLicense() throws P4JavaException {
+
+		return licenseDelegator.getLicense();
+	}
+
+	@Override
+	public String updateLicense(ILicense license) throws P4JavaException {
+
+		return licenseDelegator.updateLicense(license);
+	}
+
+
+	@Override
+	public String sampleExtension(String extnName) throws P4JavaException {
+		return extensionDelegator.sampleExtension(extnName);
+	}
+
+	@Override
+	public String packageExtension(String dirName) throws P4JavaException {
+		return extensionDelegator.packageExtension(dirName);
+	}
+
+	@Override
+	public ExtensionSummary installExtension(String extnPackageName, boolean allowUnsigned) throws P4JavaException {
+		return extensionDelegator.installExtension(extnPackageName, allowUnsigned);
+	}
+
+	@Override
+	public String createExtensionConfig(IExtension extension, String namespace, String instanceConfig) throws P4JavaException {
+		return extensionDelegator.createExtensionConfig(extension, namespace, instanceConfig);
+	}
+
+	@Override
+	public String updateExtensionConfig(IExtension extension, String namespace, String instanceConfig) throws P4JavaException {
+		return extensionDelegator.updateExtensionConfig(extension, namespace, instanceConfig);
+	}
+
+	@Override
+	public List<ExtensionSummary> listExtensions(String type) throws P4JavaException {
+		return extensionDelegator.listExtensions(type);
+	}
+
+	@Override
+	public String deleteExtension(String namespace, String extnName) throws P4JavaException {
+		return extensionDelegator.deleteExtension(namespace, extnName);
+	}
+
+	@Override
+	public Extension getExtensionConfig(String namespace, String name, String instanceName) throws P4JavaException {
+		return extensionDelegator.getExtensionConfig(namespace, name, instanceName);
+	}
+
 	/**
 	 * Usage: cat-file commit {object-sha}
 	 *
@@ -2709,7 +3039,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * Usage: cat-file -n {repo} blob {object-sha}
 	 *
 	 * @param repo graph repo
-	 * @param sha graph SHA
+	 * @param sha  graph SHA
 	 * @return InputStream for graph blob
 	 * @throws P4JavaException API errors
 	 */
@@ -2749,4 +3079,9 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	public abstract IServerAddress getServerAddressDetails();
+
+	@Override
+	public Map<String, List<IStreamlog>> getStreamlog(List<String> streamPaths, StreamlogOptions opts) throws P4JavaException {
+		return streamlogDelegator.getStreamlog(streamPaths, opts);
+	}
 }

@@ -1,17 +1,17 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.server.CmdSpec.DBSCHEMA;
-
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.admin.IDbSchema;
 import com.perforce.p4java.common.function.Function;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.impl.generic.admin.DbSchema;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IDBSchemaDelegator;
+
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.server.CmdSpec.DBSCHEMA;
+import static java.util.Objects.nonNull;
 
 /**
  * Handles DB Schema commands.

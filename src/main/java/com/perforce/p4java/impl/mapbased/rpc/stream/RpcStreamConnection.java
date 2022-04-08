@@ -47,14 +47,14 @@ import java.util.Map;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicLong;
 
-import static com.perforce.p4java.common.base.ObjectUtils.isNull;
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwConnectionException;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwConnectionExceptionIfConditionFails;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwP4JavaError;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwP4JavaErrorIfConditionFails;
 import static com.perforce.p4java.common.base.P4JavaExceptions.throwProtocolErrorIfConditionFails;
 import static com.perforce.p4java.common.base.StringHelper.format;
+import static java.util.Objects.isNull;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**

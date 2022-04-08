@@ -1,14 +1,14 @@
 package com.perforce.p4java.admin;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
+import java.util.Map;
+
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
 import static com.perforce.p4java.impl.mapbased.MapKeys.NAME_KEY;
 import static com.perforce.p4java.impl.mapbased.MapKeys.SERVER_NAME_KEY;
 import static com.perforce.p4java.impl.mapbased.MapKeys.TYPE_KEY;
 import static com.perforce.p4java.impl.mapbased.MapKeys.VALUE_KEY;
+import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.Map;
 
 /**
  * Encapsulates the server configuration values that are available through the

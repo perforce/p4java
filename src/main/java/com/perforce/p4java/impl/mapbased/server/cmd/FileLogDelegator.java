@@ -1,23 +1,5 @@
 package com.perforce.p4java.impl.mapbased.server.cmd;
 
-import static com.perforce.p4java.common.base.ObjectUtils.nonNull;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
-import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
-import static com.perforce.p4java.core.file.FileSpecOpStatus.ERROR;
-import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT_FILE;
-import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.REV;
-import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
-import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.handleFileErrorStr;
-import static com.perforce.p4java.server.CmdSpec.FILELOG;
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import javax.annotation.Nonnull;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.file.IFileRevisionData;
 import com.perforce.p4java.core.file.IFileSpec;
@@ -29,6 +11,24 @@ import com.perforce.p4java.impl.generic.core.file.FileSpec;
 import com.perforce.p4java.option.server.GetRevisionHistoryOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IFileLogDelegator;
+
+import javax.annotation.Nonnull;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import static com.perforce.p4java.common.base.P4ResultMapUtils.parseCode0ErrorString;
+import static com.perforce.p4java.common.base.P4ResultMapUtils.parseString;
+import static com.perforce.p4java.core.file.FileSpecOpStatus.ERROR;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT_FILE;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.REV;
+import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
+import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.handleFileErrorStr;
+import static com.perforce.p4java.server.CmdSpec.FILELOG;
+import static java.util.Objects.nonNull;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * @author Sean Shou
