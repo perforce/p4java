@@ -1,7 +1,7 @@
                             Release Notes for
                        P4Java, the Perforce Java API
 
-                              Version 2021.2 Patch 2
+                              Version 2021.2 Patch 3
 
 Introduction
 
@@ -122,18 +122,27 @@ Known Limitations
 	  <java-home>/lib/security/US_export_policy.jar
 
 -------------------------------------------
+Updates in 2021.2 Patch 3
+
+    #2277193 (Job #108577)
+        Fixed parallel sync batchsize.
+
+	#2277668 (Job #110201)
+		Parallel sync now passes charset to parallel threads.
+
+-------------------------------------------
 Updates in 2021.2 Patch 2
 
-    #2263992  (Job #109211)
+    #2263992 (Job #109211)
         Fixed how view mappings are parsed in label spec.
 
-    #2268314  (Job #108842)
+    #2268314 (Job #108842)
         Reconcile of unchanged UTF17-LE files, no longer opens them for edit.
 
-    #2268017  (Job #105306)
+    #2268017 (Job #105306)
         Fixed reconcile of paths with mix of slashes.
 
-    #2269716  (Job #110044)
+    #2269716 (Job #110044)
         Login no longer throws exception when connected to a broker.
 
 -------------------------------------------

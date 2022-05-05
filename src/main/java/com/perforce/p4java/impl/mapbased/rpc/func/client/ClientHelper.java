@@ -72,7 +72,7 @@ public class ClientHelper {
 			parallelOptionsBuilder.append(",batch=" + pSyncOpts.getBatch());
 		}
 		if (pSyncOpts.getBatchSize() > 0) {
-			parallelOptionsBuilder.append(",batchSize=" + pSyncOpts.getBatchSize());
+			parallelOptionsBuilder.append(",batchsize=" + pSyncOpts.getBatchSize());
 		}
 
 		String[] syncOptions = Parameters.processParameters(syncOpts, fileSpecs, serverImpl);

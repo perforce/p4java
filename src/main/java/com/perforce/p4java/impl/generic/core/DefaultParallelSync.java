@@ -80,6 +80,7 @@ public class DefaultParallelSync implements IParallelCallback {
 					server.setWorkingDirectory(cmdEnv.getServer().getWorkingDirectory());
 					server.setTrustFilePath(cmdEnv.getServer().getTrustFilePath());
 					server.setTicketsFilePath(cmdEnv.getServer().getTicketsFilePath());
+					server.setCharsetName(cmdEnv.getServer().getCharsetName());
 					server.connect();
 
 					//pass the result to the handle result
