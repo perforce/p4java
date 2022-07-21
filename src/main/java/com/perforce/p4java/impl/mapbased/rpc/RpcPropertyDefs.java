@@ -201,6 +201,38 @@ public class RpcPropertyDefs {
 	public static final String RPC_DEFAULT_SECURE_SOCKET_PROTOCOL = "TLS";
 
 	/**
+	 * Client Certificate validation Method, corresponds to p4api ssl.client.cert.validate
+	 * <p>
+	 * 0:   always use the P4TRUST mechanism.   This is pre 2022.1 behavior.<br/>
+	 * 1:   validate the certificate chain (default)<br/>
+	 * 2:   validate the subject matches the P4PORT.     The chain is not validated. but the CN of the
+	 * certificate is compared to the host in the P4PORT.<br/>
+	 */
+	public static final String RPC_SECURE_CLIENT_CERT_VALIDATE_NICK = "secureClientCertValidate";
+
+
+	/**
+	 * Default for Certificate validation Method
+	 */
+	public static final int RPC_DEFAULT_SECURE_CLIENT_CERT_VALIDATE = 1;
+
+	/**
+	 * P4TRUST file entries, corresponds to p4api ssl.client.trust.name
+	 * <br/>
+	 * 0:   Only IP address    This is pre 2022.1 behavior.<br/>
+	 * 1:   both IP and hostname (default)<br/>
+	 * 2:   Only hostname     The chain is not validated. but the CN of the
+	 * certificate is compared to the host in the P4PORT.<br/>
+	 */
+	public static final String RPC_SECURE_CLIENT_TRUST_NAME_NICK = "secureClientCertValidate";
+
+
+	/**
+	 * Default for Certificate validation Method
+	 */
+	public static final int RPC_DEFAULT_SECURE_CLIENT_TRUST_NAME = 1;
+
+	/**
 	 * If this property is set and equals "false", do not attempt to set enabled
 	 * protocol versions (SSLSocket.setEnabledProtocols()) for the connection
 	 * and use the protocol versions currently enabled for the connection.

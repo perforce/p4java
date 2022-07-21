@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Perforce Software Inc., All Rights Reserved.
+ * Copyright 2009 - 2022 Perforce Software Inc., All Rights Reserved.
  */
 package com.perforce.p4java.impl.mapbased.rpc.connection;
 
@@ -29,6 +29,8 @@ import java.io.File;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.security.cert.Certificate;
+import java.security.cert.X509Certificate;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
@@ -120,6 +122,24 @@ public abstract class RpcConnection {
     protected boolean secure = false;
     protected String fingerprint = null;
     protected boolean trusted = false;
+    protected Certificate[] serverCerts = null;
+
+    public X509Certificate[] getServerCerts() {
+        X509Certificate[] certs;
+        if ( serverCerts != null) {
+            certs = new X509Certificate[serverCerts.length];
+            for (int i = 0; i < certs.length; i++) {
+                certs[i] = (X509Certificate) serverCerts[i];
+            }
+        } else {
+            certs = new X509Certificate[0];
+        }
+        return certs;
+    }
+    protected boolean selfSigned = true;
+    public boolean isSelfSigned() {
+        return selfSigned;
+    }
 
     /**
      * Create a Perforce RPC connection to a given host and port number pair.
@@ -198,6 +218,8 @@ public abstract class RpcConnection {
      * @return - possibly null server IP and port
      */
     public abstract String getServerIpPort();
+
+    public abstract String getServerHostNamePort();
 
     /**
      * Get the client's IP and port used for the RPC connection.

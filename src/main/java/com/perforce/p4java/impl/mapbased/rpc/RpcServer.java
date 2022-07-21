@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Perforce Software Inc., All Rights Reserved.
+ * Copyright (c) 2009-2022 Perforce Software Inc., All Rights Reserved.
  */
 package com.perforce.p4java.impl.mapbased.rpc;
 
@@ -42,6 +42,9 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.nio.charset.Charset;
+import java.security.cert.CertificateException;
+import java.security.cert.CertificateParsingException;
+import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -259,6 +262,44 @@ public abstract class RpcServer extends Server {
 
 	protected String trustFilePath = null;
 
+	protected boolean validatedByChain = false;
+
+	/**
+	 * was the server ssl connection validated by chain?
+	 * @return true if it's an ssl connection with valid chain
+	 */
+	public boolean isValidatedByChain() {
+		if (!isSecure()) {
+			return false;
+		}
+		return validatedByChain;
+	}
+
+	protected boolean validatedByFingerprint = false;
+
+	/***
+	 * was the server ssl connection validated by fingerprint?
+	 * @return true if it's an ssl connection validated by fingerprint
+	 */
+	public boolean isValidatedByFingerprint() {
+		if (!isSecure()) {
+			return false;
+		}
+		return validatedByFingerprint;
+	}
+
+	protected boolean validatedByHostname = false;
+
+	/***
+	 * was the server ssl connection validated by hostname match?
+	 * @return true if it's an ssl connection validated by "cert's CN" == "P4Port's hostname"
+	 */
+	public boolean isValidatedByHostname() {
+		if (!isSecure()) {
+			return false;
+		}
+		return validatedByHostname;
+	}
 	protected int authFileLockTry = 0;
 	protected long authFileLockDelay = 0;
 	protected long authFileLockWait = 0;
@@ -545,6 +586,7 @@ public abstract class RpcServer extends Server {
 			}
 
 			String originalFingerprint = rpcConnection.getFingerprint();
+
 			PerforceMessages messages = clientTrust.getMessages();
 			String serverHostPort = getServerHostPort();
 			Object[] warningParams = {serverHostPort, originalFingerprint};
@@ -552,6 +594,7 @@ public abstract class RpcServer extends Server {
 					warningParams);
 			String newKeyWarning = messages.getMessage(CLIENT_TRUST_WARNING_NEW_KEY, warningParams);
 			String serverIpPort = rpcConnection.getServerIpPort();
+
 			boolean fingerprintExists = fingerprintExists(serverIpPort, FINGERPRINT_USER_NAME);
 			boolean fingerprintMatches = fingerprintMatches(serverIpPort, FINGERPRINT_USER_NAME,
 					originalFingerprint);
@@ -560,22 +603,37 @@ public abstract class RpcServer extends Server {
 			boolean fingerprintReplaceMatches = fingerprintMatches(serverIpPort,
 					FINGERPRINT_REPLACEMENT_USER_NAME, originalFingerprint);
 
+			boolean fingerprintExistsHost = fingerprintExists(serverHostPort, FINGERPRINT_USER_NAME);
+			boolean fingerprintMatchesHost = fingerprintMatches(serverHostPort, FINGERPRINT_USER_NAME,
+					originalFingerprint);
+			boolean fingerprintReplaceExistsHost = fingerprintExists(serverHostPort,
+					FINGERPRINT_REPLACEMENT_USER_NAME);
+			boolean fingerprintReplaceMatchesHost = fingerprintMatches(serverHostPort,
+					FINGERPRINT_REPLACEMENT_USER_NAME, originalFingerprint);
+
+
 			// auto refuse
 			if (opts.isAutoRefuse()) {
 				// new connection
-				if (!fingerprintExists) {
+				if (!fingerprintExists && !fingerprintExistsHost) {
 					return newConnectionWarning;
 				}
 				// new key
-				if (!fingerprintMatches) {
+				// if (!fingerprintMatches) {
+				if (!fingerprintMatches && ! fingerprintMatchesHost) {
 					return newKeyWarning;
 				}
 			}
 
 			// check and use replacement newFingerprint
-			if (checkAndUseReplacementFingerprint(fingerprintExists, fingerprintMatches,
-					fingerprintReplaceExists, fingerprintReplaceMatches, rpcConnection)) {
+			boolean established = checkAndUseReplacementFingerprint(serverIpPort,
+					fingerprintExists, fingerprintMatches,
+					fingerprintReplaceExists, fingerprintReplaceMatches, rpcConnection) ;
+			boolean establishedHost = checkAndUseReplacementFingerprint(serverHostPort,
+					fingerprintExists, fingerprintMatches,
+					fingerprintReplaceExists, fingerprintReplaceMatches, rpcConnection) ;
 
+			if (established || establishedHost) {
 				return messages.getMessage(CLIENT_TRUST_ALREADY_ESTABLISHED);
 			}
 
@@ -584,6 +642,7 @@ public abstract class RpcServer extends Server {
 			String newFingerprint = firstNonBlank(fingerprintValue, originalFingerprint);
 			String trustAddedInfo = messages.getMessage(CLIENT_TRUST_ADDED,
 					new Object[]{serverHostPort, serverIpPort});
+
 			// new connection
 			if (installFingerprintIfNewConnection(fingerprintExists, rpcConnection, opts,
 					fingerprintUser, newFingerprint)) {
@@ -600,7 +659,15 @@ public abstract class RpcServer extends Server {
 
 			if (fingerprintMatches && isNotBlank(fingerprintValue)) {
 				// install newFingerprint
-				clientTrust.installFingerprint(serverIpPort, fingerprintUser, newFingerprint);
+				int sslClientTrustName = RpcPropertyDefs.getPropertyAsInt(this.props,
+						RpcPropertyDefs.RPC_SECURE_CLIENT_TRUST_NAME_NICK,
+						RpcPropertyDefs.RPC_DEFAULT_SECURE_CLIENT_TRUST_NAME );
+				if (sslClientTrustName <=1 ) {
+					clientTrust.installFingerprint(serverIpPort, fingerprintUser, newFingerprint);
+				}
+				if ( sslClientTrustName >= 1) {
+					clientTrust.installFingerprint(getServerHostPort(), fingerprintUser, newFingerprint);
+				}
 				return trustAddedInfo;
 			}
 
@@ -643,9 +710,18 @@ public abstract class RpcServer extends Server {
 			}
 
 			// remove the fingerprint from the trust file
-			clientTrust.removeFingerprint(serverIpPort, fingerprintUser);
-			return message + messages.getMessage(CLIENT_TRUST_REMOVED,
-					new Object[]{getServerHostPort(), serverIpPort});
+			if (fingerprintExists(serverIpPort, fingerprintUser)) {
+				clientTrust.removeFingerprint(serverIpPort, fingerprintUser);
+				message += messages.getMessage(CLIENT_TRUST_REMOVED,
+						new Object[]{getServerHostPort(), serverIpPort});
+			}
+			// remove the host entry
+			if (fingerprintExists(getServerHostPort(), fingerprintUser)) {
+				clientTrust.removeFingerprint(getServerHostPort(), fingerprintUser);
+				message += (message.length()>0 ? " ": "") + messages.getMessage(CLIENT_TRUST_REMOVED,
+						new Object[]{getServerHostPort(), getServerHostPort()});
+			}
+			return message;
 		} finally {
 			closeQuietly(rpcConnection);
 		}
@@ -851,7 +927,8 @@ public abstract class RpcServer extends Server {
 		return init(host, port, props, null);
 	}
 
-	private boolean checkAndUseReplacementFingerprint(final boolean fingerprintExists,
+	private boolean checkAndUseReplacementFingerprint(final String serverKey,
+			                                          final boolean fingerprintExists,
 	                                                  final boolean fingerprintMatches, final boolean fingerprintReplaceExists,
 	                                                  final boolean fingerprintReplaceMatches, final RpcConnection rpcConnection)
 			throws TrustException {
@@ -859,10 +936,10 @@ public abstract class RpcServer extends Server {
 		if ((!fingerprintExists || !fingerprintMatches)
 				&& (fingerprintReplaceExists && fingerprintReplaceMatches)) {
 			// Install/override newFingerprint
-			clientTrust.installFingerprint(rpcConnection.getServerIpPort(), FINGERPRINT_USER_NAME,
+			clientTrust.installFingerprint(serverKey, FINGERPRINT_USER_NAME,
 					rpcConnection.getFingerprint());
 			// Remove the replacement
-			clientTrust.removeFingerprint(rpcConnection.getServerIpPort(),
+			clientTrust.removeFingerprint(serverKey,
 					FINGERPRINT_REPLACEMENT_USER_NAME);
 
 			return true;
@@ -871,14 +948,69 @@ public abstract class RpcServer extends Server {
 	}
 
 	/**
+	 * Check Server Trust
+	 * <p>
+	 * Certificate Validation depends on RPC_SSL_CLIENT_CERT_VALIDATE_NICK.
+	 * <p>
+	 * Self-signed certs use only a fingerprint comparison after checking the cert's dates.
+	 */
+	public void trustConnectionCheck(final  RpcConnection rpcConnection) throws ConnectionException {
+
+		int sslCertMethod = RpcPropertyDefs.getPropertyAsInt(this.props,
+				RpcPropertyDefs.RPC_SECURE_CLIENT_CERT_VALIDATE_NICK,
+				RpcPropertyDefs.RPC_DEFAULT_SECURE_CLIENT_CERT_VALIDATE);
+		// 0 = fingerprint, 1=chain then fingerprint, 2=hostname check only.
+		if (sslCertMethod < 0 || sslCertMethod > 2) {
+			sslCertMethod = RpcPropertyDefs.RPC_DEFAULT_SECURE_CLIENT_CERT_VALIDATE;
+		}
+		if ( ! rpcConnection.isSelfSigned() && sslCertMethod == 1  ) {
+			// validate the chain.
+			try {
+				ClientTrust.validateServerChain(rpcConnection.getServerCerts(), getServerHostPort().split(":")[0]);
+				validatedByChain = true;
+
+				return;
+			} catch (Exception ce) {
+				boolean x = ce instanceof CertificateException;
+				// TODO: logging? - failure to validate cert chain so fallback to fingerprint.
+				// System.out.println("Fails cert chain: " + ce.getMessage());
+			}
+
+		} else if (! rpcConnection.isSelfSigned() && sslCertMethod == 2) {
+			// validate the P4PORT matches the CN.
+			X509Certificate[] certs = rpcConnection.getServerCerts();
+			try {
+				ClientTrust.verifyCertificateSubject(certs[0], this.serverHost);
+				validatedByHostname = true ;
+				return;
+			} catch (Exception e) {
+				 // TODO:  logging - requested a subject match verification but didn't match.
+			}
+		}
+
+		checkFingerprint(rpcConnection);
+		validatedByFingerprint = rpcConnection.isTrusted();
+	}
+	/**
 	 * Check the fingerprint of the Perforce server SSL connection
 	 */
 	protected void checkFingerprint(final RpcConnection rpcConnection) throws ConnectionException {
+
 		if (nonNull(rpcConnection) && rpcConnection.isSecure() && !rpcConnection.isTrusted()) {
+
+			try {
+				if (rpcConnection.getServerCerts() .length > 0) {
+					ClientTrust.verifyCertificateDates(rpcConnection.getServerCerts()[0]);
+				}
+			} catch (CertificateException e) {
+				throw new ConnectionException(e);
+			}
+
 			String fingerprint = rpcConnection.getFingerprint();
 			throwConnectionExceptionIfConditionFails(isNotBlank(fingerprint),
 					"Null fingerprint for this Perforce SSL connection");
 
+			// look for IP in trust file
 			String serverIpPort = rpcConnection.getServerIpPort();
 			boolean fingerprintExists = fingerprintExists(serverIpPort, FINGERPRINT_USER_NAME);
 			boolean fingerprintReplaceExist = fingerprintExists(serverIpPort,
@@ -892,20 +1024,45 @@ public abstract class RpcServer extends Server {
 			boolean isNotEstablished = (!fingerprintExists && !fingerprintReplaceExist)
 					|| (!fingerprintExists && !fingerprintReplaceMatches);
 
-			throwTrustExceptionIfConditionIsTrue(isNotEstablished, rpcConnection, NEW_CONNECTION,
+			// look for host:port in trust file
+			String serverHost = getServerHostPort();
+			boolean fingerprintExistsHost = fingerprintExists(serverHost, FINGERPRINT_USER_NAME);
+			boolean fingerprintReplaceExistHost = fingerprintExists(serverHost,
+					FINGERPRINT_REPLACEMENT_USER_NAME);
+
+			boolean fingerprintMatchesHost = clientTrust.fingerprintMatches(serverHost,
+					FINGERPRINT_USER_NAME, fingerprint);
+			boolean fingerprintReplaceMatchesHost = fingerprintMatches(serverHost,
+					FINGERPRINT_REPLACEMENT_USER_NAME, fingerprint);
+
+			boolean isNotEstablishedHost = (!fingerprintExistsHost && !fingerprintReplaceExistHost)
+					|| (!fingerprintExistsHost && !fingerprintReplaceMatchesHost);
+
+			// first check:  is either IP or host found?
+			throwTrustExceptionIfConditionIsTrue(isNotEstablished && isNotEstablishedHost, rpcConnection, NEW_CONNECTION,
 					CLIENT_TRUST_WARNING_NOT_ESTABLISHED, CLIENT_TRUST_EXCEPTION_NEW_CONNECTION);
 
-			boolean isNewKey = !fingerprintMatches && !fingerprintReplaceMatches;
-			throwTrustExceptionIfConditionIsTrue(isNewKey, rpcConnection, NEW_KEY,
+			boolean isNewKey = (!fingerprintMatches && !fingerprintReplaceMatches);
+			boolean isNewKeyHost = (!fingerprintMatchesHost && !fingerprintReplaceMatchesHost);
+
+			throwTrustExceptionIfConditionIsTrue(isNewKey && isNewKeyHost, rpcConnection, NEW_KEY,
 					CLIENT_TRUST_WARNING_NEW_KEY, CLIENT_TRUST_EXCEPTION_NEW_KEY);
 
-			// Use replacement fingerprint
+			// Use replacement fingerprint for serverIP
 			if ((!fingerprintExists || !fingerprintMatches)
 					&& (fingerprintReplaceExist && fingerprintReplaceMatches)) {
 				// Install/override fingerprint
 				clientTrust.installFingerprint(serverIpPort, FINGERPRINT_USER_NAME, fingerprint);
 				// Remove the replacement
 				clientTrust.removeFingerprint(serverIpPort, FINGERPRINT_REPLACEMENT_USER_NAME);
+			}
+			// Use replacement fingerprint for hostname
+			if ((!fingerprintExistsHost || !fingerprintMatchesHost)
+					&& (fingerprintReplaceExistHost && fingerprintReplaceMatchesHost)) {
+				// Install/override fingerprint
+				clientTrust.installFingerprint(serverHost, FINGERPRINT_USER_NAME, fingerprint);
+				// Remove the replacement
+				clientTrust.removeFingerprint(serverHost, FINGERPRINT_REPLACEMENT_USER_NAME);
 			}
 
 			// Trust this connection
@@ -928,7 +1085,6 @@ public abstract class RpcServer extends Server {
 	                                                  final String warningMessageKey, final String exceptionMessageKey)
 			throws TrustException {
 		if (expression) {
-
 			throwTrustException(rpcConnection, type, warningMessageKey, exceptionMessageKey);
 		}
 	}
@@ -1081,9 +1237,20 @@ public abstract class RpcServer extends Server {
 	                                                    final String newFingerprint) throws TrustException {
 
 		if (trustOptions.isAutoAccept()) {
+			int sslClientTrustName = RpcPropertyDefs.getPropertyAsInt(this.props,
+					RpcPropertyDefs.RPC_SECURE_CLIENT_TRUST_NAME_NICK,
+					RpcPropertyDefs.RPC_DEFAULT_SECURE_CLIENT_TRUST_NAME );
 			// install newFingerprint
-			clientTrust.installFingerprint(rpcConnection.getServerIpPort(), fingerprintUser,
-					newFingerprint);
+			if (sslClientTrustName == 0 || sslClientTrustName == 1) {
+				clientTrust.installFingerprint(rpcConnection.getServerIpPort(), fingerprintUser,
+						newFingerprint);
+			}
+			if (sslClientTrustName == 1 || sslClientTrustName == 2) {
+				String serverHostNamePort = rpcConnection.getServerHostNamePort();
+				if (serverHostNamePort != null) {
+					clientTrust.installFingerprint(serverHostNamePort, fingerprintUser, newFingerprint);
+				}
+			}
 			return true;
 		}
 
@@ -1112,15 +1279,15 @@ public abstract class RpcServer extends Server {
 	 *
 	 * @return - fingerprint or null if not found.
 	 */
-	public Fingerprint loadFingerprint(final String serverIpPort, final String fingerprintUser) {
+	public Fingerprint loadFingerprint(final String serverKey, final String fingerprintUser) {
 
-		if (isBlank(serverIpPort) || isBlank(fingerprintUser)) {
+		if (isBlank(serverKey) || isBlank(fingerprintUser)) {
 			return null;
 		}
 
 		Fingerprint fingerprint = null;
 		try {
-			fingerprint = FingerprintsHelper.getFingerprint(fingerprintUser, serverIpPort,
+			fingerprint = FingerprintsHelper.getFingerprint(fingerprintUser, serverKey,
 					trustFilePath);
 		} catch (IOException e) {
 			Log.error(e.getMessage());
@@ -1440,7 +1607,7 @@ public abstract class RpcServer extends Server {
 	}
 
 	/**
-	 * Return true iff we should be performing server -> client file write I/O
+	 * Return true if we should be performing server -> client file write I/O
 	 * operations in place for this command.
 	 * <p>
 	 * <p>
@@ -1456,4 +1623,5 @@ public abstract class RpcServer extends Server {
 		return cmdName.equalsIgnoreCase(CmdSpec.SYNC.toString())
 				&& Boolean.valueOf(writeInPlaceKeyPropertyValue);
 	}
+
 }

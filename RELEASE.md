@@ -1,7 +1,7 @@
                             Release Notes for
                        P4Java, the Perforce Java API
 
-                              Version 2021.2 Patch 3
+                              Version 2021.2 Patch 5
 
 Introduction
 
@@ -120,6 +120,42 @@ Known Limitations
 
 	  <java-home>/lib/security/local_policy.jar
 	  <java-home>/lib/security/US_export_policy.jar
+	  
+-------------------------------------------
+Updates in 2021.2 Patch 5
+
+    #2299942 (Job #108736)
+        P4TRUST is no longer required for SSL connections where the server
+	    provides a certificate that's not self-signed and the certificate 
+	    chain can be verified by the client.  If verified, P4TRUST is 
+	    not required.
+	    
+	    The default java truststore is used unless you specify an 
+	    alternative truststore with java system properties
+	    javax.net.ssl.trustStore and javax.net.ssl.trustStorePassword
+	    
+	    Chain Validation can be disabled using p4java property 
+	    secureClientCertValidate set to 0 which does P4TRUST only.
+	    Setting to 2 will skip Chain validation and will ensure
+	    the server certificates' subject or subject alternate names
+	    match the hostname in the server URI.  The default of 1 will 
+	    validate the chain.  Both 1 and 2 fallback to P4TRUST if
+	    the chain cannot be validated.
+	    
+	    Fingerprints will now read and write the hostname in
+	    addition to the IP in the P4TRUST file.  Set the p4java property
+	    secureClientTrustName to 0 to only write the IP.  The default of
+	    1 writes entries for both the IP and hostname.  A value of 2
+	    will only write the hostname.   A matching fingerprint for either
+	    the IP or hostname will establish trust.
+	    
+	          
+-------------------------------------------
+Updates in 2021.2 Patch 4
+
+    #2286431 (Job #099302)
+        Fixed parallel sync authetication issue on case insensitive servers.
+        Fixes JENKINS-48525 and JENKINS-68104.
 
 -------------------------------------------
 Updates in 2021.2 Patch 3
@@ -128,7 +164,7 @@ Updates in 2021.2 Patch 3
         Fixed parallel sync batchsize.
 
 	#2277668 (Job #110201)
-		Parallel sync now passes charset to parallel threads.
+        Parallel sync now passes charset to parallel threads.
 
 -------------------------------------------
 Updates in 2021.2 Patch 2

@@ -75,13 +75,14 @@ public class DefaultParallelSync implements IParallelCallback {
 
 					server.setCurrentServerInfo(cmdEnv.getServer().getCurrentServerInfo());
 					server.setUserName(cmdEnv.getServer().getUserName());
-					server.setAuthTicket(cmdEnv.getServer().getAuthTicket());
 					server.setCurrentClient(cmdEnv.getServer().getCurrentClient());
 					server.setWorkingDirectory(cmdEnv.getServer().getWorkingDirectory());
 					server.setTrustFilePath(cmdEnv.getServer().getTrustFilePath());
 					server.setTicketsFilePath(cmdEnv.getServer().getTicketsFilePath());
 					server.setCharsetName(cmdEnv.getServer().getCharsetName());
 					server.connect();
+					// P4JAVA-1264:  must call setAuthTicket() after connect() to properly cache the ticket.
+					server.setAuthTicket(cmdEnv.getServer().getAuthTicket());
 
 					//pass the result to the handle result
 					Map<String, Object>[] results = server.execMapCmd("transmit", args.toArray(new String[]{}), null);

@@ -1,5 +1,5 @@
-/**
- * 
+/*
+ * Copyright 2009 - 2022 Perforce Software Inc., All Rights Reserved.
  */
 package com.perforce.p4java.impl.mapbased.rpc;
 
@@ -614,8 +614,9 @@ public class NtsServerImpl extends RpcServer {
 		// Should use tags?
 		boolean useTags = useTags(cmdName, cmdArgs, inMap, isStream);
 		
-		// Check fingerprint
-		checkFingerprint(rpcConnection);
+		// Check certificate chain and/or fingerprint.
+		// An exception (ConnectionException) is thrown if ssl but not trusted.
+		trustConnectionCheck(rpcConnection);
 
 		ExternalEnv env = new ExternalEnv(
 					this.getUsageOptions().getProgramName(),
@@ -749,4 +750,5 @@ public class NtsServerImpl extends RpcServer {
 		
 		return builder.build();
 	}
+
 }

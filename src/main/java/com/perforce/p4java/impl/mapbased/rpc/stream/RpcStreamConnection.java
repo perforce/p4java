@@ -1,5 +1,5 @@
 /*
- * Copyright 2009 Perforce Software Inc., All Rights Reserved.
+ * Copyright 2009-2022 Perforce Software Inc., All Rights Reserved.
  */
 package com.perforce.p4java.impl.mapbased.rpc.stream;
 
@@ -240,7 +240,6 @@ public class RpcStreamConnection extends RpcConnection {
                 }
                 this.ourPort = socket.getLocalPort();
             }
-
         }
     }
 
@@ -260,26 +259,33 @@ public class RpcStreamConnection extends RpcConnection {
                  */
                 throwConnectionExceptionIfConditionFails(sslSession.isValid(),
                         "Error occurred during the SSL handshake: invalid SSL session");
+
                 // Get the certificates
-                Certificate[] serverCerts = sslSession.getPeerCertificates();
+                serverCerts = sslSession.getPeerCertificates();
 
                 throwConnectionExceptionIfConditionFails(
                         nonNull(serverCerts) && (serverCerts.length != 0)
                                 && nonNull(serverCerts[0]),
                         "Error occurred during the SSL handshake: no certificate retrieved from SSL session");
 
+                X509Certificate siteCert = (X509Certificate) serverCerts[0];
+
                 // Check that the certificate is currently valid. Check the
                 // current date and time are within the validity period given
                 // in the certificate.
-                ((X509Certificate) serverCerts[0]).checkValidity();
+                siteCert.checkValidity();
 
                 // Get the public key from the first certificate
-                PublicKey serverPubKey = serverCerts[0].getPublicKey();
+                PublicKey serverPubKey = siteCert.getPublicKey();
                 throwConnectionExceptionIfConditionFails(nonNull(serverPubKey),
                         "Error occurred during the SSL handshake: no public key retrieved from server certificate");
 
+                // check if it's a self signed cert.
+                selfSigned = siteCert.getSubjectDN().getName().equals(siteCert.getIssuerDN().getName());
+
                 // Generate the fingerprint
                 fingerprint = ClientTrust.generateFingerprint(serverPubKey);
+
             } catch (CertificateExpiredException e) {
                 throwConnectionException(e,
                         "Error occurred during the SSL handshake: certificate expired:");
@@ -323,6 +329,9 @@ public class RpcStreamConnection extends RpcConnection {
         return serverIpPort;
     }
 
+    public String getServerHostNamePort() {
+        return hostName + ":" + String.valueOf(hostPort);
+    }
     /**
      * @see com.perforce.p4java.impl.mapbased.rpc.connection.RpcConnection#getClientIpPort()
      */
