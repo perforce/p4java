@@ -15,9 +15,8 @@ import java.util.Properties;
  * part specifies which network implementation to use and whether it is a secure
  * (SSL) connection. The optional query string part can be used to set P4Java
  * properties.
- * <p>
- * 
- * <pre>
+ *
+ * <pre>{@code
  * The P4Java URI syntax:
  * 
  * protocol://host:port?query
@@ -40,7 +39,7 @@ import java.util.Properties;
  * p4java://myp4server:1777
  * 
  * p4javassl://myp4server.xyz.com:1777?key0=value0&key1=value1
- * </pre>
+ * }</pre>
  */
 
 public interface IServerAddress {

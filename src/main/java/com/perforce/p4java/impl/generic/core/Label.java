@@ -113,6 +113,9 @@ public class Label extends LabelSummary implements ILabel {
 		 * Explicit value constructor -- calls super(order, labelMapping).
 		 * Note that this probably won't do what you expect it to if
 		 * there's more than one element in the subscription.
+		 *
+		 * @param order        order
+		 * @param labelMapping mapping
 		 */
 		public LabelMapping(int order, String labelMapping) {
 			super(order, labelMapping);
@@ -146,8 +149,16 @@ public class Label extends LabelSummary implements ILabel {
 	/**
 	 * Explicit-value constructor. Generally useful for constructing new
 	 * label implementations.
+	 *
+	 * @param name         name
+	 * @param ownerName    owner
+	 * @param lastAccess   date
+	 * @param lastUpdate   date
+	 * @param description  description
+	 * @param revisionSpec revision
+	 * @param locked       locked
+	 * @param viewMapping  view mapping
 	 */
-
 	public Label(String name, String ownerName, Date lastAccess,
 				 Date lastUpdate, String description, String revisionSpec,
 				 boolean locked, ViewMap<ILabelMapping> viewMapping) {
@@ -166,11 +177,13 @@ public class Label extends LabelSummary implements ILabel {
 	 * Construct a new Label from the map passed back from the
 	 * IServer's getLabel method or from a similar map, and the current
 	 * server object (if any). Will not work properly  with the map returned
-	 * from the server getLabelSummaryList method.<p>
+	 * from the server getLabelSummaryList method.
 	 * <p>
 	 * If the map is null, this is equivalent to calling the default constructor.
+	 *
+	 * @param map    spec map
+	 * @param server server
 	 */
-
 	public Label(Map<String, Object> map, IServer server) {
 		super(false);
 
@@ -245,15 +258,17 @@ public class Label extends LabelSummary implements ILabel {
 	/**
 	 * Given an ILabelSummary object, construct a new Label object from it. This
 	 * implementation simply gets the label on the Perforce server with the same
-	 * name as the labelSummary's name by using the Label.refresh() object.<p>
+	 * name as the labelSummary's name by using the Label.refresh() object.
 	 * <p>
 	 * If labelSummary is null this is equivalent to calling the default constructor;
 	 * otherwise all LabelSummary fields are copied, and if labelSummary.getName() is
 	 * not null, the refresh() is performed.
 	 *
 	 * @param labelSummary possibly-null ILabelSummary object.
+	 * @throws ConnectionException on error
+	 * @throws RequestException    on error
+	 * @throws AccessException     on error
 	 */
-
 	public Label(ILabelSummary labelSummary)
 			throws ConnectionException, RequestException, AccessException {
 		super(false);
@@ -299,7 +314,9 @@ public class Label extends LabelSummary implements ILabel {
 
 	/**
 	 * @see com.perforce.p4java.core.ILabel#updateOnServer()
+	 * @deprecated use update() instead.
 	 */
+	@Deprecated
 	public String updateOnServer()
 			throws ConnectionException, RequestException, AccessException {
 

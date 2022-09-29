@@ -18,7 +18,7 @@ import java.util.Queue;
  * @author Kevin Sawicki (ksawicki@perforce.com)
  */
 public class RpcSocketPool {
-	
+
 	/**
 	 * Shutdown handler for cleaning up before a socket is closed
 	 */
@@ -27,8 +27,8 @@ public class RpcSocketPool {
 		/**
 		 * Callback for before the socket is closed to do any pre-close work.
 		 * Implementors should not directly close the socket parameter.
-		 * 
-		 * @param socket
+		 *
+		 * @param socket socket
 		 */
 		void shutdown(Socket socket);
 
@@ -37,7 +37,6 @@ public class RpcSocketPool {
 	/**
 	 * Pool manager that closes sockets that have been left open for more than
 	 * the idle time allowed.
-	 * 
 	 */
 	private static class PoolManager implements Runnable {
 
@@ -120,8 +119,7 @@ public class RpcSocketPool {
 				}
 				RpcSocketPool[] pools = null;
 				synchronized (this) {
-					pools = this.pools.toArray(new RpcSocketPool[this.pools
-							.size()]);
+					pools = this.pools.toArray(new RpcSocketPool[this.pools.size()]);
 				}
 				for (RpcSocketPool pool : pools) {
 					pool.timeout(this.idleTime);
@@ -144,8 +142,8 @@ public class RpcSocketPool {
 		/**
 		 * Create a new socket entry with the specified socket with a release
 		 * time of the current system time
-		 * 
-		 * @param socket
+		 *
+		 * @param socket socket
 		 */
 		public SocketEntry(Socket socket) {
 			this.socket = socket;
@@ -160,20 +158,18 @@ public class RpcSocketPool {
 	private ShutdownHandler shutdownHandler;
 	private Queue<SocketEntry> pool;
 	private boolean secure = false;
-	
+
 	/**
 	 * Create a new socket pool indicating whether it is secure (SSL) or not.
-	 * 
-	 * @param poolSize
-	 * @param host
-	 * @param port
-	 * @param socketProperties
-	 * @param shutdownHandler
-	 * @param secure
+	 *
+	 * @param poolSize         poolSize
+	 * @param host             host
+	 * @param port             port
+	 * @param socketProperties socketProperties
+	 * @param shutdownHandler  shutdownHandler
+	 * @param secure           secure
 	 */
-	public RpcSocketPool(int poolSize, String host, int port,
-			Properties socketProperties, ShutdownHandler shutdownHandler,
-			boolean secure) {
+	public RpcSocketPool(int poolSize, String host, int port, Properties socketProperties, ShutdownHandler shutdownHandler, boolean secure) {
 		this(poolSize, host, port, socketProperties, shutdownHandler);
 		this.secure = secure;
 	}
@@ -181,15 +177,14 @@ public class RpcSocketPool {
 	/**
 	 * Create a new socket pool with a max pool size, host, port, and socket
 	 * properties, and an optional shutdown handler
-	 * 
-	 * @param poolSize
-	 * @param host
-	 * @param port
-	 * @param socketProperties
-	 * @param shutdownHandler
+	 *
+	 * @param poolSize         poolSize
+	 * @param host             host
+	 * @param port             port
+	 * @param socketProperties socketProperties
+	 * @param shutdownHandler  shutdownHandler
 	 */
-	public RpcSocketPool(int poolSize, String host, int port,
-			Properties socketProperties, ShutdownHandler shutdownHandler) {
+	public RpcSocketPool(int poolSize, String host, int port, Properties socketProperties, ShutdownHandler shutdownHandler) {
 		this.size = poolSize;
 		this.host = host;
 		this.port = port;
@@ -201,9 +196,9 @@ public class RpcSocketPool {
 
 	/**
 	 * Acquire a socket to the configured server address
-	 * 
+	 *
 	 * @return - socket
-	 * @throws IOException
+	 * @throws IOException on error
 	 */
 	public Socket acquire() throws IOException {
 		Socket socket = null;
@@ -238,20 +233,17 @@ public class RpcSocketPool {
 	}
 
 	private boolean isAlive(Socket socket) {
-		return socket != null && socket.isBound() && !socket.isClosed()
-				&& socket.isConnected() && !socket.isInputShutdown()
-				&& !socket.isOutputShutdown();
+		return socket != null && socket.isBound() && !socket.isClosed() && socket.isConnected() && !socket.isInputShutdown() && !socket.isOutputShutdown();
 	}
 
 	/**
 	 * Release a socket back to the pool as no longer using
-	 * 
-	 * @param socket
-	 * @param shutdownHandler
-	 * @throws IOException
+	 *
+	 * @param socket          socket
+	 * @param shutdownHandler shutdownHandler
+	 * @throws IOException on error
 	 */
-	public void release(Socket socket, ShutdownHandler shutdownHandler)
-			throws IOException {
+	public void release(Socket socket, ShutdownHandler shutdownHandler) throws IOException {
 		if (isAlive(socket)) {
 			boolean close = false;
 			synchronized (this.pool) {
@@ -321,8 +313,8 @@ public class RpcSocketPool {
 	/**
 	 * Timeout any sockets idle for greater than or equal to the milliseconds
 	 * value specified
-	 * 
-	 * @param idleDuration
+	 *
+	 * @param idleDuration idleDuration
 	 */
 	public void timeout(int idleDuration) {
 		synchronized (this.pool) {

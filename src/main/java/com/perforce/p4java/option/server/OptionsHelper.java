@@ -61,7 +61,7 @@ public class OptionsHelper {
    *
    * This version of applyRules implements the rules specified below:
    * <pre>
-   * "gtz": don't return anything unless the value is > 0; typically used for
+   * "gtz": don't return anything unless the value is &gt; 0; typically used for
    * 		things like maxUsers or maxRows.
    * "cl": ignore negative values; convert 0 to the string "default". Typically
    * 		used for changelists.
@@ -118,8 +118,8 @@ public class OptionsHelper {
    *
    * This version of applyRules implements the rules specified below:
    * <pre>
-   * "gtz": don't return anything unless the value is > 0.
-   * "gez": don't return anything unless the value is >= 0.
+   * "gtz": don't return anything unless the value is &gt; 0.
+   * "gez": don't return anything unless the value is &gt;= 0.
    * </pre>
    * If the passed-in ruleName is non-null and not recognized, the behaviour
    * is the same as if a null rule name was passed in.

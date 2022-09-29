@@ -3,15 +3,15 @@
  */
 package com.perforce.p4java.impl.mapbased.rpc.stream;
 
-import java.io.FilterOutputStream;
-import java.io.IOException;
-import java.io.OutputStream;
-
+import com.jcraft.jzlib.Deflater;
 import com.jcraft.jzlib.JZlib;
-import com.jcraft.jzlib.ZStream;
 import com.perforce.p4java.exception.NullPointerError;
 import com.perforce.p4java.exception.P4JavaError;
 import com.perforce.p4java.exception.UnimplementedError;
+
+import java.io.FilterOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 
 
 /**
@@ -46,12 +46,12 @@ public class RpcGZIPOutputStream extends FilterOutputStream {
 	private static final int ZBITS = 15;	// Don't change this, it's fundamental...
 	private static final int ZBUF_SIZE = 10240;	// Might want to play with this a bit...
 	
-	private ZStream jzOutputSream = null;
+	private Deflater jzOutputSream = null;
 	private byte[] jzBytes = null;
 	
 	public RpcGZIPOutputStream(OutputStream out) throws IOException {
 		super(out);
-		this.jzOutputSream = new ZStream();
+		this.jzOutputSream = new Deflater();
 		this.jzOutputSream.deflateInit(JZlib.Z_DEFAULT_COMPRESSION, ZBITS, true);
 		this.jzBytes = new byte[ZBUF_SIZE];
 		this.jzOutputSream.next_out = this.jzBytes;
@@ -171,6 +171,7 @@ public class RpcGZIPOutputStream extends FilterOutputStream {
 				done = true;
 			}
 		}
+		this.out.flush();
 	}
 	
 	/**
@@ -184,11 +185,14 @@ public class RpcGZIPOutputStream extends FilterOutputStream {
 	public void close() throws IOException {
 		this.jzOutputSream.deflateEnd();
 	}
-	
+
 	/**
-	 * Provide a more human-readable form of the underlying JZlib compression errors.<p>
-	 * 
+	 * Provide a more human-readable form of the underlying JZlib compression errors.
+	 * <p>
 	 * Should be made even more human-readable sometime later -- HR.
+	 *
+	 * @param errNum errNum
+	 * @return error message
 	 */
 	protected String getJZlibErrorStr(int errNum) {
 		switch (errNum) {

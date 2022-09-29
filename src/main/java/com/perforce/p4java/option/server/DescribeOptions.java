@@ -3,20 +3,20 @@
  */
 package com.perforce.p4java.option.server;
 
-import java.util.List;
-
 import com.perforce.p4java.core.file.DiffType;
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.exception.P4JavaError;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
  * Options class for the different options that can be specified when running a
  * describe on a changelist
  */
 public class DescribeOptions extends Options {
-	
+
 	/**
 	 * Options:
 	 */
@@ -35,19 +35,20 @@ public class DescribeOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public DescribeOptions(String... options) {
@@ -56,8 +57,8 @@ public class DescribeOptions extends Options {
 
 	/**
 	 * Create a changelist describe options
-	 * 
-	 * @param type
+	 *
+	 * @param type diff type
 	 */
 	public DescribeOptions(DiffType type) {
 		this(type, false);
@@ -65,9 +66,9 @@ public class DescribeOptions extends Options {
 
 	/**
 	 * Create a changelist describe options
-	 * 
-	 * @param type
-	 * @param outputShelvedDiffs
+	 *
+	 * @param type               diff type
+	 * @param outputShelvedDiffs shelved diffs option
 	 */
 	public DescribeOptions(DiffType type, boolean outputShelvedDiffs) {
 		this.type = type;
@@ -82,8 +83,8 @@ public class DescribeOptions extends Options {
 	}
 
 	/**
-	 * @param type
-	 *            the type to set
+	 * @param type the type to set
+	 * @return DescribeOptions class
 	 */
 	public DescribeOptions setType(DiffType type) {
 		this.type = type;
@@ -98,8 +99,8 @@ public class DescribeOptions extends Options {
 	}
 
 	/**
-	 * @param showShelvedDiffs
-	 *            the showShelvedDiffs to set
+	 * @param showShelvedDiffs the showShelvedDiffs to set
+	 * @return DescribeOptions class
 	 */
 	public DescribeOptions setOutputShelvedDiffs(boolean showShelvedDiffs) {
 		this.outputShelvedDiffs = showShelvedDiffs;

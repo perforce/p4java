@@ -3,20 +3,20 @@
  */
 package com.perforce.p4java.impl.mapbased.rpc.stream;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.Socket;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.exception.NullPointerError;
 import com.perforce.p4java.exception.P4JavaError;
 import com.perforce.p4java.impl.mapbased.rpc.ServerStats;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+
 /**
  * Implements the lowest level of the P4Java RPC input socket stream architecture.<p>
  * 
  * This class does the most basic conversion from incoming bytes on the (TCP/IP)
- * wire to a Java IO input stream whose contents are further decoded upstream.<p>
+ * wire to a Java IO input stream whose contents are further decoded upstream.
  */
 
 public class RpcSocketInputStream extends InputStream {
@@ -26,14 +26,15 @@ public class RpcSocketInputStream extends InputStream {
 	private Socket socket = null;
 	private InputStream socketStream = null;
 	private ServerStats stats = null;
-	
+
 	/**
 	 * Construct a suitable stream for the passed-in socket. No assumptions
 	 * are made about the passed-in socket except that a) it's not null, and
 	 * b) it's been initialized and set up for reading (or at least the successful
 	 * retrieval of a suitable input stream) by the caller.
-	 * 
+	 *
 	 * @param socket non-null socket
+	 * @param stats  stats
 	 */
 	public RpcSocketInputStream(Socket socket, ServerStats stats) {
 		super();

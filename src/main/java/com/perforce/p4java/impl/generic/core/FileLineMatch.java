@@ -20,64 +20,72 @@ import static java.util.Objects.nonNull;
  * Implementation class of the {@link IFileLineMatch} interface
  */
 public class FileLineMatch implements IFileLineMatch {
-  protected String file = null;
-  protected int revision = -1;
-  protected int lineNumber = -1;
-  protected String line = null;
-  protected MatchType type = MatchType.MATCH;
+	protected String file = null;
+	protected int revision = -1;
+	protected int lineNumber = -1;
+	protected String line = null;
+	protected MatchType type = MatchType.MATCH;
 
-  /**
-   * Explicit-value constructor; sets all fields to null or -1, type to MatchType.MATCH.
-   */
-  public FileLineMatch(final String file,
-                       final int revision,
-                       final String line,
-                       final MatchType type) {
-    this.file = file;
-    this.revision = revision;
-    this.line = line;
-    this.type = type;
-  }
+	/**
+	 * Explicit-value constructor; sets all fields to null or -1, type to MatchType.MATCH.
+	 *
+	 * @param file     file
+	 * @param revision revision
+	 * @param line     line
+	 * @param type     type
+	 */
+	public FileLineMatch(final String file,
+						 final int revision,
+						 final String line,
+						 final MatchType type) {
+		this.file = file;
+		this.revision = revision;
+		this.line = line;
+		this.type = type;
+	}
 
-  public FileLineMatch(Map<String, Object> map) {
-    if (nonNull(map)) {
-      file = parseString(map, DEPOT_FILE);
-      revision = FileSpec.getRevFromString(parseString(map, REV));
-      if (nonNull(map.get("line"))) {
-        try {
-          lineNumber = parseInt(map, "line");
-        } catch (NumberFormatException exc) {
-          Log.warn("NumberFormatException in FileLineMatch map-based constructor: %s",
-              exc.getLocalizedMessage());
-        }
-      }
-      line = parseString(map, "matchedLine");
-      type = MatchType.fromServerString(parseString(map, TYPE));
-    }
-  }
+	/**
+	 * @param map map
+	 */
+	public FileLineMatch(Map<String, Object> map) {
+		if (nonNull(map)) {
+			file = parseString(map, DEPOT_FILE);
+			revision = FileSpec.getRevFromString(parseString(map, REV));
+			if (nonNull(map.get("line"))) {
+				try {
+					lineNumber = parseInt(map, "line");
+				} catch (NumberFormatException exc) {
+					Log.warn("NumberFormatException in FileLineMatch map-based constructor: %s",
+							exc.getLocalizedMessage());
+				}
+			}
+			line = parseString(map, "matchedLine");
+			type = MatchType.fromServerString(parseString(map, TYPE));
+		}
+	}
 
-  @Override
-  public String getDepotFile() {
-    return file;
-  }
+	@Override
+	public String getDepotFile() {
+		return file;
+	}
 
-  @Override
-  public String getLine() {
-    return line;
-  }
+	@Override
+	public String getLine() {
+		return line;
+	}
 
-  @Override
-  public int getRevision() {
-    return revision;
-  }
+	@Override
+	public int getRevision() {
+		return revision;
+	}
 
-  @Override
-  public int getLineNumber() {
-    return lineNumber;
-  }
+	@Override
+	public int getLineNumber() {
+		return lineNumber;
+	}
 
-  @Override
-  public MatchType getType() {
-    return type;
-  }
+	@Override
+	public MatchType getType() {
+		return type;
+	}
 }

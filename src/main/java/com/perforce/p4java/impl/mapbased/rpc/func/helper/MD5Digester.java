@@ -38,11 +38,7 @@ import static java.util.Objects.requireNonNull;
  * Provide MD5 digest methods for the rest of the RPC implementation. Basically
  * just a wrapper around the normal Java stuff, with a useful added method to
  * finalise the digest as a hex string.
- * <p>
- *
- * @author Sean Shou - clean code & unit test
  */
-
 public class MD5Digester {
 	private static final String DIGEST_TYPE = "MD5";
 	private static final int LENGTH_OF_HEX_STRING = 32;
@@ -55,9 +51,7 @@ public class MD5Digester {
 			messageDigest = MessageDigest.getInstance(DIGEST_TYPE);
 			messageDigest.reset();
 		} catch (NoSuchAlgorithmException exc) {
-			throw new P4JavaError(
-					"Unable to create an MD5 digester for P4Java: " + exc.getLocalizedMessage(),
-					exc);
+			throw new P4JavaError("Unable to create an MD5 digester for P4Java: " + exc.getLocalizedMessage(), exc);
 		}
 	}
 
@@ -80,6 +74,7 @@ public class MD5Digester {
 	 * Returns null if it can't read or digest the file for whatever reason;
 	 * otherwise the finalized digest is returned as a 32 byte hex string.
 	 *
+	 * @param file file
 	 * @return - computed digest or null if computation failed
 	 */
 	@Nullable
@@ -117,6 +112,8 @@ public class MD5Digester {
 	 * Return the finalised digest as a 32 byte hex string. It's important
 	 * elsewhere and in the server that the string be exactly 32 bytes long, so
 	 * we stitch it up if possible to make it that long...
+	 *
+	 * @return digest
 	 */
 	public String digestAs32ByteHex() {
 		String retStr = new BigInteger(1, messageDigest.digest()).toString(16).toUpperCase();
@@ -124,8 +121,7 @@ public class MD5Digester {
 		if (retStr.length() > 0 && (retStr.length() <= LENGTH_OF_HEX_STRING)) {
 			return StringUtils.leftPad(retStr, LENGTH_OF_HEX_STRING, '0');
 		} else {
-			throw new P4JavaError("Bad 32 byte digest string size in MD5Digester.digestAs32ByteHex;"
-					+ " string: " + retStr + ";" + " length: " + retStr.length());
+			throw new P4JavaError("Bad 32 byte digest string size in MD5Digester.digestAs32ByteHex;" + " string: " + retStr + ";" + " length: " + retStr.length());
 		}
 	}
 
@@ -135,6 +131,8 @@ public class MD5Digester {
 	 * Returns null if it can't read or digest the file for whatever reason;
 	 * otherwise the finalized digest is returned as a 32 byte hex string.
 	 *
+	 * @param file    file
+	 * @param charset charset
 	 * @return - computed digest or null if computation failed
 	 */
 	@Nullable
@@ -148,11 +146,13 @@ public class MD5Digester {
 	 * Returns null if it can't read or digest the file for whatever reason;
 	 * otherwise the finalized digest is returned as a 32 byte hex string.
 	 *
+	 * @param file                       file
+	 * @param charset                    charset
+	 * @param doesNeedConvertLineEndings doesNeedConvertLineEndings
 	 * @return - computed digest or null if computation failed
 	 */
 	@Nullable
-	public String digestFileAs32ByteHex(@Nonnull File file, @Nullable Charset charset,
-										boolean doesNeedConvertLineEndings) {
+	public String digestFileAs32ByteHex(@Nonnull File file, @Nullable Charset charset, boolean doesNeedConvertLineEndings) {
 
 		return digestFileAs32ByteHex(file, charset, doesNeedConvertLineEndings, null);
 	}
@@ -164,19 +164,21 @@ public class MD5Digester {
 	 * Returns null if it can't read or digest the file for whatever reason;
 	 * otherwise the finalized digest is returned as a 32 byte hex string.
 	 *
+	 * @param file                       file
+	 * @param charset                    charset
+	 * @param isRequireLineEndingConvert isRequireLineEndingConvert
+	 * @param clientLineEnding           clientLineEnding
 	 * @return - computed digest or null if computation failed
 	 */
 	@Nullable
-	public String digestFileAs32ByteHex(@Nonnull File file, @Nullable Charset charset,
-										boolean isRequireLineEndingConvert, @Nullable ClientLineEnding clientLineEnding) {
+	public String digestFileAs32ByteHex(@Nonnull File file, @Nullable Charset charset, boolean isRequireLineEndingConvert, @Nullable ClientLineEnding clientLineEnding) {
 
 		requireNonNull(file, "Null file passed to MD5Digester.digestFileAs32ByteHex()");
 		if (Files.isReadable(file.toPath())) {
 			try (FileInputStream inStream = new FileInputStream(file)) {
 				reset();
 				if (nonNull(charset)) {
-					digestEncodedStreamToUtf8(inStream, charset, isRequireLineEndingConvert,
-							clientLineEnding);
+					digestEncodedStreamToUtf8(inStream, charset, isRequireLineEndingConvert, clientLineEnding);
 				} else {
 					digestStream(inStream, isRequireLineEndingConvert, clientLineEnding);
 				}
@@ -190,82 +192,61 @@ public class MD5Digester {
 		return null;
 	}
 
-	private void digestEncodedStreamToUtf8(@Nonnull InputStream inStream, @Nonnull Charset charset,
-										   boolean isRequireLineEndingConvert, @Nullable ClientLineEnding clientLineEnding)
-			throws IOException {
+	private void digestEncodedStreamToUtf8(@Nonnull InputStream inStream, @Nonnull Charset charset, boolean isRequireLineEndingConvert, @Nullable ClientLineEnding clientLineEnding) throws IOException {
 
-		try (BOMInputStream unicodeInputStream = new BOMInputStream(inStream, false,
-				ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE,
-				ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE)) {
+		try (BOMInputStream unicodeInputStream = new BOMInputStream(inStream, false, ByteOrderMark.UTF_8, ByteOrderMark.UTF_16LE, ByteOrderMark.UTF_16BE, ByteOrderMark.UTF_32LE, ByteOrderMark.UTF_32BE)) {
 
 			if (unicodeInputStream.hasBOM() && (charset.name() == "UTF-16")) {
 				charset = Charset.forName(unicodeInputStream.getBOMCharsetName());
 			}
 
-			InputStreamReader encodedStreamReader = new InputStreamReader(unicodeInputStream,
-					charset);
+			InputStreamReader encodedStreamReader = new InputStreamReader(unicodeInputStream, charset);
 
-			CharsetEncoder utf8CharsetEncoder = CharsetDefs.UTF8.newEncoder()
-					.onMalformedInput(CodingErrorAction.REPORT)
-					.onUnmappableCharacter(CodingErrorAction.REPORT);
+			CharsetEncoder utf8CharsetEncoder = CharsetDefs.UTF8.newEncoder().onMalformedInput(CodingErrorAction.REPORT).onUnmappableCharacter(CodingErrorAction.REPORT);
 
 			char[] buffer = new char[bufferSize];
 			int read;
 			while ((read = encodedStreamReader.read(buffer)) > 0) {
 				// Convert encoded stream to UTF8 since server digest is UTF8
-				ByteBuffer utf8ByteBuffer = utf8CharsetEncoder
-						.encode(CharBuffer.wrap(buffer, 0, read));
+				ByteBuffer utf8ByteBuffer = utf8CharsetEncoder.encode(CharBuffer.wrap(buffer, 0, read));
 
 				if (isRequireLineEndingConvert) {
-					ByteBuffer convert = findAndReplaceEncodedClientLineEndingIfRequireLineEndingCovert(
-							encodedStreamReader, utf8CharsetEncoder, utf8ByteBuffer,
-							clientLineEnding);
+					ByteBuffer convert = findAndReplaceEncodedClientLineEndingIfRequireLineEndingCovert(encodedStreamReader, utf8CharsetEncoder, utf8ByteBuffer, clientLineEnding);
 
 					update(convert.array(), convert.arrayOffset(), convert.limit());
 				} else {
-					update(utf8ByteBuffer.array(), utf8ByteBuffer.arrayOffset(),
-							utf8ByteBuffer.limit());
+					update(utf8ByteBuffer.array(), utf8ByteBuffer.arrayOffset(), utf8ByteBuffer.limit());
 				}
 			}
 		}
 	}
 
-	private ByteBuffer findAndReplaceEncodedClientLineEndingIfRequireLineEndingCovert(
-			@Nonnull InputStreamReader encodedStreamReader,
-			@Nonnull CharsetEncoder utf8CharsetEncoder, @Nonnull ByteBuffer initialUtf8ByteBuffer,
-			@Nullable ClientLineEnding clientLineEnding) throws IOException {
+	private ByteBuffer findAndReplaceEncodedClientLineEndingIfRequireLineEndingCovert(@Nonnull InputStreamReader encodedStreamReader, @Nonnull CharsetEncoder utf8CharsetEncoder, @Nonnull ByteBuffer initialUtf8ByteBuffer, @Nullable ClientLineEnding clientLineEnding) throws IOException {
 
 		int limit = initialUtf8ByteBuffer.limit();
-		byte[] allUtf8Bytes = Arrays.copyOfRange(initialUtf8ByteBuffer.array(),
-				initialUtf8ByteBuffer.arrayOffset(), limit);
+		byte[] allUtf8Bytes = Arrays.copyOfRange(initialUtf8ByteBuffer.array(), initialUtf8ByteBuffer.arrayOffset(), limit);
 		byte lastByte = initialUtf8ByteBuffer.get(limit - 1);
-		int offset = findOffsetOfNextClientLineEndingIfReadBytesEndWithFirstByteOfClientLineEnding(
-				lastByte, clientLineEnding);
+		int offset = findOffsetOfNextClientLineEndingIfReadBytesEndWithFirstByteOfClientLineEnding(lastByte, clientLineEnding);
 
 		while (offset > 0) {
 			char[] followingPotentialClientLineEndingChars = new char[offset];
 			offset = encodedStreamReader.read(followingPotentialClientLineEndingChars);
 			if (offset > 0) {
-				ByteBuffer moreBuffer = utf8CharsetEncoder.encode(
-						CharBuffer.wrap(followingPotentialClientLineEndingChars, 0, offset));
+				ByteBuffer moreBuffer = utf8CharsetEncoder.encode(CharBuffer.wrap(followingPotentialClientLineEndingChars, 0, offset));
 				ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
 				outputStream.write(allUtf8Bytes);
-				outputStream.write(Arrays.copyOfRange(moreBuffer.array(),
-						moreBuffer.arrayOffset(), moreBuffer.limit()));
+				outputStream.write(Arrays.copyOfRange(moreBuffer.array(), moreBuffer.arrayOffset(), moreBuffer.limit()));
 				allUtf8Bytes = outputStream.toByteArray();
 
 				lastByte = allUtf8Bytes[allUtf8Bytes.length - 1];
-				offset = findOffsetOfNextClientLineEndingIfReadBytesEndWithFirstByteOfClientLineEnding(
-						lastByte, clientLineEnding);
+				offset = findOffsetOfNextClientLineEndingIfReadBytesEndWithFirstByteOfClientLineEnding(lastByte, clientLineEnding);
 			}
 		}
 
-		return convertToP4dServerEndingsIfRequired(allUtf8Bytes, 0, allUtf8Bytes.length,
-				clientLineEnding);
+		return convertToP4dServerEndingsIfRequired(allUtf8Bytes, 0, allUtf8Bytes.length, clientLineEnding);
 	}
 
-	private int findOffsetOfNextClientLineEndingIfReadBytesEndWithFirstByteOfClientLineEnding(
-			byte lastByte, @Nullable ClientLineEnding clientLineEnding) {
+	private int findOffsetOfNextClientLineEndingIfReadBytesEndWithFirstByteOfClientLineEnding(byte lastByte, @Nullable ClientLineEnding clientLineEnding) {
 
 		int more = -1;
 		if (isRequireConvertClientOrLocalLineEndingToServerFormat(clientLineEnding)) {
@@ -277,27 +258,23 @@ public class MD5Digester {
 		return more;
 	}
 
-	private boolean isRequireConvertClientOrLocalLineEndingToServerFormat(
-			@Nullable ClientLineEnding clientLineEnding) {
+	private boolean isRequireConvertClientOrLocalLineEndingToServerFormat(@Nullable ClientLineEnding clientLineEnding) {
 		boolean isLocalLineEndingSameAsServerFormat = ClientLineEnding.CONVERT_TEXT;
 		if (nonNull(clientLineEnding)) {
-			isLocalLineEndingSameAsServerFormat = ClientLineEnding
-					.needsLineEndFiltering(clientLineEnding);
+			isLocalLineEndingSameAsServerFormat = ClientLineEnding.needsLineEndFiltering(clientLineEnding);
 		}
 
 		return isLocalLineEndingSameAsServerFormat;
 	}
 
-	private ByteBuffer convertToP4dServerEndingsIfRequired(@Nonnull byte[] sourceBytes,
-														   final int start, final int length, @Nullable ClientLineEnding clientLineEnding) {
+	private ByteBuffer convertToP4dServerEndingsIfRequired(@Nonnull byte[] sourceBytes, final int start, final int length, @Nullable ClientLineEnding clientLineEnding) {
 		ByteBuffer convertedByteBuffer;
 		if (isRequireConvertClientOrLocalLineEndingToServerFormat(clientLineEnding)) {
 			convertedByteBuffer = ByteBuffer.allocate(length);
 			byte p4dServerLineEnding = ClientLineEnding.FST_L_LF_BYTES[0];
 			byte[] clientLineEndBytes = ClientLineEnding.getLineEndBytes(clientLineEnding);
 			for (int i = start; i < length; i++) {
-				if (doesSourceBytesUseSameClientLineEnding(sourceBytes, i, length,
-						clientLineEndBytes)) {
+				if (doesSourceBytesUseSameClientLineEnding(sourceBytes, i, length, clientLineEndBytes)) {
 					convertedByteBuffer.put(p4dServerLineEnding);
 					i += clientLineEndBytes.length - 1;
 				} else {
@@ -311,30 +288,26 @@ public class MD5Digester {
 		return convertedByteBuffer;
 	}
 
-	private boolean doesSourceBytesUseSameClientLineEnding(@Nonnull byte[] sourceBytes,
-														   final int indexOfSourceBytes, final int length, byte[] clientLineEndBytes) {
+	private boolean doesSourceBytesUseSameClientLineEnding(@Nonnull byte[] sourceBytes, final int indexOfSourceBytes, final int length, byte[] clientLineEndBytes) {
 
 		boolean isSame = false;
 		int potentialLastIndex = indexOfSourceBytes + clientLineEndBytes.length - 1;
 		if (potentialLastIndex < length) {
-			byte[] subSourceBytes = Arrays.copyOfRange(sourceBytes, indexOfSourceBytes,
-					potentialLastIndex + 1);
+			byte[] subSourceBytes = Arrays.copyOfRange(sourceBytes, indexOfSourceBytes, potentialLastIndex + 1);
 			isSame = Arrays.equals(subSourceBytes, clientLineEndBytes);
 		}
 
 		return isSame;
 	}
 
-	private void digestStream(@Nonnull InputStream inStream, boolean isRequireLineEndingConvert,
-							  @Nullable ClientLineEnding clientLineEnding) throws IOException {
+	private void digestStream(@Nonnull InputStream inStream, boolean isRequireLineEndingConvert, @Nullable ClientLineEnding clientLineEnding) throws IOException {
 
 		byte[] buffer = new byte[bufferSize];
 		int read;
 		while ((read = inStream.read(buffer)) > 0) {
 			int start = 0;
 			if (isRequireLineEndingConvert) {
-				ByteBuffer convert = findAndReplaceNonEncodedClientLineEndingIfRequireLineEndingConvert(
-						inStream, buffer, read, clientLineEnding);
+				ByteBuffer convert = findAndReplaceNonEncodedClientLineEndingIfRequireLineEndingConvert(inStream, buffer, read, clientLineEnding);
 				update(convert.array(), convert.arrayOffset(), convert.limit());
 			} else {
 				update(buffer, start, read);
@@ -342,16 +315,12 @@ public class MD5Digester {
 		}
 	}
 
-	private ByteBuffer findAndReplaceNonEncodedClientLineEndingIfRequireLineEndingConvert(
-			@Nonnull InputStream inStream, @Nonnull final byte[] readBuffer,
-			final int totalBytesReadIntoBuffer, @Nullable ClientLineEnding clientLineEnding)
-			throws IOException {
+	private ByteBuffer findAndReplaceNonEncodedClientLineEndingIfRequireLineEndingConvert(@Nonnull InputStream inStream, @Nonnull final byte[] readBuffer, final int totalBytesReadIntoBuffer, @Nullable ClientLineEnding clientLineEnding) throws IOException {
 
 		byte lastReadByte = readBuffer[totalBytesReadIntoBuffer - 1];
 		byte[] allBytes = Arrays.copyOfRange(readBuffer, 0, totalBytesReadIntoBuffer);
 		int length = totalBytesReadIntoBuffer;
-		int offset = findOffsetOfNextClientLineEndingIfReadBytesEndWithFirstByteOfClientLineEnding(
-				lastReadByte, clientLineEnding);
+		int offset = findOffsetOfNextClientLineEndingIfReadBytesEndWithFirstByteOfClientLineEnding(lastReadByte, clientLineEnding);
 		while (offset > 0) {
 			byte[] potentialClientLineEndingBytes = new byte[offset];
 			offset = inStream.read(potentialClientLineEndingBytes);
@@ -361,8 +330,7 @@ public class MD5Digester {
 				outputStream.write(Arrays.copyOfRange(potentialClientLineEndingBytes, 0, offset));
 				allBytes = outputStream.toByteArray();
 				length = allBytes.length;
-				offset = findOffsetOfNextClientLineEndingIfReadBytesEndWithFirstByteOfClientLineEnding(
-						allBytes[allBytes.length - 1], clientLineEnding);
+				offset = findOffsetOfNextClientLineEndingIfReadBytesEndWithFirstByteOfClientLineEnding(allBytes[allBytes.length - 1], clientLineEnding);
 			}
 		}
 		return convertToP4dServerEndingsIfRequired(allBytes, 0, length, clientLineEnding);
@@ -382,18 +350,6 @@ public class MD5Digester {
 	public void update(byte[] bytes) {
 		if (nonNull(bytes)) {
 			messageDigest.update(bytes);
-		}
-	}
-
-	/**
-	 * NOTE: side effects!! It will be removed from next release
-	 */
-	@Deprecated
-	public void update(ByteBuffer byteBuf) {
-		if (byteBuf != null) {
-			byte[] bytes = new byte[byteBuf.limit()];
-			byteBuf.get(bytes);
-			update(bytes);
 		}
 	}
 }

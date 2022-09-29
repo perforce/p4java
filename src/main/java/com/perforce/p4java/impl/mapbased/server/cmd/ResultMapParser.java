@@ -79,9 +79,7 @@ public abstract class ResultMapParser {
 	/**
 	 * Array of access error messages.
 	 */
-	private static final String[] ACCESS_ERR_MSGS = {CORE_AUTH_FAIL_STRING_1,
-			CORE_AUTH_FAIL_STRING_2, CORE_AUTH_FAIL_STRING_3, CORE_AUTH_FAIL_STRING_4,
-			AUTH_FAIL_STRING_1, AUTH_FAIL_STRING_2};
+	private static final String[] ACCESS_ERR_MSGS = {CORE_AUTH_FAIL_STRING_1, CORE_AUTH_FAIL_STRING_2, CORE_AUTH_FAIL_STRING_3, CORE_AUTH_FAIL_STRING_4, AUTH_FAIL_STRING_1, AUTH_FAIL_STRING_2};
 
 	/**
 	 * Parses the command result map to return a String of info messages. The
@@ -93,9 +91,7 @@ public abstract class ResultMapParser {
 	 * @throws AccessException  the access exception
 	 * @throws RequestException the request exception
 	 */
-	public static String parseCommandResultMapIfIsInfoMessageAsString(
-			@Nonnull final List<Map<String, Object>> resultMaps)
-			throws AccessException, RequestException {
+	public static String parseCommandResultMapIfIsInfoMessageAsString(@Nonnull final List<Map<String, Object>> resultMaps) throws AccessException, RequestException {
 		StringBuilder retVal = new StringBuilder(INITIAL_STRING_BUILDER);
 		if (nonNull(resultMaps)) {
 			for (Map<String, Object> map : resultMaps) {
@@ -140,8 +136,7 @@ public abstract class ResultMapParser {
 	 * @throws RequestException the request exception
 	 * @throws AccessException  the access exception
 	 */
-	public static boolean handleErrorStr(final Map<String, Object> map)
-			throws RequestException, AccessException {
+	public static boolean handleErrorStr(final Map<String, Object> map) throws RequestException, AccessException {
 		String errStr = getErrorStr(map);
 
 		if (isNotBlank(errStr)) {
@@ -162,8 +157,7 @@ public abstract class ResultMapParser {
 	 * @throws RequestException the request exception
 	 * @throws AccessException  the access exception
 	 */
-	public static boolean handleWarningStr(final Map<String, Object> map)
-			throws RequestException, AccessException {
+	public static boolean handleWarningStr(final Map<String, Object> map) throws RequestException, AccessException {
 		String warnStr = getWarningStr(map);
 
 		if (isNotBlank(warnStr)) {
@@ -175,16 +169,13 @@ public abstract class ResultMapParser {
 	/**
 	 * RPC impl errors come across the wire as a map in the form usually like
 	 * this:
-	 * <p>
-	 * <pre>
+	 * <pre>{@code
 	 * fmt0=Access for user '%user%' has not been enabled by 'p4 protect'.,
 	 * func=client-Message, user=nouser, code0=822483067
-	 * </pre>
-	 * <p>
+	 * }</pre>
 	 * With tags being used for non-error payloads, we can just basically pick
 	 * up the presence of the code0 entry; if it's there, use fmt0 as the format
 	 * and the other args as appropriate...
-	 * <p>
 	 * <p>
 	 * FIXME: work with multiple code/fmt sets... -- HR.
 	 *
@@ -221,21 +212,16 @@ public abstract class ResultMapParser {
 	 * Gets the info message from the passed-in Perforce command results map. If
 	 * no info message found in the results map it returns null.
 	 * <p>
-	 * </p>
-	 * <p>
 	 * Note that the severity code is MessageSeverityCode.E_INFO. Therefore,
 	 * only message with severity code = MessageSeverityCode.E_INFO will be
 	 * returned.
 	 * <p>
-	 * <p>
 	 * RPC impl errors come across the wire as a map in the form usually like
 	 * this:
-	 * <p>
-	 * <pre>
+	 * <pre>{@code
 	 * fmt0=Access for user '%user%' has not been enabled by 'p4 protect'.,
 	 * func=client-Message, user=nouser, code0=822483067
-	 * </pre>
-	 * <p>
+	 * }</pre>
 	 * Note that the code0 entry will be used to get the severity level; the
 	 * fmt0 entry contains the message.
 	 * <p>
@@ -315,21 +301,16 @@ public abstract class ResultMapParser {
 	 * command results map. If no info/warning/error/fatal message found in the
 	 * results map it returns null.
 	 * <p>
-	 * </p>
-	 * <p>
 	 * Note that the minimum severity code is MessageSeverityCode.E_INFO.
-	 * Therefore, only message with severity code >= MessageSeverityCode.E_INFO
+	 * Therefore, only message with severity code &gt;= MessageSeverityCode.E_INFO
 	 * will be returned.
-	 * <p>
 	 * <p>
 	 * RPC impl errors come across the wire as a map in the form usually like
 	 * this:
-	 * <p>
-	 * <pre>
+	 * <pre>{@code
 	 * fmt0=Access for user '%user%' has not been enabled by 'p4 protect'.,
 	 * func=client-Message, user=nouser, code0=822483067
-	 * </pre>
-	 * <p>
+	 * }</pre>
 	 * Note that the code0 entry will be used to get the severity level; the
 	 * fmt0 entry contains the message.
 	 * <p>
@@ -348,8 +329,7 @@ public abstract class ResultMapParser {
 	 * @param map the map
 	 * @throws RequestException the request exception
 	 */
-	public static void throwRequestExceptionIfErrorMessageFound(final Map<String, Object> map)
-			throws RequestException {
+	public static void throwRequestExceptionIfErrorMessageFound(final Map<String, Object> map) throws RequestException {
 		String errStr = getErrorStr(map);
 		if (isNotBlank(errStr)) {
 			throw new RequestException(errStr, parseCode0ErrorString(map));
@@ -364,8 +344,7 @@ public abstract class ResultMapParser {
 	 * @throws RequestException the request exception
 	 * @throws AccessException  the access exception
 	 */
-	public static boolean handleErrorOrInfoStr(final Map<String, Object> map)
-			throws RequestException, AccessException {
+	public static boolean handleErrorOrInfoStr(final Map<String, Object> map) throws RequestException, AccessException {
 		String errStr = getErrorOrInfoStr(map);
 
 		if (isNotBlank(errStr)) {
@@ -386,9 +365,7 @@ public abstract class ResultMapParser {
 	 * @throws AccessException  the access exception
 	 * @throws RequestException the request exception
 	 */
-	public static String parseCommandResultMapAsString(
-			@Nonnull final List<Map<String, Object>> resultMaps)
-			throws AccessException, RequestException {
+	public static String parseCommandResultMapAsString(@Nonnull final List<Map<String, Object>> resultMaps) throws AccessException, RequestException {
 		StringBuilder retVal = new StringBuilder();
 		if (nonNull(resultMaps)) {
 			for (Map<String, Object> map : resultMaps) {
@@ -414,8 +391,7 @@ public abstract class ResultMapParser {
 	 * @param resultMaps the result maps
 	 * @return the list
 	 */
-	public static List<IFileSpec> parseCommandResultMapAsFileSpecs(final int id,
-																   final IServer server, final List<Map<String, Object>> resultMaps) {
+	public static List<IFileSpec> parseCommandResultMapAsFileSpecs(final int id, final IServer server, final List<Map<String, Object>> resultMaps) {
 
 		List<IFileSpec> fileList = new ArrayList<>();
 		if (nonNull(resultMaps)) {
@@ -442,8 +418,7 @@ public abstract class ResultMapParser {
 	 * @param resultMaps the result maps
 	 * @return the list
 	 */
-	public static List<IExtendedFileSpec> parseCommandResultMapAsExtendedFileSpecs(final int id,
-																		   final IServer server, final List<Map<String, Object>> resultMaps) {
+	public static List<IExtendedFileSpec> parseCommandResultMapAsExtendedFileSpecs(final int id, final IServer server, final List<Map<String, Object>> resultMaps) {
 
 		List<IExtendedFileSpec> fileList = new ArrayList<>();
 
@@ -521,8 +496,7 @@ public abstract class ResultMapParser {
 	 * @throws ConnectionException the connection exception
 	 * @throws AccessException     the access exception
 	 */
-	public static String handleFileErrorStr(final Map<String, Object> map)
-			throws ConnectionException, AccessException {
+	public static String handleFileErrorStr(final Map<String, Object> map) throws ConnectionException, AccessException {
 		String errStr = getErrorOrInfoStr(map);
 		if (isNotBlank(errStr)) {
 			if (isAuthFail(errStr)) {

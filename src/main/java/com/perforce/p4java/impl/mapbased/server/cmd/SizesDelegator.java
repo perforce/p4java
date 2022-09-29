@@ -42,12 +42,7 @@ public class SizesDelegator extends BaseDelegator implements ISizesDelegator {
 
         return buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, IFileSize>() {
-                    @Override
-                    public IFileSize apply(Map map) {
-                        return new FileSize(map);
-                    }
-                }
-        );
+				map -> new FileSize(map)
+		);
     }
 }

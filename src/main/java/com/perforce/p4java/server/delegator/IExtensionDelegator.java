@@ -7,7 +7,6 @@ import com.perforce.p4java.impl.generic.core.ExtensionSummary;
 
 import javax.annotation.Nullable;
 import java.util.List;
-import java.util.Map;
 
 public interface IExtensionDelegator {
 	/**
@@ -30,12 +29,13 @@ public interface IExtensionDelegator {
 
 
 	/**
-	 * Creates sample extension with the given name. As a result a folder <extnName> will be created with main.lua
+	 * Creates sample extension with the given name. As a result a folder extnName will be created with main.lua
 	 * and manifest.json in it.
 	 * command: extension [ --sample name ]
 	 *
 	 * @param extnName - name of the extension
-	 * @throws P4JavaException
+	 * @return result
+	 * @throws P4JavaException on error
 	 */
 	String sampleExtension(String extnName) throws P4JavaException;
 
@@ -44,7 +44,8 @@ public interface IExtensionDelegator {
 	 * command: extension [ --package dir ]
 	 *
 	 * @param dirName - Directory name containing main.lua and manifest.json for the extension
-	 * @throws P4JavaException
+	 * @return result
+	 * @throws P4JavaException on error
 	 */
 	String packageExtension(String dirName) throws P4JavaException;
 
@@ -53,7 +54,9 @@ public interface IExtensionDelegator {
 	 * command: extension [ --install file [--yes] [--cert] [--allow-unsigned] ]
 	 *
 	 * @param extnPackageName - Name of the extension package file. For ex. p4java-obliterate-extn.p4-extension
-	 * @throws P4JavaException
+	 * @param allowUnsigned   if true
+	 * @return extension summary
+	 * @throws P4JavaException on error
 	 */
 	ExtensionSummary installExtension(String extnPackageName, boolean allowUnsigned) throws P4JavaException;
 
@@ -61,22 +64,22 @@ public interface IExtensionDelegator {
 	/**
 	 * Creates/updates an extension's global/instance config.
 	 *
-	 * @param extension
-	 * @param namespace
+	 * @param extension      extension
+	 * @param namespace      name space
 	 * @param instanceConfig - If provided, creates/updates this instance config.
-	 * @return
-	 * @throws P4JavaException
+	 * @return result
+	 * @throws P4JavaException on error
 	 */
 	String createExtensionConfig(IExtension extension, String namespace, @Nullable String instanceConfig) throws P4JavaException;
 
 	/**
 	 * Updates an extension's global/instance config.
 	 *
-	 * @param extension
-	 * @param namespace
+	 * @param extension      extension
+	 * @param namespace      name space
 	 * @param instanceConfig - If provided updates this instance config.
-	 * @return
-	 * @throws P4JavaException
+	 * @return result
+	 * @throws P4JavaException on error
 	 */
 	String updateExtensionConfig(IExtension extension, String namespace, @Nullable String instanceConfig) throws P4JavaException;
 
@@ -84,29 +87,29 @@ public interface IExtensionDelegator {
 	 * Lists extensions or configs based on type.
 	 *
 	 * @param type - Can be "extensions" or "configs"
-	 * @return
-	 * @throws P4JavaException
+	 * @return list of extensions
+	 * @throws P4JavaException on error
 	 */
 	List<ExtensionSummary> listExtensions(String type) throws P4JavaException;
 
 	/**
 	 * Deletes an extension along with all of its configuration.
 	 *
-	 * @param namespace
-	 * @param extnName
-	 * @return
-	 * @throws P4JavaException
+	 * @param namespace name space
+	 * @param extnName  extension name
+	 * @return result
+	 * @throws P4JavaException on error
 	 */
 	String deleteExtension(String namespace, String extnName) throws P4JavaException;
 
 	/**
 	 * Retrieves an extension/config.
 	 *
-	 * @param namespace
-	 * @param name
+	 * @param namespace    name space
+	 * @param name         extension name
 	 * @param instanceName Optional, only required for instance config
-	 * @return
-	 * @throws P4JavaException
+	 * @return extension config
+	 * @throws P4JavaException on error
 	 */
 	Extension getExtensionConfig(String namespace, String name, @Nullable String instanceName) throws P4JavaException;
 }

@@ -28,7 +28,7 @@ import static org.apache.commons.io.ByteOrderMark.UTF_8;
 /**
  * Provides a Perforce-specific extension to the basic Java
  * InputStream to allow us to intercept methods and implement
- * our own extensions.<p>
+ * our own extensions.
  * <p>
  * The current main use is for line-end processing with the
  * RpcLineEndFilterInputStream filter class; more uses

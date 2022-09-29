@@ -13,9 +13,8 @@ import com.perforce.p4java.impl.mapbased.rpc.ServerStats;
  * Implements the lowest level of the P4Java RPC 'rsh' output stream architecture.<p>
  * 
  * This class does the most basic conversion of outgoing bytes to the (TCP/IP)
- * wire from a Java IO output stream whose contents have been encoded upstream.<p>
+ * wire from a Java IO output stream whose contents have been encoded upstream.
  */
-
 public class RpcRshOutputStream extends OutputStream {
 	public static final String TRACE_PREFIX = "RpcRshOutputStream";
 	

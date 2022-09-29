@@ -3,14 +3,14 @@
  */
 package com.perforce.p4java.charset;
 
+import com.perforce.p4java.PropertyDefs;
+
 import java.nio.ByteBuffer;
 import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.CoderResult;
-
-import com.perforce.p4java.PropertyDefs;
 
 /**
  * Charset implementation which performs P4ShiftJIS encoding. P4-ShiftJIS
@@ -20,8 +20,7 @@ import com.perforce.p4java.PropertyDefs;
  */
 public class PerforceShiftJISCharset extends Charset {
 	// Environment variable for enabling Perforce specific updates
-	public static final boolean UNICODE_MAPPING = (System.getProperty(PropertyDefs.UNICODE_MAPPING_SHORT_FORM,
-			System.getProperty(PropertyDefs.UNICODE_MAPPING, null))) == null ? false : true;
+	public static final boolean UNICODE_MAPPING = (System.getProperty(PropertyDefs.UNICODE_MAPPING_SHORT_FORM, System.getProperty(PropertyDefs.UNICODE_MAPPING, null))) == null ? false : true;
 
 	// The name of the real charset encoding delegate.
 	// Microsoft code page 932 (windows-31j, csWindows31J, windows-932, MS932)
@@ -33,6 +32,9 @@ public class PerforceShiftJISCharset extends Charset {
 	/**
 	 * Constructor for the P4ShiftJIS charset. Call the superclass constructor
 	 * to pass along the name and aliases.
+	 *
+	 * @param canonical canonical
+	 * @param aliases   aliases
 	 */
 	protected PerforceShiftJISCharset(String canonical, String[] aliases) {
 		super(canonical, aliases);
@@ -56,10 +58,10 @@ public class PerforceShiftJISCharset extends Charset {
 	}
 
 	/**
-     * Tells whether or not this charset contains the given charset.
+	 * Tells whether or not this charset contains the given charset.
 	 */
 	public boolean contains(Charset cs) {
-        return this.getClass().isInstance(cs);
+		return this.getClass().isInstance(cs);
 	}
 
 	/**
@@ -70,13 +72,13 @@ public class PerforceShiftJISCharset extends Charset {
 			for (int pos = cb.position(); pos < cb.limit(); pos++) {
 				char c = cb.get(pos);
 				switch (c) {
-				case '\\':
-					cb.put(pos, '\u00A5');
-					break;
-				case '\u007E':
-					cb.put(pos, '\u203E');
-					break;
-				default:
+					case '\\':
+						cb.put(pos, '\u00A5');
+						break;
+					case '\u007E':
+						cb.put(pos, '\u203E');
+						break;
+					default:
 				}
 			}
 		}

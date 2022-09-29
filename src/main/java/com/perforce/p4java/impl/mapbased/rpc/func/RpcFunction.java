@@ -10,11 +10,11 @@ import java.util.EnumMap;
 import java.util.HashMap;
 
 /**
- * General Perforce RPC function utilities and definitions.<p>
+ * General Perforce RPC function utilities and definitions.
  * <p>
  * An RPC function in this context is anything that can be encoded
  * with the "func" field in an RPC packet, e.g. "func client-Message",
- * "func user-files", or "func dm-Login".<p>
+ * "func user-files", or "func dm-Login".
  * <p>
  * Note that a lot of optimizations could be done here, but we'll hold
  * off on this until we're clearer about usage models, actual performance,

@@ -1,33 +1,33 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option.client;
-
-import java.util.List;
 
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
  * IClient reconcileFiles method Options definitions.
- * 
+ *
  * @see com.perforce.p4java.client.IClient#addFiles(List, AddFilesOptions)
  */
 public class ReconcileFilesOptions extends Options {
-	
+
 	/**
 	 * Options: -n, -c[changelist], -e, -a, -f, -I, -d, -l, -m, -t, -w
 	 */
 	public static final String OPTIONS_SPECS = "b:n i:c:gtz b:e b:a b:f b:I b:d b:l b:m b:t b:w";
-	
+
 	/**
 	 * If true, don't actually do the add, just return the files that
 	 * would have been opened for addition.
 	 * Corresponds to the '-n' flag.
 	 */
 	protected boolean noUpdate = false;
-	
+
 	/**
 	 * If positive, the opened files are put into the pending
 	 * changelist identified by changelistId (this changelist must have been
@@ -36,14 +36,14 @@ public class ReconcileFilesOptions extends Options {
 	 * Corresponds to the '-c changelist#' flag.
 	 */
 	protected int changelistId = 0;
-	
+
 	/**
 	 * If true, allows the user to reconcile files that have been modified
 	 * outside of Perforce. The reconcile command will open these files for edit.
 	 * Corresponds to the '-e' flag.
 	 */
 	protected boolean outsideEdit = false;
-	
+
 	/**
 	 * If true, allows the user to reconcile files that are in the user's
 	 * directory that are not under Perforce source control. These files are
@@ -64,7 +64,7 @@ public class ReconcileFilesOptions extends Options {
 	 * Corresponds to the '-I' flag
 	 */
 	protected boolean noIgnoreChecking = false;
-	
+
 	/**
 	 * If true, allows the user to reconcile files that have been removed from
 	 * the user's directory but are still in the depot. These files will be
@@ -115,19 +115,20 @@ public class ReconcileFilesOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public ReconcileFilesOptions(String... options) {
@@ -136,10 +137,17 @@ public class ReconcileFilesOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param noUpdate         noUpdate
+	 * @param changelistId     changelistId
+	 * @param outsideEdit      outsideEdit
+	 * @param outsideAdd       outsideAdd
+	 * @param useWildcards     useWildcards
+	 * @param noIgnoreChecking noIgnoreChecking
+	 * @param removed          removed
+	 * @param localSyntax      localSyntax
 	 */
-	public ReconcileFilesOptions(boolean noUpdate, int changelistId, boolean outsideEdit,
-			boolean outsideAdd, boolean useWildcards, boolean noIgnoreChecking, boolean removed,
-			boolean localSyntax) {
+	public ReconcileFilesOptions(boolean noUpdate, int changelistId, boolean outsideEdit, boolean outsideAdd, boolean useWildcards, boolean noIgnoreChecking, boolean removed, boolean localSyntax) {
 		super();
 		this.noUpdate = noUpdate;
 		this.changelistId = changelistId;
@@ -155,18 +163,7 @@ public class ReconcileFilesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-								this.noUpdate,
-								this.changelistId,
-								this.outsideEdit,
-								this.outsideAdd,
-								this.useWildcards,
-								this.noIgnoreChecking,
-								this.removed,
-								this.localSyntax,
-								this.checkModTime,
-								this.fileType,
-								this.updateWorkspace);
+		this.optionList = this.processFields(OPTIONS_SPECS, this.noUpdate, this.changelistId, this.outsideEdit, this.outsideAdd, this.useWildcards, this.noIgnoreChecking, this.removed, this.localSyntax, this.checkModTime, this.fileType, this.updateWorkspace);
 		return this.optionList;
 	}
 
@@ -218,7 +215,7 @@ public class ReconcileFilesOptions extends Options {
 	public boolean isNoIgnoreChecking() {
 		return noIgnoreChecking;
 	}
-	
+
 	public ReconcileFilesOptions setNoIgnoreChecking(boolean noIgnoreChecking) {
 		this.noIgnoreChecking = noIgnoreChecking;
 		return this;
@@ -227,7 +224,7 @@ public class ReconcileFilesOptions extends Options {
 	public boolean isRemoved() {
 		return removed;
 	}
-	
+
 	public ReconcileFilesOptions setRemoved(boolean removed) {
 		this.removed = removed;
 		return this;
@@ -236,7 +233,7 @@ public class ReconcileFilesOptions extends Options {
 	public boolean isLocalSyntax() {
 		return localSyntax;
 	}
-	
+
 	public ReconcileFilesOptions setLocalSyntax(boolean localSyntax) {
 		this.localSyntax = localSyntax;
 		return this;
@@ -245,13 +242,15 @@ public class ReconcileFilesOptions extends Options {
 	public boolean isCheckModTime() {
 		return checkModTime;
 	}
-	
+
 	public ReconcileFilesOptions setCheckModTime(boolean checkModTime) {
 		this.checkModTime = checkModTime;
 		return this;
 	}
 
-	public boolean isFileType() { return fileType; }
+	public boolean isFileType() {
+		return fileType;
+	}
 
 	public ReconcileFilesOptions setFileType(boolean fileType) {
 		this.fileType = fileType;
@@ -261,7 +260,7 @@ public class ReconcileFilesOptions extends Options {
 	public boolean isUpdateWorkspace() {
 		return updateWorkspace;
 	}
-	
+
 	public ReconcileFilesOptions setUpdateWorkspace(boolean updateWorkspace) {
 		this.updateWorkspace = updateWorkspace;
 		return this;

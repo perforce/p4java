@@ -11,13 +11,13 @@ import com.perforce.p4java.option.server.DuplicateRevisionsOptions;
  */
 public interface IDuplicateDelegator {
     /**
-     * Duplicate revisions with integration history (unsupported).<p>
+     * Duplicate revisions with integration history (unsupported).
      * <p>
      * Duplicate revisions as if they always existed. All aspects of the source
      * revisions are mirrored to the target revisions, including changelist
      * number, date, attributes, and contents. The target revision must not
      * already exist and the target file must not be opened (for any operation)
-     * on any client.<p>
+     * on any client.
      * <p>
      * Note that integration records are duplicated as well. 'p4 duplicate'
      * followed by a 'p4 obliterate' (of the source revisions) is in effect a

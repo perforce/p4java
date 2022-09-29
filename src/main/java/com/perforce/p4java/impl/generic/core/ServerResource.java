@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Abstract implementation class for the IServerResource interface.<p>
+ * Abstract implementation class for the IServerResource interface.
  * <p>
  * Implementations of interfaces that extend IServerResource should
  * use this as a superclass unless there are good reasons not to.
@@ -57,6 +57,8 @@ public abstract class ServerResource implements IServerResource {
 	/**
 	 * Sets complete to true, completable, refreshable, and
 	 * updateable to false, and server to the passed-in value.
+	 *
+	 * @param server server
 	 */
 	protected ServerResource(IServer server) {
 		this.server = server;
@@ -64,6 +66,9 @@ public abstract class ServerResource implements IServerResource {
 
 	/**
 	 * Explicit some-value constructor; sets server to null.
+	 *
+	 * @param refreshable refreshable
+	 * @param updateable  updateable
 	 */
 	protected ServerResource(boolean refreshable, boolean updateable) {
 		this(refreshable, updateable, null);
@@ -71,6 +76,10 @@ public abstract class ServerResource implements IServerResource {
 
 	/**
 	 * Explicit all-value constructor.
+	 *
+	 * @param refreshable refreshable
+	 * @param updateable  updateable
+	 * @param server      server
 	 */
 	protected ServerResource(
 			boolean refreshable, boolean updateable, IServer server) {
@@ -132,7 +141,7 @@ public abstract class ServerResource implements IServerResource {
 	/**
 	 * Set the resource as refreshable
 	 *
-	 * @param refreshable
+	 * @param refreshable true if refreshable
 	 */
 	public void setRefreshable(boolean refreshable) {
 		this.refreshable = refreshable;
@@ -216,5 +225,5 @@ public abstract class ServerResource implements IServerResource {
 
     }
     */
-     
+
 }

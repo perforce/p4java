@@ -22,17 +22,14 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 /**
  * Default IProtectionEntry implementation class.
  * <p>
- *
  * Note that the order of this protection entry in the protections table is part
  * of the protection entry key when pass to the server for updating the
  * protections table.
  * <p>
- *
  * When exclusionary mappings are used, order is relevant: the exclusionary
  * mapping overrides any matching protections listed above it in the table. No
  * matter what access level is being denied in the exclusionary protection, all
  * the access levels for the matching users, files, and IP addresses are denied.
- * <p>
  *
  * <pre>
  * Protections0: super user p4java * //depot/...
@@ -45,235 +42,238 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ProtectionEntry extends MapEntry implements IProtectionEntry {
 
-  /**
-   * The protection mode for this entry. The permission level or right being
-   * granted or denied. Each permission level includes all the permissions
-   * above it, except for 'review'. Each permission only includes the specific
-   * right and no lesser rights. This approach enables you to deny individual
-   * rights without having to re-grant lesser rights. Modes prefixed by '='
-   * are rights. All other modes are permission levels.
-   */
-  private String mode = null;
+	/**
+	 * The protection mode for this entry. The permission level or right being
+	 * granted or denied. Each permission level includes all the permissions
+	 * above it, except for 'review'. Each permission only includes the specific
+	 * right and no lesser rights. This approach enables you to deny individual
+	 * rights without having to re-grant lesser rights. Modes prefixed by '='
+	 * are rights. All other modes are permission levels.
+	 */
+	private String mode = null;
 
-  /**
-   * If true, this protection entry applies to a group.
-   */
-  private boolean group = false;
+	/**
+	 * If true, this protection entry applies to a group.
+	 */
+	private boolean group = false;
 
-  /**
-   * The IP address of a client host; can include wildcards.
-   */
-  private String host = null;
+	/**
+	 * The IP address of a client host; can include wildcards.
+	 */
+	private String host = null;
 
-  /**
-   * A Perforce group or user name; can include wildcards.
-   */
-  private String name = null;
+	/**
+	 * A Perforce group or user name; can include wildcards.
+	 */
+	private String name = null;
 
-  /**
-   * Default constructor -- sets all fields to null, zero, or false.
-   */
-  public ProtectionEntry() {
-    super();
-  }
+	/**
+	 * Default constructor -- sets all fields to null, zero, or false.
+	 */
+	public ProtectionEntry() {
+		super();
+	}
 
-  /**
-   * Explicit-value constructor.
-   */
-  public ProtectionEntry(final int order,
-                         final String mode,
-                         final boolean group,
-                         final String host,
-                         final String name,
-                         final String path,
-                         final boolean pathExcluded) {
+	/**
+	 * Explicit-value constructor.
+	 *
+	 * @param order        order
+	 * @param mode         mode
+	 * @param group        group
+	 * @param host         host
+	 * @param name         name
+	 * @param path         path
+	 * @param pathExcluded pathExcluded
+	 */
+	public ProtectionEntry(final int order, final String mode, final boolean group, final String host, final String name, final String path, final boolean pathExcluded) {
 
-    super(order, null);
+		super(order, null);
 
-    this.mode = mode;
-    this.group = group;
-    this.host = host;
-    this.name = name;
-    if (isNotBlank(path)) {
-      String[] entries = parseViewMappingString(quoteWhitespaceString(path));
-      type = EntryType.fromString(entries[0]);
-      left = stripTypePrefix(entries[0]);
-      right = entries[1];
-    }
-    left = quoteWhitespaceString(left);
+		this.mode = mode;
+		this.group = group;
+		this.host = host;
+		this.name = name;
+		if (isNotBlank(path)) {
+			String[] entries = parseViewMappingString(quoteWhitespaceString(path));
+			type = EntryType.fromString(entries[0]);
+			left = stripTypePrefix(entries[0]);
+			right = entries[1];
+		}
+		left = quoteWhitespaceString(left);
 
-    if (pathExcluded) {
-      type = EntryType.EXCLUDE;
-    }
-  }
+		if (pathExcluded) {
+			type = EntryType.EXCLUDE;
+		}
+	}
 
-  /**
-   * Constructs a ProtectionEntry from the passed-in map; this map
-   * must have come from a Perforce IServer method call or it may fail.
-   * If map is null, equivalent to calling the default constructor.
-   */
+	/**
+	 * Constructs a ProtectionEntry from the passed-in map; this map
+	 * must have come from a Perforce IServer method call or it may fail.
+	 * If map is null, equivalent to calling the default constructor.
+	 *
+	 * @param map   map
+	 * @param order order
+	 */
+	public ProtectionEntry(final Map<String, Object> map, final int order) {
+		super(order, null);
 
-  public ProtectionEntry(final Map<String, Object> map,
-                         final int order) {
-    super(order, null);
+		if (nonNull(map)) {
+			host = parseString(map, HOST);
+			String pathStr = parseString(map, DEPOT_FILE);
+			if (isNotBlank(pathStr)) {
+				String[] entries = parseViewMappingString(quoteWhitespaceString(pathStr));
+				type = EntryType.fromString(entries[0]);
+				left = stripTypePrefix(entries[0]);
+				right = entries[1];
+			}
+			left = quoteWhitespaceString(left);
+			mode = parseString(map, PERM);
+			name = parseString(map, USER);
 
-    if (nonNull(map)) {
-      host = parseString(map, HOST);
-      String pathStr = parseString(map, DEPOT_FILE);
-      if (isNotBlank(pathStr)) {
-        String[] entries = parseViewMappingString(quoteWhitespaceString(pathStr));
-        type = EntryType.fromString(entries[0]);
-        left = stripTypePrefix(entries[0]);
-        right = entries[1];
-      }
-      left = quoteWhitespaceString(left);
-      mode = parseString(map, PERM);
-      name = parseString(map, USER);
+			group = map.containsKey(IS_GROUP);
+			if (map.containsKey(UNMAP)) {
+				type = EntryType.EXCLUDE;
+			}
+		}
+	}
 
-      group = map.containsKey(IS_GROUP);
-      if (map.containsKey(UNMAP)) {
-        type = EntryType.EXCLUDE;
-      }
-    }
-  }
+	@Override
+	public String getHost() {
+		return host;
+	}
 
-  @Override
-  public String getHost() {
-    return host;
-  }
+	@Override
 
-  @Override
+	public String getMode() {
+		return mode;
+	}
 
-  public String getMode() {
-    return mode;
-  }
+	@Override
 
-  @Override
+	public String getName() {
+		return name;
+	}
 
-  public String getName() {
-    return name;
-  }
+	@Override
 
-  @Override
+	public String getPath() {
+		if (isPathExcluded()) {
+			return addExclude(left);
+		} else if (type == EntryType.OVERLAY) {
+			return addOverlay(left);
+		} else {
+			return left;
+		}
+	}
 
-  public String getPath() {
-    if (isPathExcluded()) {
-      return addExclude(left);
-    } else if (type == EntryType.OVERLAY) {
-      return addOverlay(left);
-    } else {
-      return left;
-    }
-  }
+	@Override
 
-  @Override
+	public boolean isGroup() {
+		return this.group;
+	}
 
-  public boolean isGroup() {
-    return this.group;
-  }
+	@Override
 
-  @Override
+	public void setGroup(boolean group) {
+		this.group = group;
+	}
 
-  public void setGroup(boolean group) {
-    this.group = group;
-  }
+	@Override
 
-  @Override
+	public void setHost(String host) {
+		this.host = host;
+	}
 
-  public void setHost(String host) {
-    this.host = host;
-  }
+	@Override
 
-  @Override
+	public void setMode(String mode) {
+		this.mode = mode;
+	}
 
-  public void setMode(String mode) {
-    this.mode = mode;
-  }
+	@Override
 
-  @Override
+	public void setName(String name) {
+		this.name = name;
+	}
 
-  public void setName(String name) {
-    this.name = name;
-  }
+	@Override
 
-  @Override
+	public void setPath(String path) {
+		left = quoteWhitespaceString(path);
+	}
 
-  public void setPath(String path) {
-    left = quoteWhitespaceString(path);
-  }
+	@Override
 
-  @Override
+	public boolean isPathExcluded() {
+		return type == EntryType.EXCLUDE;
+	}
 
-  public boolean isPathExcluded() {
-    return type == EntryType.EXCLUDE;
-  }
+	@Override
 
-  @Override
+	public void setPathExcluded(boolean pathExcluded) {
+		if (pathExcluded) {
+			type = EntryType.EXCLUDE;
+		}
+	}
 
-  public void setPathExcluded(boolean pathExcluded) {
-    if (pathExcluded) {
-      type = EntryType.EXCLUDE;
-    }
-  }
+	/**
+	 * Add exclude ('-') to a string. If it is a double quoted string, add the
+	 * exclude immediately after the first double quote char.
+	 *
+	 * @param str with quotes
+	 * @return exclude in quoted str
+	 */
+	private String addExclude(String str) {
+		return buildDiffSyntaxString(str, "-");
+	}
 
-  /**
-   * Add exclude ('-') to a string. If it is a double quoted string, add the
-   * exclude immediately after the first double quote char.
-   *
-   * @param str with quotes
-   * @return exclude in quoted str
-   */
-  private String addExclude(String str) {
-    return buildDiffSyntaxString(str, "-");
-  }
+	/**
+	 * Add overlay ('+') to a string. If it is a double quoted string, add the
+	 * overlay immediately after the first double quote char.
+	 *
+	 * @param str with quotes
+	 * @return overlay in quoted str
+	 */
+	private String addOverlay(String str) {
+		return buildDiffSyntaxString(str, "+");
+	}
 
-  /**
-   * Add overlay ('+') to a string. If it is a double quoted string, add the
-   * overlay immediately after the first double quote char.
-   *
-   * @param str with quotes
-   * @return overlay in quoted str
-   */
-  private String addOverlay(String str) {
-    return buildDiffSyntaxString(str, "+");
-  }
+	private String buildDiffSyntaxString(String str, String syntax) {
+		if (isNotBlank(str)) {
+			if (str.startsWith("\"")) {
+				str = "\"" + syntax + str.substring(1);
+			} else {
+				str = syntax + str;
+			}
+		}
+		return str;
+	}
 
-  private String buildDiffSyntaxString(String str, String syntax) {
-    if (isNotBlank(str)) {
-      if (str.startsWith("\"")) {
-        str = "\"" + syntax + str.substring(1);
-      } else {
-        str = syntax + str;
-      }
-    }
-    return str;
-  }
-
-  /**
-   * Returns string representation of the protection entry.
-   *
-   * @return the string representation of the protection entry
-   */
-  @Override
-  public String toString() {
-    StringBuilder sb = new StringBuilder();
-    if (isNotBlank(mode)) {
-      sb.append(mode);
-    }
-    if (isGroup()) {
-      sb.append(SPACE).append("group");
-    } else {
-      sb.append(SPACE).append(USER);
-    }
-    if (isNotBlank(name)) {
-      sb.append(SPACE).append(name);
-    }
-    if (isNotBlank(host)) {
-      sb.append(SPACE).append(host);
-    }
-    if (isNotBlank(left)) {
-      sb.append(SPACE).append(getPath());
-    }
-    return sb.toString();
-  }
+	/**
+	 * Returns string representation of the protection entry.
+	 *
+	 * @return the string representation of the protection entry
+	 */
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		if (isNotBlank(mode)) {
+			sb.append(mode);
+		}
+		if (isGroup()) {
+			sb.append(SPACE).append("group");
+		} else {
+			sb.append(SPACE).append(USER);
+		}
+		if (isNotBlank(name)) {
+			sb.append(SPACE).append(name);
+		}
+		if (isNotBlank(host)) {
+			sb.append(SPACE).append(host);
+		}
+		if (isNotBlank(left)) {
+			sb.append(SPACE).append(getPath());
+		}
+		return sb.toString();
+	}
 }

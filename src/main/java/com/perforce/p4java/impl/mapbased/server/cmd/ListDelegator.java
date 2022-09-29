@@ -37,14 +37,13 @@ public class ListDelegator extends BaseDelegator implements IListDelegator {
 	 *
 	 * @param fileSpecs List of file paths to be labeled
 	 * @param options   Options as required by the command p4 list
-	 * @return
-	 * @throws P4JavaException
+	 * @return ListData
+	 * @throws P4JavaException on error
 	 */
 	@Override
 	public ListData getListData(List<IFileSpec> fileSpecs, ListOptions options) throws P4JavaException {
 
-		Map<String, Object>[] resultMap = server.execMapCmd(LIST.toString(),
-				Parameters.processParameters(options, fileSpecs, server), null);
+		Map<String, Object>[] resultMap = server.execMapCmd(LIST.toString(), Parameters.processParameters(options, fileSpecs, server), null);
 
 		if (!nonNull(resultMap)) {
 			return null;

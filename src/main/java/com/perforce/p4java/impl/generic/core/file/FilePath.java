@@ -62,23 +62,30 @@ public class FilePath {
 	 */
 	public FilePath() {
 	}
-	
+
 	/**
 	 * Construct a FilePath from explicit type and path string values. If the
 	 * passed-in pathString contains version / date / changelist information,
 	 * it is stripped from the path and ignored.
+	 *
+	 * @param pathType   pathType
+	 * @param pathString pathString
 	 */
 	public FilePath(PathType pathType, String pathString) {
 		this(pathType, pathString, false);
 	}
-	
+
 	/**
 	 * Construct a FilePath from explicit type and path string values. If the
-	 * ignoreAnnotations parameter is false and if the 
+	 * ignoreAnnotations parameter is false and if the
 	 * passed-in pathString contains version / date / changelist information,
 	 * it is stripped from the path and ignored; otherwise the pathString
 	 * parameter is used-as is (allowing for embedded "#" and "@" characters,
 	 * for instance).
+	 *
+	 * @param pathType          pathType
+	 * @param pathString        pathString
+	 * @param ignoreAnnotations ignoreAnnotations
 	 */
 	public FilePath(PathType pathType, String pathString, boolean ignoreAnnotations) {
 		this.pathType = pathType;
@@ -88,13 +95,15 @@ public class FilePath {
 			this.pathString = PathAnnotations.stripAnnotations(pathString);
 		}
 	}
-	
+
 	/**
 	 * Annotate this path with the passed-in Perforce file metadata
 	 * annotations. If either or both this.pathString and annotations
 	 * is null, returns this.pathString.
+	 *
+	 * @param annotations annotations
+	 * @return path string
 	 */
-	
 	public String annotate(PathAnnotations annotations) {
 		if ((annotations != null) && (this.pathString != null)) {
 			return this.pathString + annotations.toString();
@@ -102,7 +111,11 @@ public class FilePath {
 		
 		return this.pathString;
 	}
-	
+
+	/**
+	 * @param fileSpec file spec
+	 * @return annotated path string
+	 */
 	public String annotate(IFileSpec fileSpec) {
 		if ((fileSpec != null) && (this.pathString != null)) {
 			return this.pathString + new PathAnnotations(fileSpec);

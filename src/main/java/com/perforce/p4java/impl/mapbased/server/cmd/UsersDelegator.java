@@ -50,13 +50,8 @@ public class UsersDelegator extends BaseDelegator implements IUsersDelegator {
 
         return buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, IUserSummary>() {
-                    @Override
-                    public IUserSummary apply(Map map) {
-                        return new UserSummary(map, true);
-                    }
-                }
-        );
+				map -> new UserSummary(map, true)
+		);
     }
 
     @Override

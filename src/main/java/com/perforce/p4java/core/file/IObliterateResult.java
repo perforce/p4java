@@ -14,42 +14,42 @@ import java.util.List;
 public interface IObliterateResult {
 	
 	/**
-	 * Get the list of filespecs purged
+	 * @return the list of filespecs purged
 	 */
 	List<IFileSpec> getFileSpecs();
 
 	/**
-	 * Get the number of integration records added
+	 * @return the number of integration records added
 	 */
 	int getIntegrationRecAdded();
 	
 	/**
-	 * Get the number of integration records deleted
+	 * @return the number of integration records deleted
 	 */
 	int getLabelRecDeleted();
 
 	/**
-	 * Get the number of client records deleted
+	 * @return the number of client records deleted
 	 */
 	int getClientRecDeleted();
 
 	/**
-	 * Get the number of integration records deleted
+	 * @return the number of integration records deleted
 	 */
 	int getIntegrationRecDeleted();
 
 	/**
-	 * Get the number of working records deleted
+	 * @return the number of working records deleted
 	 */
 	int getWorkingRecDeleted();
 
 	/**
-	 * Get the number of revision records deleted
+	 * @return the number of revision records deleted
 	 */
 	int getRevisionRecDeleted();
 	
 	/**
-	 * Is report only
+	 * @return true, if report only
 	 */
 	boolean isReportOnly();
 }

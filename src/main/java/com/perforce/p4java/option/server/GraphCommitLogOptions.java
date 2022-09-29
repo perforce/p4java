@@ -11,7 +11,6 @@ import java.util.List;
  * that forms the options part of the 'p4 graph log' command
  * <p>
  * Usage: log -n repo [ -u user -A date-B date -m N -N N -X N ] [ commit... ]
- * <p>
  */
 public class GraphCommitLogOptions extends Options {
 
@@ -68,16 +67,15 @@ public class GraphCommitLogOptions extends Options {
 	/**
 	 * Constructs a GraphCommitLogOptions with the given arguments
 	 *
-	 * @param repo - repo against which the 'p4 graph log' command is issued
-	 * @param maxResults - maximum number of items to be returned by the graph log command
-	 * @param startDate - Date starting from when the commit logs will be fetched
-	 * @param endDate - Date used as the end date up to when the commit logs will be fetched
+	 * @param repo               - repo against which the 'p4 graph log' command is issued
+	 * @param maxResults         - maximum number of items to be returned by the graph log command
+	 * @param startDate          - Date starting from when the commit logs will be fetched
+	 * @param endDate            - Date used as the end date up to when the commit logs will be fetched
 	 * @param minNumberOfParents - lower bound for the number of parents a commit is expected to have as part of the fetch
 	 * @param maxNumberOfParents - upper bound for the number of parents a commit is expected to have as part of the fetch
-	 * @param commitValue - Additional commit SHA values that can be used to filter the search
+	 * @param commitValue        - Additional commit SHA values that can be used to filter the search
 	 */
-	public GraphCommitLogOptions(String repo, int maxResults, String startDate, String endDate,
-	                             int minNumberOfParents, int maxNumberOfParents, String... commitValue) {
+	public GraphCommitLogOptions(String repo, int maxResults, String startDate, String endDate, int minNumberOfParents, int maxNumberOfParents, String... commitValue) {
 		this.repo = repo;
 		this.maxResults = maxResults;
 		this.startDate = startDate;
@@ -94,13 +92,11 @@ public class GraphCommitLogOptions extends Options {
 	 *               possible to ignore it and do the best you can with what you've
 	 *               got...
 	 * @return list of options strings associated with this Option
-	 * @throws OptionsException
+	 * @throws OptionsException on error
 	 */
 	@Override
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.repo,
-				this.user, this.maxResults, this.startDate,
-				this.endDate, this.minNumberOfParents, this.maxNumberOfParents);
+		this.optionList = this.processFields(OPTIONS_SPECS, this.repo, this.user, this.maxResults, this.startDate, this.endDate, this.minNumberOfParents, this.maxNumberOfParents);
 		if (commitValue != null && commitValue.length > 0) {
 			for (String commitValueItem : commitValue) {
 				this.optionList.add(commitValueItem);
@@ -243,7 +239,7 @@ public class GraphCommitLogOptions extends Options {
 	}
 
 	/**
-	 * @return  the user of the commit
+	 * @return the user of the commit
 	 */
 	public String getUser() {
 		return this.user = user;

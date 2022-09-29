@@ -9,7 +9,6 @@ import com.perforce.p4java.exception.FileEncoderException;
  * This class handles the combination of the data fork, resource fork and other
  * entries into an AppleSingle/Double file.
  * <p>
- * 
  * Note that if it is an AppleDouble, the data fork is a separate file external
  * to this file.
  */
@@ -17,8 +16,9 @@ public class AppleFileEncoder extends AppleFile {
 
 	/**
 	 * Instantiates a new apple file decoder.
-	 * 
-	 * @throws FileEncoderException 
+	 *
+	 * @param fileFormat fileFormat
+	 * @throws FileEncoderException on error
 	 */
 	public AppleFileEncoder(FileFormat fileFormat) throws FileEncoderException {
 		if (fileFormat == null) {
@@ -32,9 +32,8 @@ public class AppleFileEncoder extends AppleFile {
 	/**
 	 * Combine the data fork, resource fork and other entries into an
 	 * AppleSingle/Double file.
-	 * 
-	 * @throws FileEncoderException
-	 *             the file encoder exception
+	 *
+	 * @throws FileEncoderException the file encoder exception
 	 */
 	@SuppressWarnings("unused")
 	public void combine() throws FileEncoderException {

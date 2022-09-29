@@ -41,7 +41,7 @@ public class GraphRevListOptions extends Options {
 	 *               possible to ignore it and do the best you can with what you've
 	 *               got...
 	 * @return list of options strings associated with this Option.
-	 * @throws OptionsException
+	 * @throws OptionsException on error
 	 */
 	@Override
 	public List<String> processOptions(IServer server) throws OptionsException {

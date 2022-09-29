@@ -59,6 +59,7 @@ public class CountersDelegator extends BaseDelegator implements ICountersDelegat
         }
     }
 
+	@Deprecated
     @Override
     public Map<String, String> getCounters(final CounterOptions opts) throws P4JavaException {
         List<Map<String, Object>> resultMaps = execMapCmdList(

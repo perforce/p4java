@@ -80,7 +80,7 @@ public class RevertFilesOptions extends Options {
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
 	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
@@ -89,6 +89,7 @@ public class RevertFilesOptions extends Options {
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
 	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public RevertFilesOptions(String... options) {
@@ -97,9 +98,13 @@ public class RevertFilesOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param noUpdate            noUpdate
+	 * @param changeListId        changeListId
+	 * @param revertOnlyUnchanged revertOnlyUnchanged
+	 * @param noClientRefresh     noClientRefresh
 	 */
-	public RevertFilesOptions(boolean noUpdate, int changeListId,
-			boolean revertOnlyUnchanged, boolean noClientRefresh) {
+	public RevertFilesOptions(boolean noUpdate, int changeListId, boolean revertOnlyUnchanged, boolean noClientRefresh) {
 		super();
 		this.noUpdate = noUpdate;
 		this.changelistId = changeListId;
@@ -111,14 +116,7 @@ public class RevertFilesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-								this.noUpdate,
-								this.changelistId,
-								this.revertOnlyUnchanged,
-								this.noClientRefresh,
-								this.wipeAddFiles,
-								this.revertStreamSpec,
-								this.revertFileList);
+		this.optionList = this.processFields(OPTIONS_SPECS, this.noUpdate, this.changelistId, this.revertOnlyUnchanged, this.noClientRefresh, this.wipeAddFiles, this.revertStreamSpec, this.revertFileList);
 		return this.optionList;
 	}
 

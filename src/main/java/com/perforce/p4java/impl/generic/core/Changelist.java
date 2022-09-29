@@ -26,6 +26,7 @@ import com.perforce.p4java.impl.mapbased.MapKeys;
 import com.perforce.p4java.impl.mapbased.server.Parameters;
 import com.perforce.p4java.impl.mapbased.server.Server;
 import com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder;
+import com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.option.changelist.SubmitOptions;
 import com.perforce.p4java.option.server.ChangelistOptions;
@@ -63,7 +64,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	 * Return a new local Changelist object with default values. Default values
 	 * for all fields not mentioned in the parameter list are as given for the
 	 * default Changelist and ChangelistSummary default constructors; the main
-	 * exception is the user name, which is filled in with the current user name.<p>
+	 * exception is the user name, which is filled in with the current user name.
 	 * <p>
 	 * Note that this object is a local object only -- you must subsequently call
 	 * the client's createChangelist method to also create it on the server (or use
@@ -75,29 +76,18 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	 *                    Changelist.DEFAULT_DESCRIPTION.
 	 * @return new local Changelist object.
 	 */
-	public static Changelist newChangelist(IServer server, String clientName,
-	                                       String description) {
+	public static Changelist newChangelist(IServer server, String clientName, String description) {
 		if (server == null) {
 			throw new NullPointerError("null server passed to Changelist.newChangelist");
 		}
 		if (!(server instanceof Server)) {
-			throw new P4JavaError(
-					"IOptionsServer passed to Changelist.newChangelist does not implement 'Server' class");
+			throw new P4JavaError("IOptionsServer passed to Changelist.newChangelist does not implement 'Server' class");
 		}
 		if (clientName == null) {
 			throw new NullPointerError("null client name passed to Changelist.newChangelist");
 		}
 
-		return new Changelist(
-				IChangelist.UNKNOWN,
-				clientName,
-				server.getUserName(),
-				ChangelistStatus.NEW,
-				null,
-				description == null ? DEFAULT_DESCRIPTION : description,
-				false,
-				(Server) server
-		);
+		return new Changelist(IChangelist.UNKNOWN, clientName, server.getUserName(), ChangelistStatus.NEW, null, description == null ? DEFAULT_DESCRIPTION : description, false, (Server) server);
 	}
 
 	/**
@@ -119,15 +109,14 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 			throw new NullPointerError("null client passed to Changelist.newChangelist");
 		}
 		if (client.getServer() == null) {
-			throw new NullPointerError(
-					"client has no server associated with it in Changelist.newChangelist");
+			throw new NullPointerError("client has no server associated with it in Changelist.newChangelist");
 		}
 
 		return newChangelist(client.getServer(), client.getName(), description);
 	}
 
 	/**
-	 * Default constructor; calls default superclass constructor.<p>
+	 * Default constructor; calls default superclass constructor.
 	 * <p>
 	 * Actual users of this constructor need to ensure that the super-super-class
 	 * ServeResource fields are set appropriately after calling this constructor.
@@ -137,16 +126,23 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	}
 
 	/**
-	 * Construct a changelist implementation given an explicit set of initial field values.<p>
+	 * Construct a changelist implementation given an explicit set of initial field values.
 	 * <p>
 	 * This constructor requires a Server object as its serverImpl parameter;
 	 * note that any server object returned by the ServerFactory will work, as long
 	 * as it's downcast to Server. If it doesn't cast cleanly, then it is not
 	 * suitable for use here.
+	 *
+	 * @param id          id
+	 * @param clientId    client
+	 * @param username    user name
+	 * @param status      status
+	 * @param date        date
+	 * @param description description
+	 * @param shelved     shelved
+	 * @param serverImpl  server
 	 */
-	public Changelist(int id, String clientId, String username,
-	                  ChangelistStatus status, Date date, String description,
-	                  boolean shelved, Server serverImpl) {
+	public Changelist(int id, String clientId, String username, ChangelistStatus status, Date date, String description, boolean shelved, Server serverImpl) {
 		super(false, true, true, true, serverImpl);
 		this.id = id;
 		this.clientId = clientId;
@@ -159,16 +155,24 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	}
 
 	/**
-	 * Construct a changelist implementation given an explicit set of initial field values.<p>
+	 * Construct a changelist implementation given an explicit set of initial field values.
 	 * <p>
 	 * This constructor requires a Server object as its serverImpl parameter;
 	 * note that any server object returned by the ServerFactory will work, as long
 	 * as it's downcast to Server. If it doesn't cast cleanly, then it is not
 	 * suitable for use here.
+	 *
+	 * @param id          id
+	 * @param clientId    client
+	 * @param username    user name
+	 * @param status      status
+	 * @param date        date
+	 * @param description description
+	 * @param shelved     shelved
+	 * @param serverImpl  server
+	 * @param visibility  visibility
 	 */
-	public Changelist(int id, String clientId, String username,
-	                  ChangelistStatus status, Date date, String description,
-	                  boolean shelved, Server serverImpl, Visibility visibility) {
+	public Changelist(int id, String clientId, String username, ChangelistStatus status, Date date, String description, boolean shelved, Server serverImpl, Visibility visibility) {
 		super(false, true, true, true, serverImpl);
 		this.id = id;
 		this.clientId = clientId;
@@ -184,22 +188,24 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	/**
 	 * Construct a new Changelist using the passed-in changelist as a template.
 	 * If summary and server are not null and refresh is true, perform a refresh
-	 * from the Perforce server to initialize the full changelist.<p>
+	 * from the Perforce server to initialize the full changelist.
 	 * <p>
 	 * If changelist is null, this is equivalent to calling the default constructor.
 	 *
+	 * @param summary              summary
+	 * @param server               server
+	 * @param refresh              refresh
 	 * @throws ConnectionException if the Perforce server is unreachable or is not connected.
 	 * @throws RequestException    if the Perforce server encounters an error during its processing of
 	 *                             the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-	public Changelist(IChangelistSummary summary, IOptionsServer server, boolean refresh)
-			throws ConnectionException, RequestException, AccessException {
+	public Changelist(IChangelistSummary summary, IOptionsServer server, boolean refresh) throws ConnectionException, RequestException, AccessException {
 		super(summary);
 		super.setRefreshable(true);
 		super.updateable = true;
 		super.server = server;
-		//Set server impl if specified server is an impl
+		// Set server impl if specified server is an impl
 		if (server instanceof Server) {
 			this.serverImpl = server;
 		}
@@ -209,20 +215,22 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	}
 
 	@Deprecated
-	public Changelist(IChangelistSummary summary, IServer server, boolean refresh)
-			throws ConnectionException, RequestException, AccessException {
-		this(summary, (IOptionsServer)server, refresh);
+	public Changelist(IChangelistSummary summary, IServer server, boolean refresh) throws ConnectionException, RequestException, AccessException {
+		this(summary, (IOptionsServer) server, refresh);
 	}
 
 	/**
 	 * Construct a changelist impl from the passed-in map and serverImpl parameters.
 	 * Calls super(map, false, serverImpl) and additionally sets job ids associated
-	 * with this changelist, if any.<p>
+	 * with this changelist, if any.
 	 * <p>
 	 * This constructor requires a Server object as its serverImpl parameter;
 	 * note that any server object returned by the ServerFactory will work, as long
 	 * as it's downcast to Server. If it doesn't cast cleanly, then it is not
 	 * suitable for use here.
+	 *
+	 * @param map        map
+	 * @param serverImpl server
 	 */
 	public Changelist(Map<String, Object> map, IOptionsServer serverImpl) {
 		super(map, false, serverImpl);
@@ -249,7 +257,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 
 	@Deprecated
 	public Changelist(Map<String, Object> map, IServer serverImpl) {
-		this(map, (IOptionsServer)serverImpl);
+		this(map, (IOptionsServer) serverImpl);
 	}
 
 	/**
@@ -324,15 +332,11 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		this.serverImpl = serverImpl;
 	}
 
-	public List<IFileSpec> getFiles(boolean refresh)
-			throws ConnectionException, RequestException,
-			AccessException {
+	public List<IFileSpec> getFiles(boolean refresh) throws ConnectionException, RequestException, AccessException {
 		return getFiles(refresh, false);
 	}
 
-	public List<IFileSpec> getFiles(boolean refresh, boolean bypassServer)
-			throws ConnectionException, RequestException,
-			AccessException {
+	public List<IFileSpec> getFiles(boolean refresh, boolean bypassServer) throws ConnectionException, RequestException, AccessException {
 
 		if (!refresh && (this.fileSpecs != null)) {
 			return this.fileSpecs;
@@ -346,8 +350,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		}
 
 		if (this.serverImpl == null) {
-			throw new RequestException(
-					"Changelist not associated with a Perforce server");
+			throw new RequestException("Changelist not associated with a Perforce server");
 		}
 
 		// We need to special-case the default changelist:
@@ -356,8 +359,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 			// Use the "opened" command and list all files for this client
 			// in the default changelist. This can be expensive... (HR)
 
-			List<IFileSpec> openList = this.serverImpl.getOpenedFiles(
-					null, false, this.clientId, 0, 0);
+			List<IFileSpec> openList = this.serverImpl.getOpenedFiles(null, false, this.clientId, 0, 0);
 			List<IFileSpec> defList = new ArrayList<IFileSpec>();
 			if (openList != null) {
 				for (IFileSpec fSpec : openList) {
@@ -374,15 +376,11 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		return this.fileSpecs;
 	}
 
-	public List<IExtendedFileSpec> getExtendedFiles(boolean refresh)
-			throws ConnectionException, RequestException,
-			AccessException {
+	public List<IExtendedFileSpec> getExtendedFiles(boolean refresh) throws ConnectionException, RequestException, AccessException {
 		return getExtendedFiles(refresh, false);
 	}
 
-	public List<IExtendedFileSpec> getExtendedFiles(boolean refresh, boolean bypassServer)
-			throws ConnectionException, RequestException,
-			AccessException {
+	public List<IExtendedFileSpec> getExtendedFiles(boolean refresh, boolean bypassServer) throws ConnectionException, RequestException, AccessException {
 
 		if (!refresh && (this.extendedFileSpecs != null)) {
 			return this.extendedFileSpecs;
@@ -396,8 +394,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		}
 
 		if (this.serverImpl == null) {
-			throw new RequestException(
-					"Changelist not associated with a Perforce server");
+			throw new RequestException("Changelist not associated with a Perforce server");
 		}
 
 		// We need to special-case the default changelist:
@@ -406,13 +403,12 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 			// Use the "opened" command and list all files for this client
 			// in the default changelist. This can be expensive... (HR)
 
-			List<IFileSpec> openList = this.serverImpl.getOpenedFiles(
-					null, false, this.clientId, 0, 0);
+			List<IFileSpec> openList = this.serverImpl.getOpenedFiles(null, false, this.clientId, 0, 0);
 			List<IExtendedFileSpec> defList = new ArrayList<>();
 			if (openList != null) {
 				for (IFileSpec fSpec : openList) {
 					if (fSpec.getChangelistId() == IChangelist.DEFAULT) {
-						defList.add((ExtendedFileSpec)fSpec);
+						defList.add((ExtendedFileSpec) fSpec);
 					}
 				}
 			}
@@ -427,8 +423,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	/**
 	 * @see com.perforce.p4java.core.IChangelist#getDiffs(com.perforce.p4java.core.file.DiffType)
 	 */
-	public InputStream getDiffs(DiffType diffType)
-			throws ConnectionException, RequestException, AccessException {
+	public InputStream getDiffs(DiffType diffType) throws ConnectionException, RequestException, AccessException {
 		if (this.serverImpl == null) {
 			throw new RequestException("Changelist not associated with a Perforce server");
 		}
@@ -450,8 +445,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	 * @see com.perforce.p4java.core.IChangelist#getJobIds()
 	 */
 
-	public List<String> getJobIds()
-			throws ConnectionException, RequestException, AccessException {
+	public List<String> getJobIds() throws ConnectionException, RequestException, AccessException {
 		List<String> idList = new ArrayList<String>();
 
 		// Don't do this if we're a new (or unknown) changelist:
@@ -478,8 +472,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	/**
 	 * @see com.perforce.p4java.core.IChangelist#getCachedJobIdList()
 	 */
-	public List<String> getCachedJobIdList()
-			throws ConnectionException, RequestException, AccessException {
+	public List<String> getCachedJobIdList() throws ConnectionException, RequestException, AccessException {
 		if (this.jobIds != null) {
 			return this.jobIds;
 		}
@@ -491,8 +484,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	 * @see com.perforce.p4java.core.IChangelist#getJobs()
 	 */
 
-	public List<IJob> getJobs()
-			throws ConnectionException, RequestException, AccessException {
+	public List<IJob> getJobs() throws ConnectionException, RequestException, AccessException {
 		List<String> idList = getJobIds();
 
 		List<IJob> jobList = new ArrayList<IJob>();
@@ -510,13 +502,9 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 	 * @see com.perforce.p4java.core.IChangelist#submit(boolean, java.util.List, java.lang.String)
 	 */
 
-	public List<IFileSpec> submit(boolean reOpen, List<String> jobIds, String jobStatus)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IFileSpec> submit(boolean reOpen, List<String> jobIds, String jobStatus) throws ConnectionException, RequestException, AccessException {
 		try {
-			return submit(new SubmitOptions()
-					.setJobIds(jobIds)
-					.setJobStatus(jobStatus)
-					.setReOpen(reOpen));
+			return submit(new SubmitOptions().setJobIds(jobIds).setJobStatus(jobStatus).setReOpen(reOpen));
 		} catch (ConnectionException exc) {
 			throw exc;
 		} catch (AccessException exc) {
@@ -538,11 +526,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		}
 
 		Map<String, Object> inMap = getInMap(opts);
-		List<Map<String, Object>> retMaps = this.serverImpl.execMapCmdList(
-				CmdSpec.SUBMIT,
-				Parameters.processParameters(
-						opts, null, "-i", this.serverImpl),
-				inMap);
+		List<Map<String, Object>> retMaps = this.serverImpl.execMapCmdList(CmdSpec.SUBMIT, Parameters.processParameters(opts, null, "-i", this.serverImpl), inMap);
 
 		List<IFileSpec> fileList = new ArrayList<IFileSpec>();
 
@@ -556,8 +540,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 				if (map.get("submittedChange") != null) {
 					this.id = new Integer((String) map.get("submittedChange"));
 					this.status = ChangelistStatus.SUBMITTED;
-					fileList.add(new FileSpec(FileSpecOpStatus.INFO,
-							"Submitted as change " + this.id));
+					fileList.add(new FileSpec(FileSpecOpStatus.INFO, "Submitted as change " + this.id));
 				} else if (map.get("locked") != null) {
 					// disregard this message for now -- FIXME -- HR
 				} else {
@@ -580,20 +563,13 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		}
 
 		Map<String, Object> inMap = getInMap(opts);
-		this.serverImpl.execStreamingMapCommand(
-				CmdSpec.SUBMIT.toString(),
-				Parameters.processParameters(
-						opts, null, "-i", this.serverImpl),
-				inMap,
-				callback,
-				key);
+		this.serverImpl.execStreamingMapCommand(CmdSpec.SUBMIT.toString(), Parameters.processParameters(opts, null, "-i", this.serverImpl), inMap, callback, key);
 	}
 
 	/**
 	 * @see com.perforce.p4java.core.IChangelist#submit(boolean)
 	 */
-	public List<IFileSpec> submit(boolean reOpen)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IFileSpec> submit(boolean reOpen) throws ConnectionException, RequestException, AccessException {
 		return submit(reOpen, null, null);
 	}
 
@@ -613,7 +589,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		inMap.put("User", this.username);
 		inMap.put("Description", this.description);
 
-		if (this.changelistStream != null){
+		if (this.changelistStream != null) {
 			inMap.put("Stream", this.changelistStream);
 		}
 
@@ -663,8 +639,7 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		return inMap;
 	}
 
-	public void refresh()
-			throws ConnectionException, RequestException, AccessException {
+	public void refresh() throws ConnectionException, RequestException, AccessException {
 		// Basically, just ask the server about us and fill in the blanks... (and what
 		// a waste of a perfectly good IChangelist object :-) ).
 		if (this.serverImpl == null) {
@@ -725,14 +700,11 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 		}
 
 		try {
-			List<Map<String, Object>> retMaps = this.serverImpl.execMapCmdList(CmdSpec.CHANGE,
-					Parameters.processParameters(
-							opts, null, new String[]{"-i"}, this.serverImpl),
-					InputMapper.map(this));
+			List<Map<String, Object>> retMaps = this.serverImpl.execMapCmdList(CmdSpec.CHANGE, Parameters.processParameters(opts, null, new String[]{"-i"}, this.serverImpl), InputMapper.map(this));
 
 			if (retMaps != null) {
 				for (Map<String, Object> map : retMaps) {
-					this.serverImpl.handleErrorStr(map);
+					ResultMapParser.handleErrorStr(map);
 				}
 			}
 		} catch (ConnectionException exc) {
@@ -748,9 +720,10 @@ public class Changelist extends ChangelistSummary implements IChangelist {
 
 	/**
 	 * @see com.perforce.p4java.core.IChangelist#updateOnServer(boolean)
+	 * @deprecated use update optionally followed by refresh()
 	 */
-	public void updateOnServer(boolean refresh)
-			throws ConnectionException, RequestException, AccessException {
+	@Deprecated
+	public void updateOnServer(boolean refresh) throws ConnectionException, RequestException, AccessException {
 		this.update();
 		if (refresh) {
 			this.refresh();

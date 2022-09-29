@@ -25,7 +25,7 @@ import java.nio.charset.Charset;
  * operations defined in ClientMerge. Modeled somewhat on the C++ API's
  * clientmerge3.cc object, but tuned more to our more limited purposes.
  * Also includes support for two-way merge, but this is currently less-well
- * exercised and tested.<p>
+ * exercised and tested.
  * <p>
  * Note: not particularly thread-safe, nor intended to be.
  */
@@ -98,12 +98,16 @@ public class ClientMergeState {
 	protected String baseDigest = null;
 
 	/**
+	 * @param clientPath          clientPath
 	 * @param externalStreamMerge set true if this is a merge from an external stream
+	 * @param clientType          clientType
+	 * @param clientLineEnding    clientLineEnding
+	 * @param resultType          resultType
+	 * @param resultLineEnding    resultLineEnding
 	 * @param tmpDir              the name of a suitable directory for creating temporary files in
+	 * @param charset             charset
 	 */
-	protected ClientMergeState(String clientPath, boolean externalStreamMerge,
-	                           RpcPerforceFileType clientType, ClientLineEnding clientLineEnding, RpcPerforceFileType resultType, ClientLineEnding resultLineEnding,
-	                           String tmpDir, Charset charset) {
+	protected ClientMergeState(String clientPath, boolean externalStreamMerge, RpcPerforceFileType clientType, ClientLineEnding clientLineEnding, RpcPerforceFileType resultType, ClientLineEnding resultLineEnding, String tmpDir, Charset charset) {
 		this.externalStreamMerge = externalStreamMerge;
 		this.clientPath = clientPath;
 		this.clientType = clientType;
@@ -112,8 +116,7 @@ public class ClientMergeState {
 		this.resultLineEnding = resultLineEnding;
 		this.charset = charset;
 		if (tmpDir == null) {
-			throw new NullPointerError(
-					"null tmpdir passed to ClientMergeState constructor");
+			throw new NullPointerError("null tmpdir passed to ClientMergeState constructor");
 		}
 		this.tmpDir = tmpDir;
 	}
@@ -123,11 +126,12 @@ public class ClientMergeState {
 	 * file is the original client file, and doesn't need opening. The rest
 	 * are opened as tmp files in the system tmp directory; this isn't exactly
 	 * the same as the C++ API's behaviour (which opens them in the target directory)
-	 * but it should be fairly safe.<p>
+	 * but it should be fairly safe.
 	 * <p>
 	 * Note that the file types for each file are copied from the C++ API usage;
 	 * I'm not entirely sure this arrangement always make sense...
 	 *
+	 * @param rpcConnection rpcConnection
 	 * @throws IOException if there's been a problem opening any of the files.
 	 */
 	protected void openMergeFiles(RpcConnection rpcConnection) throws IOException {

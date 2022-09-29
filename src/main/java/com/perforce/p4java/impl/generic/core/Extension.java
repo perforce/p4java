@@ -9,6 +9,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
+import java.util.stream.Collectors;
 
 public class Extension extends ExtensionSummary implements IExtension {
 	/**
@@ -78,8 +79,9 @@ public class Extension extends ExtensionSummary implements IExtension {
 				}
 
 				Object extAllowedGroups = map.get(MapKeys.EXTENSION_GROUPS_KEY);
-				if (extAllowedGroups != null) {
-					this.extAllowedGroups = (List<String>) extAllowedGroups;
+				if (extAllowedGroups instanceof List) {
+					List<?> unknown = (List<?>) extAllowedGroups;
+					this.extAllowedGroups = unknown.stream().map(String::valueOf).collect(Collectors.toList());
 				}
 
 				this.extP4USER = (String) map.get(MapKeys.EXTENSION_P4USER_KEY);

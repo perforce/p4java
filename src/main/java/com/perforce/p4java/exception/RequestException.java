@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.exception;
 
@@ -12,7 +12,7 @@ import com.perforce.p4java.Log;
  * a semantics error in the request. Note that this is not the same as a
  * connection exception, which is typically signaled when the Perforce server
  * itself can't be reached.<p>
- * 
+ *
  * RequestExceptions coming back from the server have a non-zero rawCode field
  * that is set to the corresponding raw code value sent from the server; this
  * code normally requires processing for use by callers, who typically want to
@@ -24,18 +24,18 @@ import com.perforce.p4java.Log;
  * set to meaningful values here (in fact, all RequestExceptions constructed 'under
  * the covers' in the RPC layer will do what they can to get meaningful value for
  * these other fields, but this is not guaranteed)...<p>
- * 
+ *
  * Note that if you set the raw code yourself using the accessor methods, you are
  * required to also set the other fields to appropriate values yourself; failure
  * to do this will cause a lot of confusion up the chain, as the subsidiary codes are
  * only calculated once. The setCodes method is provided to make this easy.<p>
- * 
+ *
  * See the MessageSeverityCode and MessageGenericCode definitions for suitable help
  * with those types of code.
  */
 
 public class RequestException extends P4JavaException {
-	
+
 	private static final long serialVersionUID = 1L;
 	private int rawCode = 0;
 	private int severityCode = 0;
@@ -59,12 +59,12 @@ public class RequestException extends P4JavaException {
 	public RequestException(Throwable cause) {
 		super(cause);
 	}
-	
+
 	public RequestException(String message, int rawCode) {
 		super(message);
 		setCodes(rawCode);
 	}
-	
+
 	public RequestException(String message, String codeString) {
 		super(message);
 		if (codeString != null) {
@@ -75,31 +75,31 @@ public class RequestException extends P4JavaException {
 			}
 		}
 	}
-	
+
 	public RequestException(String message, int genericCode, int severityCode) {
 		super(message);
 		this.genericCode = genericCode;
 		this.severityCode = severityCode;
 	}
-	
+
 	public RequestException(Throwable cause, int genericCode, int severityCode) {
 		super(cause);
 		this.genericCode = genericCode;
 		this.severityCode = severityCode;
 	}
-	
+
 	public RequestException(String message, Throwable cause, int genericCode, int severityCode) {
 		super(message, cause);
 		this.genericCode = genericCode;
 		this.severityCode = severityCode;
 	}
-	
+
 	/**
 	 * Set the raw code and associated subsidiary codes according to
 	 * the passed-in values. If you only have the raw code from the server,
 	 * this is probably the easiest and least error-prone way to set the
 	 * request exception codes.
-	 * 
+	 *
 	 * @param rawCode raw code from the server.
 	 * @return 'this' for chaining.
 	 */
@@ -121,12 +121,9 @@ public class RequestException extends P4JavaException {
 	public void setGenericCode(int genericCode) {
 		this.genericCode = genericCode;
 	}
-	
+
 	public String getDisplayString() {
-		return "" + (this.genericCode != 0 ? "Generic: " + this.genericCode : "")
-				+ (this.severityCode != 0 ? " Severity: " + this.severityCode + "; " : "")
-				+ this.getMessage()
-				+ (this.getCause() != null ? this.getCause() : "");
+		return "" + (this.genericCode != 0 ? "Generic: " + this.genericCode : "") + (this.severityCode != 0 ? " Severity: " + this.severityCode + "; " : "") + this.getMessage() + (this.getCause() != null ? this.getCause() : "");
 	}
 
 	public int getUniqueCode() {
@@ -160,6 +157,7 @@ public class RequestException extends P4JavaException {
 	/**
 	 * Get the Perforce severity code associated with this exception, if any.
 	 * See the MessageSeverityCode Javadocs for an explanation of these codes.
+	 * @return code
 	 */
 	public int getSeverityCode() {
 		return this.severityCode;
@@ -168,6 +166,7 @@ public class RequestException extends P4JavaException {
 	/**
 	 * Get the Perforce generic code associated with this exception, if any.
 	 * See the MessageSGenericCode Javadocs for an explanation of these codes.
+	 * @return code
 	 */
 	public int getGenericCode() {
 		return this.genericCode;

@@ -64,6 +64,10 @@ public class Stream extends StreamSummary implements IStream {
 
 		/**
 		 * Explicit-value constructor.
+		 *
+		 * @param name  name
+		 * @param type  type
+		 * @param value value
 		 */
 		public ExtraTag(String name, String type, String value) {
 			if (name == null) {
@@ -81,26 +85,44 @@ public class Stream extends StreamSummary implements IStream {
 			this.value = value;
 		}
 
+		/**
+		 * @return name
+		 */
 		public String getName() {
 			return this.name;
 		}
 
+		/**
+		 * @param name name
+		 */
 		public void setName(String name) {
 			this.name = name;
 		}
 
+		/**
+		 * @return type
+		 */
 		public String getType() {
 			return this.type;
 		}
 
+		/**
+		 * @param type type
+		 */
 		public void setType(String type) {
 			this.type = type;
 		}
 
+		/**
+		 * @return value
+		 */
 		public String getValue() {
 			return this.value;
 		}
 
+		/**
+		 * @param value value
+		 */
 		public void setValue(String value) {
 			this.value = value;
 		}
@@ -109,6 +131,18 @@ public class Stream extends StreamSummary implements IStream {
 	/**
 	 * Simple factory / convenience method for creating a new local Stream
 	 * object with defult values.
+	 *
+	 * @param server           server
+	 * @param streamPath       stream path
+	 * @param type             type
+	 * @param parentStreamPath parent stream
+	 * @param name             name
+	 * @param description      description
+	 * @param options          options
+	 * @param viewPaths        view paths
+	 * @param remappedPaths    remapped paths
+	 * @param ignoredPaths     ignored paths
+	 * @return stream object
 	 */
 	public static Stream newStream(IOptionsServer server, String streamPath,
 								   String type, String parentStreamPath, String name,
@@ -139,11 +173,10 @@ public class Stream extends StreamSummary implements IStream {
 	 * @param options          flags to configure stream behavior: allsubmit/ownersubmit
 	 *                         [un]locked [no]toparent [no]fromparent mergedown/mergeany.
 	 * @param viewPaths        one or more lines that define file paths in the stream view.
-	 *                         Each line is of the form: <path_type> <view_path>
-	 *                         [<depot_path>]
+	 *                         Each line is of the form: path_type view_path depot_path
 	 * @param remappedPaths    optional; one or more lines that define how stream view paths
 	 *                         are to be remapped in client views. Each line is of the form:
-	 *                         <view_path_1> <view_path_2>
+	 *                         view_path_1 view_path_2
 	 * @param ignoredPaths     optional; a list of file or directory names to be ignored in
 	 *                         client views. For example:
 	 *                         /tmp      # ignores files named 'tmp'
@@ -273,6 +306,11 @@ public class Stream extends StreamSummary implements IStream {
 
 		/**
 		 * Explicit value constructor -- calls super(order, target, targetSpec).
+		 *
+		 * @param order     order
+		 * @param pathType  path type
+		 * @param viewPath  view path
+		 * @param depotPath depot path
 		 */
 		public StreamViewMapping(int order, PathType pathType, String viewPath,
 								 String depotPath) {
@@ -286,6 +324,9 @@ public class Stream extends StreamSummary implements IStream {
 		/**
 		 * Construct a mapping from the passed-in string, which is assumed to be
 		 * in the format.
+		 *
+		 * @param order         order
+		 * @param rawViewString raw view string
 		 */
 		public StreamViewMapping(int order, String rawViewString) {
 			this.order = order;
@@ -350,7 +391,7 @@ public class Stream extends StreamSummary implements IStream {
 
 		@Override
 		public String toString(String sepString, boolean quoteBlanks) {
-			String returnedString =  super.toString(sepString, quoteBlanks);
+			String returnedString = super.toString(sepString, quoteBlanks);
 			if (this.getPathType() != null) {
 				return this.getPathType().getValue() + " " + returnedString;
 			}
@@ -374,6 +415,10 @@ public class Stream extends StreamSummary implements IStream {
 
 		/**
 		 * Explicit value constructor -- calls super(order, target, targetSpec).
+		 *
+		 * @param order          order
+		 * @param leftRemapPath  left remapped path
+		 * @param rightRemapPath right remapped path
 		 */
 		public StreamRemappedMapping(int order, String leftRemapPath,
 									 String rightRemapPath) {
@@ -383,6 +428,9 @@ public class Stream extends StreamSummary implements IStream {
 		/**
 		 * Construct a mapping from the passed-in string, which is assumed to be
 		 * in the format described in MapEntry.parseViewString(String).
+		 *
+		 * @param order      order
+		 * @param viewString view string
 		 */
 		public StreamRemappedMapping(int order, String viewString) {
 			super(order, viewString);
@@ -434,6 +482,9 @@ public class Stream extends StreamSummary implements IStream {
 
 		/**
 		 * Explicit value constructor -- calls super(order, target, targetSpec).
+		 *
+		 * @param order      order
+		 * @param ignorePath ignore path
 		 */
 		public StreamIgnoredMapping(int order, String ignorePath) {
 			super(order, ignorePath, null);
@@ -463,6 +514,19 @@ public class Stream extends StreamSummary implements IStream {
 
 	/**
 	 * Construct a new Stream from explicit field values.
+	 *
+	 * @param stream       stream
+	 * @param type         type
+	 * @param parent       parent
+	 * @param accessed     accessed
+	 * @param updated      updated
+	 * @param name         name
+	 * @param description  description
+	 * @param ownerName    ownerName
+	 * @param options      options
+	 * @param streamView   streamView
+	 * @param remappedView remappedView
+	 * @param ignoredView  ignoredView
 	 */
 	public Stream(String stream, Type type, String parent, Date accessed,
 				  Date updated, String name, String description, String ownerName,
@@ -476,6 +540,20 @@ public class Stream extends StreamSummary implements IStream {
 
 	/**
 	 * Construct a new Stream from explicit field values.
+	 *
+	 * @param stream       stream
+	 * @param type         type
+	 * @param parent       parent
+	 * @param accessed     accessed
+	 * @param updated      updated
+	 * @param name         name
+	 * @param description  description
+	 * @param ownerName    ownerName
+	 * @param options      options
+	 * @param streamView   streamView
+	 * @param remappedView remappedView
+	 * @param ignoredView  ignoredView
+	 * @param clientView   clientView
 	 */
 	public Stream(String stream, Type type, String parent, Date accessed,
 				  Date updated, String name, String description, String ownerName,
@@ -502,6 +580,9 @@ public class Stream extends StreamSummary implements IStream {
 	/**
 	 * Construct a Stream from a map passed back from the Perforce server in
 	 * response to a getStream command.
+	 *
+	 * @param map    spec map
+	 * @param server server
 	 */
 	public Stream(Map<String, Object> map, IServer server) {
 		super(map, false);
@@ -579,7 +660,7 @@ public class Stream extends StreamSummary implements IStream {
 						remappedMap.setLeft(matchStrs[0]);
 						remappedMap.setRight(matchStrs[1]);
 					}
-				}catch (Throwable thr) {
+				} catch (Throwable thr) {
 					Log.error("Unexpected exception in Stream map-based constructor: "
 							+ thr.getLocalizedMessage());
 					Log.exception(thr);
@@ -611,7 +692,7 @@ public class Stream extends StreamSummary implements IStream {
 						ignoreMap.setOrder(i);
 						ignoreMap.setLeft(matchStrs[0]);
 					}
-				}catch (Throwable thr) {
+				} catch (Throwable thr) {
 					Log.error("Unexpected exception in Stream map-based constructor: "
 							+ thr.getLocalizedMessage());
 					Log.exception(thr);
@@ -663,6 +744,7 @@ public class Stream extends StreamSummary implements IStream {
 	 * constructor; otherwise after name initialization a refresh() is done on
 	 * the new (empty) Stream.
 	 *
+	 * @param summary summary class
 	 * @throws ConnectionException if the Perforce server is unreachable or is not connected.
 	 * @throws RequestException    if the Perforce server encounters an error during its
 	 *                             processing of the request
@@ -698,7 +780,7 @@ public class Stream extends StreamSummary implements IStream {
 			try {
 				IStream refreshedStream = refreshServer.getStream(refreshStreamPath);
 				if (refreshedStream != null) {
-					if(refreshedStream.getRawFields() != null) {
+					if (refreshedStream.getRawFields() != null) {
 						setRawFields(refreshedStream.getRawFields());
 					} else {
 						clearRawFields();

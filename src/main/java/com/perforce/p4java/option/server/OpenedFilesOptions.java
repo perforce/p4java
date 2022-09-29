@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option.server;
 
@@ -13,41 +13,41 @@ import java.util.List;
 /**
  * Options-based method options for IServer and IClient openedFiles method(s).
  * <p>
- * 
+ *
  * Note that when used with the IClient openedFiles method, the
  * allClients and clientName options are ignored; the clientName
- * is (of course) filled in using the client's own name.<p>
- * 
+ * is (of course) filled in using the client's own name.
+ *
  * @see com.perforce.p4java.client.IClient#openedFiles(java.util.List, com.perforce.p4java.option.server.OpenedFilesOptions)
  */
 public class OpenedFilesOptions extends Options {
-	
+
 	/**
 	 * Options: -a, -c[changelist], -C[client], -u[user], -m[max], -s
 	 */
 	public static final String OPTIONS_SPECS = "b:a i:c:cl s:C s:u i:m:gtz b:s";
-	
+
 	/**
 	 * If true, list opened files in all clients.
 	 * Normally only files opened by the current client are listed.
 	 */
 	protected boolean allClients = false;
-	
+
 	/**
 	 * If not null, restrict the list of files to those opened on the named client.
 	 */
 	protected String clientName = null;
-	
+
 	/**
 	 * If positive, limit output to the first 'maxFiles' number of files.
 	 */
 	protected int maxFiles = 0;
-	
+
 	/**
 	 * If not null, restrict the list of files to those opened by the named user.
 	 */
 	protected String userName = null;
-	
+
 	/**
 	 * If non-negative, restrict the list to files opened under
 	 * the given changelist#.  Normally files in any changelist (including
@@ -72,19 +72,20 @@ public class OpenedFilesOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public OpenedFilesOptions(String... options) {
@@ -93,9 +94,14 @@ public class OpenedFilesOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param allClients   allClients
+	 * @param clientName   clientName
+	 * @param maxFiles     maxFiles
+	 * @param userName     userName
+	 * @param changelistId changelistId
 	 */
-	public OpenedFilesOptions(boolean allClients, String clientName,
-			int maxFiles, String userName, int changelistId) {
+	public OpenedFilesOptions(boolean allClients, String clientName, int maxFiles, String userName, int changelistId) {
 		super();
 		this.allClients = allClients;
 		this.clientName = clientName;
@@ -108,14 +114,7 @@ public class OpenedFilesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-									this.allClients,
-									this.changelistId,
-									this.clientName,
-									this.userName,
-									this.maxFiles,
-									this.shortOutput
-								);
+		this.optionList = this.processFields(OPTIONS_SPECS, this.allClients, this.changelistId, this.clientName, this.userName, this.maxFiles, this.shortOutput);
 		return this.optionList;
 	}
 

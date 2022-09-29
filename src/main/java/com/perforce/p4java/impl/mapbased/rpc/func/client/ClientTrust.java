@@ -3,6 +3,18 @@
  */
 package com.perforce.p4java.impl.mapbased.rpc.func.client;
 
+import com.perforce.p4java.exception.ConfigException;
+import com.perforce.p4java.exception.NullPointerError;
+import com.perforce.p4java.exception.TrustException;
+import com.perforce.p4java.impl.mapbased.rpc.RpcServer;
+import com.perforce.p4java.messages.PerforceMessages;
+import com.perforce.p4java.server.Fingerprint;
+
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.TrustManagerFactory;
+import javax.net.ssl.X509TrustManager;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.security.GeneralSecurityException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.KeyStore;
@@ -26,20 +38,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import com.perforce.p4java.exception.ConfigException;
-import com.perforce.p4java.exception.NullPointerError;
-import com.perforce.p4java.exception.TrustException;
-import com.perforce.p4java.impl.mapbased.rpc.RpcServer;
-import com.perforce.p4java.messages.PerforceMessages;
-import com.perforce.p4java.server.Fingerprint;
-
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.TrustManagerFactory;
-import javax.net.ssl.X509TrustManager;
-
 /**
  * Handle the client trust and fingerprint for Perforce SSL connections.
- *
+ * <p>
  * This also include methods to assist in validating a certificate path.
  * We trust all certificates but save the certificates for
  * later checking with methods in this class.
@@ -48,8 +49,7 @@ public class ClientTrust {
 
 	public static final String DIGEST_TYPE = "SHA";
 
-	public static final char[] HEX_CHARS = { '0', '1', '2', '3', '4', '5', '6',
-			'7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F' };
+	public static final char[] HEX_CHARS = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
 
 	public static final String FINGERPRINT_USER_NAME = "**++**";
 
@@ -74,109 +74,83 @@ public class ClientTrust {
 	public static final String CLIENT_TRUST_INSTALL_EXCEPTION = "client.trust.install.exception";
 	public static final String CLIENT_TRUST_UNINSTALL_EXCEPTION = "client.trust.uninstall.exception";
 
-	public static final String SSL_CLIENT_TRUST_BADDATE= "client.trust.cert.bad.date.exception";
+	public static final String SSL_CLIENT_TRUST_BADDATE = "client.trust.cert.bad.date.exception";
 	public static final String SSL_CLIENT_TRUST_BADHOST = "client.trust.cert.bad.host.exception";
 	private RpcServer rpcServer = null;
 
-	private static PerforceMessages messages = new PerforceMessages(
-			ClientTrust.CLIENT_TRUST_MESSAGES);
+	private static PerforceMessages messages = new PerforceMessages(ClientTrust.CLIENT_TRUST_MESSAGES);
 
 	/**
 	 * Instantiates a new client trust.
-	 * 
-	 * @param rpcServer
-	 *            the rpc server
+	 *
+	 * @param rpcServer the rpc server
 	 */
 	public ClientTrust(RpcServer rpcServer) {
 		if (rpcServer == null) {
-			throw new NullPointerError(
-					"null rpcServer passed to ClientTrust constructor");
+			throw new NullPointerError("null rpcServer passed to ClientTrust constructor");
 		}
 		this.rpcServer = rpcServer;
 	}
 
 	/**
 	 * Install the fingerprint for the specified server IP and port
-	 * 
-	 * @param serverIpPort
-	 *            the serverIpPort
-	 * @param fingerprintUser
-	 *            the fingerprintUser
-	 * @param fingerprint
-	 *            the fingerprint
-	 * @throws TrustException
-	 *             the trust exception
+	 *
+	 * @param serverIpPort    the serverIpPort
+	 * @param fingerprintUser the fingerprintUser
+	 * @param fingerprint     the fingerprint
+	 * @throws TrustException the trust exception
 	 */
-	public void installFingerprint(String serverIpPort, String fingerprintUser, String fingerprint)
-			throws TrustException {
+	public void installFingerprint(String serverIpPort, String fingerprintUser, String fingerprint) throws TrustException {
 		if (serverIpPort == null) {
-			throw new NullPointerError(
-					"null serverIpPort passed to the ClientTrust installFingerprint method");
+			throw new NullPointerError("null serverIpPort passed to the ClientTrust installFingerprint method");
 		}
 		if (fingerprintUser == null) {
-			throw new NullPointerError(
-					"null fingerprintUser passed to the ClientTrust installFingerprint method");
+			throw new NullPointerError("null fingerprintUser passed to the ClientTrust installFingerprint method");
 		}
 		if (fingerprint == null) {
-			throw new NullPointerError(
-					"null fingerprint passed to the ClientTrust installFingerprint method");
+			throw new NullPointerError("null fingerprint passed to the ClientTrust installFingerprint method");
 		}
 		try {
 			rpcServer.saveFingerprint(serverIpPort, fingerprintUser, fingerprint);
 		} catch (ConfigException e) {
-			throw new TrustException(TrustException.Type.INSTALL,
-					rpcServer.getServerHostPort(), serverIpPort, fingerprint,
-					messages.getMessage(ClientTrust.CLIENT_TRUST_INSTALL_EXCEPTION,
-    						new Object[] { fingerprint, rpcServer.getServerHostPort(), serverIpPort }), e);
+			throw new TrustException(TrustException.Type.INSTALL, rpcServer.getServerHostPort(), serverIpPort, fingerprint, messages.getMessage(ClientTrust.CLIENT_TRUST_INSTALL_EXCEPTION, new Object[]{fingerprint, rpcServer.getServerHostPort(), serverIpPort}), e);
 		}
 	}
 
 	/**
 	 * Removes the fingerprint for the specified server IP and port
-	 * 
-	 * @param serverIpPort
-	 *            the serverIpPort
-	 * @param fingerprintUser
-	 *            the fingerprintUser
-	 * @throws TrustException
-	 *             the trust exception
+	 *
+	 * @param serverIpPort    the serverIpPort
+	 * @param fingerprintUser the fingerprintUser
+	 * @throws TrustException the trust exception
 	 */
 	public void removeFingerprint(String serverIpPort, String fingerprintUser) throws TrustException {
 		if (serverIpPort == null) {
-			throw new NullPointerError(
-					"null serverIpPort passed to the ClientTrust removeFingerprint method");
+			throw new NullPointerError("null serverIpPort passed to the ClientTrust removeFingerprint method");
 		}
 		if (fingerprintUser == null) {
-			throw new NullPointerError(
-					"null fingerprintUser passed to the ClientTrust removeFingerprint method");
+			throw new NullPointerError("null fingerprintUser passed to the ClientTrust removeFingerprint method");
 		}
 		try {
 			rpcServer.saveFingerprint(serverIpPort, fingerprintUser, null);
 		} catch (ConfigException e) {
-			throw new TrustException(TrustException.Type.UNINSTALL,
-					rpcServer.getServerHostPort(), serverIpPort, null,
-					messages.getMessage(ClientTrust.CLIENT_TRUST_UNINSTALL_EXCEPTION,
-    						new Object[] { rpcServer.getServerHostPort(), serverIpPort }), e);
+			throw new TrustException(TrustException.Type.UNINSTALL, rpcServer.getServerHostPort(), serverIpPort, null, messages.getMessage(ClientTrust.CLIENT_TRUST_UNINSTALL_EXCEPTION, new Object[]{rpcServer.getServerHostPort(), serverIpPort}), e);
 		}
 	}
 
 	/**
 	 * Check if the fingerprint exists for the specified server IP and port
-	 * 
-	 * @param serverKey
-	 *            the serverIpPort or serverHostName
-	 * @param fingerprintUser
-	 *            the fingerprintUser
+	 *
+	 * @param serverKey       the serverIpPort or serverHostName
+	 * @param fingerprintUser the fingerprintUser
 	 * @return true, if successful
 	 */
 	public boolean fingerprintExists(String serverKey, String fingerprintUser) {
 		if (serverKey == null) {
-			throw new NullPointerError(
-					"null serverIpPort passed to the ClientTrust fingerprintExists method");
+			throw new NullPointerError("null serverIpPort passed to the ClientTrust fingerprintExists method");
 		}
 		if (fingerprintUser == null) {
-			throw new NullPointerError(
-					"null fingerprintUser passed to the ClientTrust fingerprintExists method");
+			throw new NullPointerError("null fingerprintUser passed to the ClientTrust fingerprintExists method");
 		}
 		return (rpcServer.loadFingerprint(serverKey, fingerprintUser) != null);
 	}
@@ -185,34 +159,25 @@ public class ClientTrust {
 	 * Check if the fingerprint for the specified server IP and port matches the
 	 * one in trust file.
 	 *
-	 * @param serverKey
-	 *            the serverIpPort or serverHostName
-	 * @param fingerprintUser
-	 *            the fingerprintUser
-	 * @param fingerprint
-	 *            the fingerprint
+	 * @param serverKey       the serverIpPort or serverHostName
+	 * @param fingerprintUser the fingerprintUser
+	 * @param fingerprint     the fingerprint
 	 * @return true, if successful
 	 */
 	public boolean fingerprintMatches(String serverKey, String fingerprintUser, String fingerprint) {
 		if (serverKey == null) {
-			throw new NullPointerError(
-					"null serverIpPort passed to the ClientTrust fingerprintMatches method");
+			throw new NullPointerError("null serverIpPort passed to the ClientTrust fingerprintMatches method");
 		}
 		if (fingerprintUser == null) {
-			throw new NullPointerError(
-					"null fingerprintUser passed to the ClientTrust fingerprintMatches method");
+			throw new NullPointerError("null fingerprintUser passed to the ClientTrust fingerprintMatches method");
 		}
 		if (fingerprint == null) {
-			throw new NullPointerError(
-					"null fingerprint passed to the ClientTrust fingerprintMatches method");
+			throw new NullPointerError("null fingerprint passed to the ClientTrust fingerprintMatches method");
 		}
 		if (fingerprintExists(serverKey, fingerprintUser)) {
-			Fingerprint existingFingerprint = rpcServer
-					.loadFingerprint(serverKey, fingerprintUser);
-			if (existingFingerprint != null
-					&& existingFingerprint.getFingerprintValue() != null) {
-				if (fingerprint.equalsIgnoreCase(existingFingerprint
-						.getFingerprintValue())) {
+			Fingerprint existingFingerprint = rpcServer.loadFingerprint(serverKey, fingerprintUser);
+			if (existingFingerprint != null && existingFingerprint.getFingerprintValue() != null) {
+				if (fingerprint.equalsIgnoreCase(existingFingerprint.getFingerprintValue())) {
 					return true;
 				}
 			}
@@ -222,15 +187,12 @@ public class ClientTrust {
 
 	/**
 	 * Generate fingerprint from public key using MessageDigest.
-	 * 
-	 * @param publicKey
-	 *            the public key
+	 *
+	 * @param publicKey the public key
 	 * @return the string
-	 * @throws NoSuchAlgorithmException
-	 *             the no such algorithm exception
+	 * @throws NoSuchAlgorithmException the no such algorithm exception
 	 */
-	public static String generateFingerprint(PublicKey publicKey)
-			throws NoSuchAlgorithmException {
+	public static String generateFingerprint(PublicKey publicKey) throws NoSuchAlgorithmException {
 		MessageDigest md = MessageDigest.getInstance(DIGEST_TYPE);
 		md.update(publicKey.getEncoded());
 		byte[] fp = md.digest();
@@ -239,17 +201,13 @@ public class ClientTrust {
 
 	/**
 	 * Generate fingerprint from a certificate using MessageDigest.
-	 * 
-	 * @param certificate
-	 *            the certificate
+	 *
+	 * @param certificate the certificate
 	 * @return the string
-	 * @throws NoSuchAlgorithmException
-	 *             the no such algorithm exception
-	 * @throws CertificateEncodingException
-	 *             the certificate encoding exception
+	 * @throws NoSuchAlgorithmException     the no such algorithm exception
+	 * @throws CertificateEncodingException the certificate encoding exception
 	 */
-	public static String generateFingerprint(X509Certificate certificate)
-			throws NoSuchAlgorithmException, CertificateEncodingException {
+	public static String generateFingerprint(X509Certificate certificate) throws NoSuchAlgorithmException, CertificateEncodingException {
 		MessageDigest md = MessageDigest.getInstance(DIGEST_TYPE);
 		md.update(certificate.getEncoded());
 		byte[] fp = md.digest();
@@ -258,9 +216,8 @@ public class ClientTrust {
 
 	/**
 	 * Convert a byte array to a hexadecimal string
-	 * 
-	 * @param data
-	 *            the data
+	 *
+	 * @param data the data
 	 * @return the string
 	 */
 	public static String convert2Hex(byte[] data) {
@@ -278,7 +235,7 @@ public class ClientTrust {
 
 	/**
 	 * Gets the messages.
-	 * 
+	 *
 	 * @return the messages
 	 */
 	public PerforceMessages getMessages() {
@@ -296,24 +253,28 @@ public class ClientTrust {
 	 * Gets the root CAs in the trust store, either the default truststore or as
 	 * specified by javax.net.ssl.trustStore/javax.net.ssl.trustStorePassword.
 	 * root CAs are cached.
+	 *
+	 * @return root CAs
+	 * @throws NoSuchAlgorithmException           on error
+	 * @throws KeyStoreException                  on error
+	 * @throws InvalidAlgorithmParameterException on error
 	 */
-	public static Set<TrustAnchor> getTrustedCAs()
-			throws NoSuchAlgorithmException, KeyStoreException, InvalidAlgorithmParameterException {
+	public static Set<TrustAnchor> getTrustedCAs() throws NoSuchAlgorithmException, KeyStoreException, InvalidAlgorithmParameterException {
 		return getTrustedCAs(false);
 	}
+
 	/**
 	 * Gets the root CAs from the trust store, either the default truststore or as
 	 * specified by javax.net.ssl.trustStore/javax.net.ssl.trustStorePassword.
 	 *
 	 * @param refreshCache force retrieve from truststore
-	 * @return
-	 * @throws NoSuchAlgorithmException
-	 * @throws KeyStoreException
-	 * @throws InvalidAlgorithmParameterException
+	 * @return root CAs
+	 * @throws NoSuchAlgorithmException           on error
+	 * @throws KeyStoreException                  on error
+	 * @throws InvalidAlgorithmParameterException on error
 	 */
-	public static synchronized Set<TrustAnchor> getTrustedCAs(boolean refreshCache)
-			throws NoSuchAlgorithmException, KeyStoreException, InvalidAlgorithmParameterException {
-		if (! refreshCache && trustedCAs != null) {
+	public static synchronized Set<TrustAnchor> getTrustedCAs(boolean refreshCache) throws NoSuchAlgorithmException, KeyStoreException, InvalidAlgorithmParameterException {
+		if (!refreshCache && trustedCAs != null) {
 			return trustedCAs;
 		}
 		X509TrustManager x509tm = getDefaultX509TrustManager();
@@ -323,8 +284,13 @@ public class ClientTrust {
 		}
 		return trustedCAs;
 	}
+
 	/**
 	 * Get the system default trust manager {@link X509TrustManager}
+	 *
+	 * @return trust manager
+	 * @throws NoSuchAlgorithmException on errror
+	 * @throws KeyStoreException        on error
 	 */
 	public static X509TrustManager getDefaultX509TrustManager() throws NoSuchAlgorithmException, KeyStoreException {
 		TrustManagerFactory tmf = TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
@@ -341,11 +307,11 @@ public class ClientTrust {
 	/**
 	 * Check the certificate chain.
 	 *
-	 * @param certs    the certificates from p4d handshake.
+	 * @param certs   the certificates from p4d handshake.
+	 * @param refName refName
 	 * @throws CertificateException if the validation fails
 	 */
-	public static void validateServerChain(X509Certificate[] certs, String refName)
-			throws CertificateException {
+	public static void validateServerChain(X509Certificate[] certs, String refName) throws CertificateException {
 
 		// workaround for bug P4-22041:
 		//     remove duplicates at the end of the chain.
@@ -374,7 +340,7 @@ public class ClientTrust {
 
 			// TODO logging for validation:  ssl=3 System.out.println("result=" + valDetails.toString());
 
-		} catch (GeneralSecurityException e) {
+		} catch (GeneralSecurityException | UnknownHostException e ) {
 			// example:  java.security.cert.CertPathValidatorException:  path does not chain with any of the trust anchors
 			throw new CertificateException(e);
 		}
@@ -382,21 +348,20 @@ public class ClientTrust {
 
 	/**
 	 * Check the certificate Not Before and Not After dates
-	 * @param cert
-	 * @throws CertificateException
+	 *
+	 * @param cert cert
+	 * @throws CertificateException on error
 	 */
 	public static void verifyCertificateDates(X509Certificate cert) throws CertificateException {
-		Date after= cert.getNotAfter();
-		Date before = cert.getNotBefore() ;
+		Date after = cert.getNotAfter();
+		Date before = cert.getNotBefore();
 		Date now = new Date();
 
 		if (now.before(before)) {
-			throw new CertificateException(messages.getMessage(SSL_CLIENT_TRUST_BADDATE,
-					new Object[] { "before", before}));
+			throw new CertificateException(messages.getMessage(SSL_CLIENT_TRUST_BADDATE, new Object[]{"before", before}));
 		}
 		if (now.after(after)) {
-			throw new CertificateException(messages.getMessage(SSL_CLIENT_TRUST_BADDATE,
-					new Object[] { "after", after}));
+			throw new CertificateException(messages.getMessage(SSL_CLIENT_TRUST_BADDATE, new Object[]{"after", after}));
 		}
 		return;
 	}
@@ -404,19 +369,21 @@ public class ClientTrust {
 	/**
 	 * Verify the request's hostname to that in the certificate.
 	 *
-	 * @param cert certificate
+	 * @param cert     certificate
 	 * @param hostName Host name
-	 * @throws CertificateParsingException
-	 * @throws CertificateException
+	 * @throws CertificateParsingException on error
+	 * @throws CertificateException        on error
+	 * @throws UnknownHostException Could not find IP Address for Given Host name
 	 */
-	public static void verifyCertificateSubject(X509Certificate cert, String hostName) throws CertificateParsingException, CertificateException {
+	public static void verifyCertificateSubject(X509Certificate cert, String hostName) throws CertificateParsingException, CertificateException, UnknownHostException {
 
 		// check SANs first, https://www.rfc-editor.org/rfc/rfc6125#section-6.4.3
+		InetAddress address = InetAddress.getByName(hostName);
 		for (List<?> entry : cert.getSubjectAlternativeNames()) {
 			final int type = ((Integer) entry.get(0)).intValue();
 			// DNS or IP
 			if (type == 2 || type == 7) {
-				if ( matchSubject((String)entry.get(1), hostName)) {
+				if (matchSubject((String) entry.get(1), hostName) || matchSubject((String)entry.get(1),address.getHostAddress())) {
 					return;
 				}
 			}
@@ -427,7 +394,7 @@ public class ClientTrust {
 		if (cn.startsWith("CN=")) {
 			cn = cn.substring(3);
 		}
-		if ( matchSubject(cn, hostName)) {
+		if (matchSubject(cn, hostName) || matchSubject(cn,address.getHostAddress())) {
 			return;
 		}
 
@@ -437,26 +404,26 @@ public class ClientTrust {
 		for (List<?> entry : cert.getSubjectAlternativeNames()) {
 			final int type = ((Integer) entry.get(0)).intValue();
 			if (type == 2 || type == 7) {
-				sb.append((String)entry.get(1) + ",");
+				sb.append((String) entry.get(1) + ",");
 			}
 		}
 		sb.append(cn);
-		throw new CertificateException(messages.getMessage(SSL_CLIENT_TRUST_BADHOST,new Object[]{hostName, sb}));
+		throw new CertificateException(messages.getMessage(SSL_CLIENT_TRUST_BADHOST, new Object[]{hostName, sb}));
 	}
 
 	/**
 	 * Check to see if a cert's subject matches with a reference name (e.g., hostname in P4PORT)
-	 * Note that the subject may contain a leading wildcard "*.".<br/>
-	 *
+	 * Note that the subject may contain a leading wildcard "*.".
+	 * <p>
 	 * @param subject - certificate's subject name (a SAN value or CN)
 	 * @param refName reference name to compare.
 	 * @return true if matches.
 	 */
 	private static boolean matchSubject(String subject, String refName) {
-		if ( subject.startsWith("*.") ) {
+		if (subject.startsWith("*.")) {
 			subject = subject.substring(1); // remove "*"
 			int firstDot = refName.indexOf("."); // remove hostname?
-			firstDot = (firstDot >= 0 ) ? firstDot  : 0;
+			firstDot = (firstDot >= 0) ? firstDot : 0;
 			if (subject.equalsIgnoreCase(refName.substring(firstDot))) {
 				return true;
 			}

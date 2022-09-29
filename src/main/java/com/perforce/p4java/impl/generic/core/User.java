@@ -3,9 +3,6 @@
  */
 package com.perforce.p4java.impl.generic.core;
 
-import java.util.Date;
-import java.util.Map;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.IReviewSubscription;
 import com.perforce.p4java.core.IUser;
@@ -15,22 +12,25 @@ import com.perforce.p4java.exception.ConnectionException;
 import com.perforce.p4java.exception.RequestException;
 import com.perforce.p4java.server.IServer;
 
+import java.util.Date;
+import java.util.Map;
+
 /**
  * Simple default IUser implementation class.
  */
 
 public class User extends UserSummary implements IUser {
-	
+
 	private String password = null;
 	private String jobView = null;
 	private ViewMap<IReviewSubscription> reviewSubscriptions = null;
-	
+
 	/**
 	 * Simple convenience factory method to create a new local User object
 	 * with default (null) jobView and reviewSubscriptions fields.
-	 * 
-	 * @param name non-null user name.
-	 * @param email user's email address.
+	 *
+	 * @param name     non-null user name.
+	 * @param email    user's email address.
 	 * @param fullName user's full name.
 	 * @param password user's password (usually ignored).
 	 * @return new local user object.
@@ -38,7 +38,7 @@ public class User extends UserSummary implements IUser {
 	public static User newUser(String name, String email, String fullName, String password) {
 		return new User(name, email, fullName, null, null, password, null, null);
 	}
-	
+
 	/**
 	 * Default constructor -- sets all summary and extended
 	 * fields to null.
@@ -48,25 +48,44 @@ public class User extends UserSummary implements IUser {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param loginName           loginName
+	 * @param email               email
+	 * @param fullName            fullName
+	 * @param access              access
+	 * @param update              update
+	 * @param password            password
+	 * @param jobView             jobView
+	 * @param reviewSubscriptions reviewSubscriptions
 	 */
-	
+
 	public User(String loginName, String email, String fullName,
-			Date access, Date update, String password, String jobView,
-			ViewMap<IReviewSubscription> reviewSubscriptions) {
+				Date access, Date update, String password, String jobView,
+				ViewMap<IReviewSubscription> reviewSubscriptions) {
 		super(loginName, email, fullName, access, update);
 		this.password = password;
 		this.jobView = jobView;
 		this.reviewSubscriptions = reviewSubscriptions;
 	}
-	
+
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param loginName           loginName
+	 * @param email               email
+	 * @param fullName            fullName
+	 * @param access              access
+	 * @param update              update
+	 * @param password            password
+	 * @param jobView             jobView
+	 * @param type                type
+	 * @param reviewSubscriptions reviewSubscriptions
 	 */
-	
+
 	public User(String loginName, String email, String fullName,
-			Date access, Date update, String password, String jobView,
-			UserType type,
-			ViewMap<IReviewSubscription> reviewSubscriptions) {
+				Date access, Date update, String password, String jobView,
+				UserType type,
+				ViewMap<IReviewSubscription> reviewSubscriptions) {
 		super(loginName, email, fullName, access, update, type);
 		this.password = password;
 		this.jobView = jobView;
@@ -78,22 +97,25 @@ public class User extends UserSummary implements IUser {
 	 * is assumed to come from a suitable call on IServer; if
 	 * the map is null this is equivalent to calling the
 	 * default constructor.
+	 *
+	 * @param map    spec map
+	 * @param server server
 	 */
 	public User(Map<String, Object> map, IServer server) {
 		super(map, false);
 		this.server = server;
 		if (map != null) {
 			final String JOBVIEW_KEY = "JobView";
-			final String PASSWORD_KEY = "Password";	// FIXME: check this... -- HR.
+			final String PASSWORD_KEY = "Password";    // FIXME: check this... -- HR.
 			final String REVIEW_KEY_PFX = "Reviews";
 
 			// Only concerned about the Reviews*, JobView, and Password
 			// keys here:
-			
+
 			try {
 				this.jobView = (String) map.get(JOBVIEW_KEY);
 				this.password = (String) map.get(PASSWORD_KEY);
-				
+
 				for (int i = 0; map.containsKey(REVIEW_KEY_PFX + i); i++) {
 					if (this.reviewSubscriptions == null) {
 						this.reviewSubscriptions = new ViewMap<IReviewSubscription>();
@@ -150,12 +172,12 @@ public class User extends UserSummary implements IUser {
 	public void setReviewSubscriptions(ViewMap<IReviewSubscription> reviewSubscriptions) {
 		this.reviewSubscriptions = reviewSubscriptions;
 	}
-	
+
 	/**
 	 * @see com.perforce.p4java.impl.generic.core.ServerResource#refresh()
 	 */
 	public void refresh() throws ConnectionException, RequestException,
-										AccessException {
+			AccessException {
 		IServer refreshServer = this.server;
 		String refreshName = this.getLoginName();
 		if (refreshServer != null && refreshName != null) {
@@ -172,15 +194,15 @@ public class User extends UserSummary implements IUser {
 			}
 		}
 	}
-	
+
 	/**
 	 * @see com.perforce.p4java.impl.generic.core.ServerResource#update()
 	 */
 	public void update()
-					throws ConnectionException, RequestException, AccessException {
+			throws ConnectionException, RequestException, AccessException {
 		this.server.updateUser(this, false);
 	}
-	
+
 	public void update(boolean force) throws ConnectionException, RequestException, AccessException {
 		this.server.updateUser(this, true);
 	}

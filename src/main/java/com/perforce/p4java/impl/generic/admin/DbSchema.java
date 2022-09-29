@@ -1,21 +1,21 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.impl.generic.admin;
+
+import com.perforce.p4java.Log;
+import com.perforce.p4java.admin.IDbSchema;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.perforce.p4java.Log;
-import com.perforce.p4java.admin.IDbSchema;
-
 /**
  * Simple default implementation class for the IDbSchema interface.
  */
 public class DbSchema implements IDbSchema {
-	
+
 	private String name = null;
 	private int version = NOVERSION;
 	private List<Map<String, String>> columnMetadata = null;
@@ -28,20 +28,25 @@ public class DbSchema implements IDbSchema {
 
 	/**
 	 * Construct a DbSchema using explicit field values.
+	 *
+	 * @param name           name
+	 * @param version        version
+	 * @param columnMetadata columnMetadata
 	 */
-	public DbSchema(String name, int version,
-			List<Map<String, String>> columnMetadata) {
+	public DbSchema(String name, int version, List<Map<String, String>> columnMetadata) {
 		this.name = name;
 		this.version = version;
 		this.columnMetadata = columnMetadata;
 	}
-	
+
 	/**
-	 * Construct a DbSchema from a map returned by the Perforce server.<p>
-	 * 
+	 * Construct a DbSchema from a map returned by the Perforce server.
+	 * <p>
 	 * Don't use this unless you know the correct format of the maps and you either
 	 * got the map directly from the server or you cobbled together something
 	 * suitable yourself. No real error- or sanity-checking is done here.
+	 *
+	 * @param map map data
 	 */
 	public DbSchema(Map<String, Object> map) {
 		if (map != null) {
@@ -49,7 +54,7 @@ public class DbSchema implements IDbSchema {
 				this.name = (String) map.get("table");
 				this.version = new Integer((String) map.get("version"));
 				this.columnMetadata = new ArrayList<Map<String, String>>();
-				
+
 				String columnName = null;
 				for (int i = 0; (columnName = (String) map.get("name" + i)) != null; i++) {
 					Map<String, String> colMap = new HashMap<String, String>();

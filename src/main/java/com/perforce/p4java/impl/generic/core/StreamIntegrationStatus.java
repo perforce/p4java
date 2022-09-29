@@ -3,15 +3,15 @@
  */
 package com.perforce.p4java.impl.generic.core;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.IChangelist;
 import com.perforce.p4java.core.IStreamIntegrationStatus;
 import com.perforce.p4java.core.IStreamSummary;
 import com.perforce.p4java.core.IStreamSummary.Type;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Default implementation class for the IStreamIntegrationStatus interface.
@@ -49,9 +49,17 @@ public class StreamIntegrationStatus implements IStreamIntegrationStatus {
 
 		/**
 		 * Explicit-value all-fields constructor.
+		 *
+		 * @param change       change
+		 * @param parentChange parentChange
+		 * @param copyParent   copyParent
+		 * @param mergeParent  mergeParent
+		 * @param mergeHighVal mergeHighVal
+		 * @param branchHash   branchHash
+		 * @param status       status
 		 */
 		public CachedState(int change, int parentChange, int copyParent,
-				int mergeParent, int mergeHighVal, int branchHash, int status) {
+						   int mergeParent, int mergeHighVal, int branchHash, int status) {
 
 			this.change = change;
 			this.parentChange = parentChange;
@@ -121,14 +129,29 @@ public class StreamIntegrationStatus implements IStreamIntegrationStatus {
 
 	/**
 	 * Explicit-value all-fields constructor.
+	 *
+	 * @param stream                stream
+	 * @param parent                parent
+	 * @param type                  type
+	 * @param parentType            parentType
+	 * @param firmerThanParent      firmerThanParent
+	 * @param changeFlowsToParent   changeFlowsToParent
+	 * @param changeFlowsFromParent changeFlowsFromParent
+	 * @param integToParent         integToParent
+	 * @param integToParentHow      integToParentHow
+	 * @param toResult              toResult
+	 * @param integFromParent       integFromParent
+	 * @param integFromParentHow    integFromParentHow
+	 * @param fromResult            fromResult
+	 * @param cachedStates          cachedStates
 	 */
 	public StreamIntegrationStatus(String stream, String parent,
-			IStreamSummary.Type type, IStreamSummary.Type parentType,
-			boolean firmerThanParent, boolean changeFlowsToParent,
-			boolean changeFlowsFromParent, boolean integToParent,
-			String integToParentHow, String toResult, boolean integFromParent,
-			String integFromParentHow, String fromResult,
-			List<ICachedState> cachedStates) {
+								   IStreamSummary.Type type, IStreamSummary.Type parentType,
+								   boolean firmerThanParent, boolean changeFlowsToParent,
+								   boolean changeFlowsFromParent, boolean integToParent,
+								   String integToParentHow, String toResult, boolean integFromParent,
+								   String integFromParentHow, String fromResult,
+								   List<ICachedState> cachedStates) {
 		this.stream = stream;
 		this.parent = parent;
 		this.type = type;
@@ -147,6 +170,8 @@ public class StreamIntegrationStatus implements IStreamIntegrationStatus {
 
 	/**
 	 * Constructor for use with maps passed back from the Perforce server only.
+	 *
+	 * @param map spec map
 	 */
 	public StreamIntegrationStatus(Map<String, Object> map) {
 		if (map != null) {

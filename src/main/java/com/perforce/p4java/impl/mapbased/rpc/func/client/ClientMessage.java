@@ -7,7 +7,7 @@ import com.perforce.p4java.Log;
 import com.perforce.p4java.exception.NullPointerError;
 
 /**
- * Perforce P4Java client error / info / warning messages.<p>
+ * Perforce P4Java client error / info / warning messages.
  * <p>
  * These are messages that the P4Java API itself generates
  * rather than receives from the Perforce server. Most
@@ -15,16 +15,16 @@ import com.perforce.p4java.exception.NullPointerError;
  * C++ API class(es) and not all are currently used. The messages
  * defined here all use the common %arg% string interpolation
  * scheme that's used for messages coming in from the server
- * in (e.g.) client-Message packets.<p>
+ * in (e.g.) client-Message packets.
  * <p>
  * The errors here are not typically passed as-is back to the
  * end user, but are translated in the map-based server
  * implementation superclass ServerImpl to more generic
- * P4Java exceptions or filespec statuses.<p>
+ * P4Java exceptions or filespec statuses.
  * <p>
  * No attempt has (yet) been made to internationalise the
  * corresponding error strings, but that may happen in future
- * releases of the API.<p>
+ * releases of the API.
  * <p>
  * FIXME: what to do about P4Java-specific codes? -- HR.(Current
  * strategy is to simply use zero, as we don't actually extract error
@@ -50,10 +50,10 @@ public class ClientMessage {
 	/**
 	 * Basic message ID. Order here is not important; explanation of
 	 * each ID's meaning is generally given with the associated error
-	 * string -- see the static ClientMessage array below...<p>
+	 * string -- see the static ClientMessage array below...
 	 * <p>
 	 * Not all codes are currently applicable, and some of these codes
-	 * as P4Java-specific.<p>
+	 * as P4Java-specific.
 	 * <p>
 	 * Note that ID's are NOT the same as error codes; codes are given below
 	 * for each message as copied from the C++ API, and those codes are
@@ -89,7 +89,8 @@ public class ClientMessage {
 		FILE_DECODER_ERROR, // 17.3 UTF16 decoder
 		FILE_ENCODER_ERROR,  // 17.3 UTF16 encoder
 		NO_MODIFIED_FILE,
-		NOT_UNDER_CLIENT_PATH
+		NOT_UNDER_CLIENT_PATH,
+		DIR_NOT_EMPTY
 	}
 
 	;
@@ -199,6 +200,10 @@ public class ClientMessage {
 					0,
 					"%file% - decoding error.",
 					new String[]{"file"}),
+			new ClientMessage(ClientMessageId.FILE_ENCODER_ERROR,
+					0,
+					"%file% - encoding error.",
+					new String[]{"file"}),
 			new ClientMessage(ClientMessageId.NO_MODIFIED_FILE,
 					0,
 					"Can't %action% modified file %file%",
@@ -207,14 +212,20 @@ public class ClientMessage {
 					38,
 					"File %clientFile% is not inside permitted filesystem path %clientPath%",
 					new String[]{"clientFile", "clientPath"}),
+			new ClientMessage(ClientMessageId.DIR_NOT_EMPTY,
+					93,
+					"Directory %directory% is not empty.",
+					new String[]{"directory"}),
 	};
 
 	/**
 	 * Return the ClientMessage associated with this ID, if any.
 	 * Never returns null, but will return the UNKNOWN message if it
 	 * can't find a match.
+	 *
+	 * @param id ClientMessageId
+	 * @return ClientMessage
 	 */
-
 	public static ClientMessage getClientMessage(ClientMessageId id) {
 		if (id == null) {
 			throw new NullPointerError(
@@ -227,8 +238,7 @@ public class ClientMessage {
 			}
 		}
 
-		Log.warn(
-				"Unmatched error ID spec in ClientMessage.getClientMessage()");
+		Log.warn("Unmatched error ID spec in ClientMessage.getClientMessage()");
 
 		return messages[0]; // i.e. UNKNOWN, unless someone moved it.
 	}

@@ -9,12 +9,17 @@ import com.perforce.p4java.impl.generic.client.ClientLineEnding;
 import com.perforce.p4java.impl.generic.sys.ISystemFileCommandsHelper;
 import com.perforce.p4java.impl.mapbased.rpc.sys.helper.SymbolicLinkHelper;
 import com.perforce.p4java.impl.mapbased.rpc.sys.helper.SysFileHelperBridge;
+import org.apache.commons.io.FileUtils;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.UUID;
 
 /**
  * Encapsulates and implements a lot of Perforce-specific information
@@ -47,13 +52,11 @@ public class RpcPerforceFile extends File {
 				tmpDir = new File(tmpDirName);
 			}
 
-			File tmpFile = File.createTempFile(TMP_FILE_PFX, TMP_FILE_SFX,
-					tmpDir);
+			File tmpFile = File.createTempFile(TMP_FILE_PFX, TMP_FILE_SFX, tmpDir);
 
 			return tmpFile.getPath();
 		} catch (IOException ioexc) {
-			Log.error(
-					"Unable to create temporary file: " + ioexc.getLocalizedMessage());
+			Log.error("Unable to create temporary file: " + ioexc.getLocalizedMessage());
 		}
 
 		return null;
@@ -63,34 +66,29 @@ public class RpcPerforceFile extends File {
 		super(fileName);
 		if (fileName == null) {
 			// We don't need or want (much less expect) null paths in the API:
-			throw new NullPointerError(
-					"Null file name passed to RpcPerforceFile constructor");
+			throw new NullPointerError("Null file name passed to RpcPerforceFile constructor");
 		}
 
 		this.fileType = RpcPerforceFileType.decodeFromServerString(fileTypeStr);
-		this.lineEnding = ClientLineEnding.decodeFromServerString(
-				fileTypeStr, this.fileType);
+		this.lineEnding = ClientLineEnding.decodeFromServerString(fileTypeStr, this.fileType);
 	}
 
 	public RpcPerforceFile(String fileName, RpcPerforceFileType fileType) {
 		super(fileName);
 		if (fileName == null) {
 			// We don't need or want (much less expect) null paths in the API:
-			throw new NullPointerError(
-					"Null file name passed to RpcPerforceFile constructor");
+			throw new NullPointerError("Null file name passed to RpcPerforceFile constructor");
 		}
 
 		this.fileType = fileType;
 		this.lineEnding = ClientLineEnding.FST_L_LOCAL;
 	}
 
-	public RpcPerforceFile(String fileName, RpcPerforceFileType fileType,
-	                       ClientLineEnding lineEnding) {
+	public RpcPerforceFile(String fileName, RpcPerforceFileType fileType, ClientLineEnding lineEnding) {
 		super(fileName);
 		if (fileName == null) {
 			// We don't need or want (much less expect) null paths in the API:
-			throw new NullPointerError(
-					"Null file name passed to RpcPerforceFile constructor");
+			throw new NullPointerError("Null file name passed to RpcPerforceFile constructor");
 		}
 
 		this.fileType = fileType;
@@ -112,11 +110,14 @@ public class RpcPerforceFile extends File {
 	 * Another special version of renameTo to support RPC implementation-
 	 * specific needs. This one allows callers to specify whether to
 	 * always copy as-is (no munging).
+	 *
+	 * @param targetFile         targetFile
+	 * @param alwaysCopyUnMunged alwaysCopyUnMunged
+	 * @return ok
 	 */
 	public boolean renameTo(File targetFile, boolean alwaysCopyUnMunged) {
 		if (targetFile == null) {
-			throw new NullPointerError(
-					"Null target file in RpcPerforceFile.renameTo");
+			throw new NullPointerError("Null target file in RpcPerforceFile.renameTo");
 		}
 		try {
 			if ((this.fileType == null) || alwaysCopyUnMunged || canCopyAsIs()) {
@@ -127,6 +128,10 @@ public class RpcPerforceFile extends File {
 				targetFile.delete();
 				if (super.renameTo(targetFile)) {
 					return true;
+				} else if (this.getCanonicalPath().contains(targetFile.getCanonicalPath())
+						|| targetFile.getCanonicalPath().contains(this.getCanonicalPath())) {
+					return renameOverlapping(targetFile);
+
 				} else {
 					return copyTo(targetFile);
 				}
@@ -135,8 +140,59 @@ public class RpcPerforceFile extends File {
 				return decodeTo(targetFile);
 			}
 		} catch (IOException ioexc) {
-			Log.error("Unexpected problem with renaming / copying file '"
-					+ targetFile.getName() + "': " + ioexc.getLocalizedMessage());
+			Log.error("Unexpected problem with renaming / copying file '" + targetFile.getName() + "': " + ioexc.getLocalizedMessage());
+			Log.exception(ioexc);
+		}
+		return false;
+	}
+
+	private boolean renameOverlapping(File targetFile) {
+		// Either target is a substring (directory) of source,
+		// or source is a substring of target (target has a
+		// directory subpath which is the as source)
+		// or source or target has a component which is not a directory.
+		try {
+			// Try moving the current name to a temporary name, and then trying again.
+			if (targetFile.getCanonicalPath().contains(this.getCanonicalPath())) {
+				// Source is a substring of the target
+
+				// Rename source to tmp
+				Path tmpFile = Paths.get(this.getParent(), TMP_FILE_PFX + UUID.randomUUID());
+				FileUtils.moveFile(this, tmpFile.toFile());
+
+				// If the old name directory doesn't exist, make it now.
+				targetFile.getParentFile().mkdirs();
+
+				// Move and rename to target file
+				FileUtils.moveFile(tmpFile.toFile(), targetFile);
+				return true;
+			} else {
+				// Target is a substring of the source
+
+				// Scan target for other files
+				String[] contents = targetFile.list();
+				int count = 0;
+				if (contents != null) {
+					count = contents.length;
+				}
+				if (count > 1) {
+					return false;
+				}
+
+				// Change the current name to a temporary name in the directory
+				Path parentDir = this.getParentFile().toPath();
+				Path tempDir = Paths.get(parentDir + TMP_FILE_PFX + UUID.randomUUID());
+				Files.move(parentDir, tempDir);
+
+				Path tmpFile = Paths.get(tempDir.toString(), this.getName());
+				FileUtils.moveFile(tmpFile.toFile(), targetFile);
+
+				// Remove temp name directory
+				FileUtils.forceDelete(tempDir.toFile());
+				return true;
+			}
+		} catch (IOException ioexc) {
+			Log.error("Unexpected problem with renaming / copying file '" + targetFile.getName() + "': " + ioexc.getLocalizedMessage());
 			Log.exception(ioexc);
 		}
 		return false;
@@ -152,16 +208,17 @@ public class RpcPerforceFile extends File {
 	}
 
 	/**
-	 * Copy this file to another (target file). Assumes no
-	 * decoding necessary. If the target file exists,
+	 * Copy this file to another (target file). Assumes no decoding necessary. If the target file exists,
 	 * it's removed before copying.
+	 *
+	 * @param targetFile targetFile
+	 * @return ok
+	 * @throws IOException on error
 	 */
-
 	public boolean copyTo(File targetFile) throws IOException {
 
 		if (targetFile == null) {
-			throw new NullPointerError(
-					"Null target file in RpcPerforceFile.copyTo");
+			throw new NullPointerError("Null target file in RpcPerforceFile.copyTo");
 		}
 
 		if (targetFile.exists()) {
@@ -178,9 +235,7 @@ public class RpcPerforceFile extends File {
 				//Warn if file still exists
 				if (targetFile.exists()) {
 					// FIXME: cope better with delete fail -- HR.
-					Log
-							.warn("Unable to delete target file for copy in RpcPerforceFile.copyTo; target: '"
-									+ targetFile.getPath());
+					Log.warn("Unable to delete target file for copy in RpcPerforceFile.copyTo; target: '" + targetFile.getPath());
 				}
 			}
 		}
@@ -199,13 +254,10 @@ public class RpcPerforceFile extends File {
 			if ((sourceChannel != null) && (targetChannel != null)) {
 				// Light fuse, stand back...
 
-				bytesTransferred = sourceChannel.transferTo(
-						0, sourceChannel.size(), targetChannel);
+				bytesTransferred = sourceChannel.transferTo(0, sourceChannel.size(), targetChannel);
 
 				if (bytesTransferred != sourceChannel.size()) {
-					Log.error("channel copy for copyTo operation failed with fewer bytes"
-							+ " transferred than expected; expected: " + sourceChannel.size()
-							+ "; saw: " + bytesTransferred);
+					Log.error("channel copy for copyTo operation failed with fewer bytes" + " transferred than expected; expected: " + sourceChannel.size() + "; saw: " + bytesTransferred);
 					return false;    // FIXME: clean up...
 				}
 
@@ -215,29 +267,25 @@ public class RpcPerforceFile extends File {
 			try {
 				if (sourceChannel != null) sourceChannel.close();
 			} catch (Exception exc) {
-				Log.warn("source channel file close error in RpcPerforceFile.copyTo(): "
-						+ exc.getLocalizedMessage());
+				Log.warn("source channel file close error in RpcPerforceFile.copyTo(): " + exc.getLocalizedMessage());
 				Log.exception(exc);
 			}
 			try {
 				if (targetChannel != null) targetChannel.close();
 			} catch (Exception exc) {
-				Log.warn("target channel file close error in RpcPerforceFile.copyTo(): "
-						+ exc.getLocalizedMessage());
+				Log.warn("target channel file close error in RpcPerforceFile.copyTo(): " + exc.getLocalizedMessage());
 				Log.exception(exc);
 			}
 			try {
 				if (inStream != null) inStream.close();
 			} catch (Exception exc) {
-				Log.warn("instream file close error in RpcPerforceFile.copyTo(): "
-						+ exc.getLocalizedMessage());
+				Log.warn("instream file close error in RpcPerforceFile.copyTo(): " + exc.getLocalizedMessage());
 				Log.exception(exc);
 			}
 			try {
 				if (outStream != null) outStream.close();
 			} catch (Exception exc) {
-				Log.warn("outstream file close error in RpcPerforceFile.copyTo(): "
-						+ exc.getLocalizedMessage());
+				Log.warn("outstream file close error in RpcPerforceFile.copyTo(): " + exc.getLocalizedMessage());
 				Log.exception(exc);
 			}
 		}
@@ -248,8 +296,7 @@ public class RpcPerforceFile extends File {
 	public boolean decodeTo(File targetFile) throws IOException {
 
 		if (targetFile == null) {
-			throw new NullPointerError(
-					"Null target file in RpcPerforceFile.decodeTo");
+			throw new NullPointerError("Null target file in RpcPerforceFile.decodeTo");
 		}
 
 		return copyTo(targetFile);
@@ -276,20 +323,20 @@ public class RpcPerforceFile extends File {
 	 * GKZIP decoding or munging, etc. Currently all file types can
 	 * be copied as-is, but this wasn't always true and may not always
 	 * be true...
+	 *
+	 * @return ok
 	 */
 	public boolean canCopyAsIs() {
 		return true;
 	}
 
 	/**
-	 * @see java.io.File#equals()
+	 * @see java.io.File#equals(Object)
 	 */
 	@Override
 	public boolean equals(Object obj) {
 		if ((obj != null) && (obj instanceof RpcPerforceFile)) {
-			if ((super.equals((File) obj)) &&
-					(((RpcPerforceFile) obj).getFileType() == this.fileType) &&
-					(((RpcPerforceFile) obj).getLineEnding() == this.lineEnding)) {
+			if ((super.equals((File) obj)) && (((RpcPerforceFile) obj).getFileType() == this.fileType) && (((RpcPerforceFile) obj).getLineEnding() == this.lineEnding)) {
 				return true;
 			}
 		}
@@ -313,6 +360,10 @@ public class RpcPerforceFile extends File {
 
 	/**
 	 * Check if the file or symbolic link exists.
+	 *
+	 * @param file       file
+	 * @param fstSymlink fstSymlink
+	 * @return exists
 	 */
 	public static boolean fileExists(File file, boolean fstSymlink) {
 

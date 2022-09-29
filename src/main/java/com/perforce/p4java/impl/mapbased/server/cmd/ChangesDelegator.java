@@ -130,11 +130,6 @@ public class ChangesDelegator extends BaseDelegator implements IChangesDelegator
 
         return ResultListBuilder.buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, IChangelistSummary>() {
-                    @Override
-                    public IChangelistSummary apply(Map map) {
-                        return new ChangelistSummary(map, true);
-                    }
-                });
+				map -> new ChangelistSummary(map, true));
     }
 }

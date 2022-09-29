@@ -108,13 +108,8 @@ public class ChangeDelegator extends BaseDelegator implements IChangeDelegator {
 
         return ResultListBuilder.buildNullableObjectFromNonInfoMessageCommandResultMaps(
                 resultMaps,
-                new Function<Map, IChangelist>() {
-                    @Override
-                    public IChangelist apply(Map map) {
-                        return new Changelist(map, server);
-                    }
-                }
-        );
+				(Function<Map<String, Object>, IChangelist>) map -> new Changelist(map, server)
+		);
     }
 
 }

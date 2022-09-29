@@ -115,11 +115,6 @@ public class ConfigureDelegator extends BaseDelegator implements IConfigureDeleg
         List<Map<String, Object>> resultMaps = execMapCmdList(CONFIGURE, args, null);
 
         return ResultListBuilder.buildNonNullObjectListFromCommandResultMaps(resultMaps,
-                new Function<Map, ServerConfigurationValue>() {
-                    @Override
-                    public ServerConfigurationValue apply(Map map) {
-                        return new ServerConfigurationValue(map);
-                    }
-                });
+				map -> new ServerConfigurationValue(map));
     }
 }

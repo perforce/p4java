@@ -1,43 +1,43 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option.server;
-
-import java.util.List;
 
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
- * Options class for IOptionsServer.verifyFiles method.<p>
- * 
+ * Options class for IOptionsServer.verifyFiles method.
+ *
  * @see com.perforce.p4java.server.IOptionsServer#verifyFiles(java.util.List, com.perforce.p4java.option.server.VerifyFilesOptions)
  */
 public class VerifyFilesOptions extends Options {
-	
+
 	/**
 	 * <pre>
 	 * Options:
 	 * 		[-t | -u | -v | -z] [-m max -q -s -X -b N] file[revRange] ...
-     * 		-U unloadfiles...
+	 * 		-U unloadfiles...
 	 * </pre>
 	 */
 	public static final String OPTIONS_SPECS = "b:t b:u b:v b:z i:m:gtz b:q b:s b:X l:b:gez b:U";
-	
+
 	/**
 	 * If true, causes 'p4 verify' to schedule transfer of the content of any
 	 * damaged revision. This option is for use only with a replica server and
 	 * cannot be used with the '-v' or '-u' options. Corresponds to the -t flag.
 	 */
 	protected boolean transferContent = false;
-	
+
 	/**
 	 * If true, computes and saves the digest only for revisions that have no
 	 * saved digest. Corresponds to the -u flag.
 	 */
 	protected boolean computeMissingDigest = false;
-	
+
 	/**
 	 * If true, computes and saves the digest for each revision, regardless of
 	 * whether the revision already has a saved digest. This option can be used
@@ -81,7 +81,7 @@ public class VerifyFilesOptions extends Options {
 	 * skipped. Corresponds to the -s flag.
 	 */
 	protected boolean skipPlusXModifier = false;
-	
+
 	/**
 	 * If greater than zero, specifies the batch size. By default, 'p4 verify'
 	 * processes files in batches of 10000 files at a time. Specify -b 0 to
@@ -90,7 +90,7 @@ public class VerifyFilesOptions extends Options {
 	 * single batch.. Corresponds to the -b N flag.
 	 */
 	protected long batchSize = 0;
-	
+
 	/**
 	 * If true, verifies files in the unload depot (see 'p4 help unload').
 	 * Corresponds to the -U flag.
@@ -106,19 +106,20 @@ public class VerifyFilesOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public VerifyFilesOptions(String... options) {
@@ -129,17 +130,7 @@ public class VerifyFilesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-								this.isTransferContent(),
-								this.isComputeMissingDigest(),
-								this.isComputeDigest(),
-								this.isSkipComputedDigest(),
-								this.getMaxRevisions(),
-								this.isQuiet(),
-								this.isVerifySize(),
-								this.isSkipPlusXModifier(),
-								this.getBatchSize(),
-								this.isVerifyUnload());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isTransferContent(), this.isComputeMissingDigest(), this.isComputeDigest(), this.isSkipComputedDigest(), this.getMaxRevisions(), this.isQuiet(), this.isVerifySize(), this.isSkipPlusXModifier(), this.getBatchSize(), this.isVerifyUnload());
 		return this.optionList;
 	}
 

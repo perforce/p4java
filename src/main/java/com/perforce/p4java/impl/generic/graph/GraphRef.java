@@ -11,6 +11,11 @@ public class GraphRef implements IGraphRef {
 
 	/**
 	 * Default constructor
+	 *
+	 * @param repo repo
+	 * @param type type
+	 * @param sha  sha
+	 * @param name name
 	 */
 	public GraphRef(final String repo, final String type, final String sha, final String name) {
 		this.repo = repo;

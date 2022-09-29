@@ -1,7 +1,9 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.impl.mapbased.server;
+
+import com.perforce.p4java.server.IServerInfo;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -10,8 +12,6 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
-
-import com.perforce.p4java.server.IServerInfo;
 
 /**
  * Default simple implementation for server info interface.
@@ -22,7 +22,7 @@ public class ServerInfo implements IServerInfo {
 	// Perforce server info date pattern with time zone
 	// Example: "2014/06/05 17:28:14 -0700 PDT"
 	public static final String SERVER_INFO_DATE_PATTERN = "yyyy/MM/dd HH:mm:ss Z z";
-	
+
 	private String clientName = null;
 	private String clientHost = null;
 	private String clientRoot = null;
@@ -40,7 +40,7 @@ public class ServerInfo implements IServerInfo {
 	private boolean serverEncrypted = false;
 	private String serverId = null;
 	private String serverCluster = null;
-	
+
 	private String replica = null;
 	private boolean passwordEnabled = false;
 	private boolean caseSensitive = false;
@@ -69,16 +69,27 @@ public class ServerInfo implements IServerInfo {
 
 	/**
 	 * Explicit-value all-fields constructor.
-	 * 
+	 *
+	 * @param clientName             clientName
+	 * @param clientHost             clientHost
+	 * @param clientRoot             clientRoot
+	 * @param clientAddress          clientAddress
+	 * @param clientCurrentDirectory clientCurrentDirectory
+	 * @param serverAddress          serverAddress
+	 * @param serverDate             serverDate
+	 * @param serverLicense          serverLicense
+	 * @param serverRoot             serverRoot
+	 * @param serverUptime           serverUptime
+	 * @param serverVersion          serverVersion
+	 * @param serverLicenseIp        serverLicenseIp
+	 * @param proxyVersion           proxyVersion
+	 * @param userName               userName
+	 * @param unicodeEnabled         unicodeEnabled
+	 * @param monitorEnabled         monitorEnabled
 	 * @deprecated Use constructor with map parameter to initialize all fields.
 	 */
 	@Deprecated
-	public ServerInfo(String clientName, String clientHost, String clientRoot,
-			String clientAddress, String clientCurrentDirectory,
-			String serverAddress, String serverDate, String serverLicense,
-			String serverRoot, String serverUptime, String serverVersion,
-			String serverLicenseIp, String proxyVersion, String userName,
-			boolean unicodeEnabled, boolean monitorEnabled) {
+	public ServerInfo(String clientName, String clientHost, String clientRoot, String clientAddress, String clientCurrentDirectory, String serverAddress, String serverDate, String serverLicense, String serverRoot, String serverUptime, String serverVersion, String serverLicenseIp, String proxyVersion, String userName, boolean unicodeEnabled, boolean monitorEnabled) {
 		this.clientName = clientName;
 		this.clientHost = clientHost;
 		this.clientRoot = clientRoot;
@@ -99,8 +110,9 @@ public class ServerInfo implements IServerInfo {
 
 	/**
 	 * Constructor for use with maps passed back from the Perforce server only.
-	 * 
+	 *
 	 * When a broker is involved, there will be more than one map.
+	 * @param maps maps
 	 */
 	public ServerInfo(List<Map<String, Object>> maps) {
 		for (Map<String, Object> map : maps) {
@@ -110,6 +122,7 @@ public class ServerInfo implements IServerInfo {
 
 	/**
 	 * Constructor for use with maps passed back from the Perforce server only.
+	 * @param map map
 	 */
 	public ServerInfo(Map<String, Object> map) {
 		if (map != null) {
@@ -119,6 +132,7 @@ public class ServerInfo implements IServerInfo {
 
 	/**
 	 * add any fields that are set in map; don't clear fields that are missing from map
+	 * @param map map
 	 */
 	private void setFromMap(Map<String, Object> map) {
 		this.userName = setFromMap(map, "userName", this.userName);
@@ -127,7 +141,7 @@ public class ServerInfo implements IServerInfo {
 		this.clientRoot = setFromMap(map, "clientRoot", this.clientRoot);
 		this.clientHost = setFromMap(map, "clientHost", this.clientHost);
 		this.clientAddress = setFromMap(map, "clientAddress", this.clientAddress);
-		
+
 		this.serverAddress = setFromMap(map, "serverAddress", this.serverAddress);
 		this.serverDate = setFromMap(map, "serverDate", this.serverDate);
 		this.serverLicense = setFromMap(map, "serverLicense", this.serverLicense);
@@ -137,13 +151,13 @@ public class ServerInfo implements IServerInfo {
 		this.serverLicenseIp = setFromMap(map, "serverLicense-ip", this.serverLicenseIp);
 		this.serverId = setFromMap(map, "ServerID", this.serverId);
 		this.serverCluster = setFromMap(map, "serverCluster", this.serverCluster);
-		
+
 		this.replica = setFromMap(map, "replica", this.replica);
 
 		this.proxyVersion = setFromMap(map, "proxyVersion", this.proxyVersion);
 		this.proxyAddress = setFromMap(map, "proxyAddress", this.proxyAddress);
 		this.proxyRoot = setFromMap(map, "proxyRoot", this.proxyRoot);
-		
+
 		this.brokerVersion = setFromMap(map, "brokerVersion", this.brokerVersion);
 		this.brokerAddress = setFromMap(map, "brokerAddress", this.brokerAddress);
 		this.sandboxVersion = setFromMap(map, "p4sandboxBrokerVersion", this.sandboxVersion);
@@ -153,9 +167,9 @@ public class ServerInfo implements IServerInfo {
 		this.ssoAuth = setFromMap(map, "ssoAuth", this.ssoAuth);
 
 		if (map.get("serverDate") != null) {
-            DateFormat df = new SimpleDateFormat(SERVER_INFO_DATE_PATTERN);
-            try {
-				Date d = df.parse((String)map.get("serverDate"));
+			DateFormat df = new SimpleDateFormat(SERVER_INFO_DATE_PATTERN);
+			try {
+				Date d = df.parse((String) map.get("serverDate"));
 				if (d != null) {
 					this.serverCalendar = Calendar.getInstance();
 					this.serverCalendar.setTime(d);
@@ -165,47 +179,37 @@ public class ServerInfo implements IServerInfo {
 			}
 		}
 
-		if (map.containsKey("serverEncryption")
-				&& ((String) map.get("serverEncryption")).equalsIgnoreCase("encrypted")) {
+		if (map.containsKey("serverEncryption") && ((String) map.get("serverEncryption")).equalsIgnoreCase("encrypted")) {
 			this.serverEncrypted = true;
 		}
-		if (map.containsKey("proxyEncryption")
-				&& ((String) map.get("proxyEncryption")).equalsIgnoreCase("encrypted")) {
+		if (map.containsKey("proxyEncryption") && ((String) map.get("proxyEncryption")).equalsIgnoreCase("encrypted")) {
 			this.proxyEncrypted = true;
 		}
-		if (map.containsKey("brokerEncryption")
-				&& ((String) map.get("brokerEncryption")).equalsIgnoreCase("encrypted")) {
+		if (map.containsKey("brokerEncryption") && ((String) map.get("brokerEncryption")).equalsIgnoreCase("encrypted")) {
 			this.brokerEncrypted = true;
 		}
-		if (map.containsKey("password")
-				&& ((String) map.get("password")).equalsIgnoreCase("enabled")) {
+		if (map.containsKey("password") && ((String) map.get("password")).equalsIgnoreCase("enabled")) {
 			this.passwordEnabled = true;
 		}
-		if (map.containsKey("caseHandling")
-				&& ((String) map.get("caseHandling")).equalsIgnoreCase("sensitive")) {
+		if (map.containsKey("caseHandling") && ((String) map.get("caseHandling")).equalsIgnoreCase("sensitive")) {
 			this.caseSensitive = true;
 		}
-		if (map.containsKey("unicode")
-				&& ((String) map.get("unicode")).equalsIgnoreCase("enabled")) {
+		if (map.containsKey("unicode") && ((String) map.get("unicode")).equalsIgnoreCase("enabled")) {
 			this.unicodeEnabled = true;
 		}
-		if (map.containsKey("monitor")
-				&& ((String) map.get("monitor")).equalsIgnoreCase("enabled")) {
+		if (map.containsKey("monitor") && ((String) map.get("monitor")).equalsIgnoreCase("enabled")) {
 			this.monitorEnabled = true;
 		}
-		if (map.containsKey("move")
-				&& ((String) map.get("move")).equalsIgnoreCase("disabled")) {
+		if (map.containsKey("move") && ((String) map.get("move")).equalsIgnoreCase("disabled")) {
 			this.moveDisabled = true;
 		}
 	}
-	
+
 	private String setFromMap(Map<String, Object> map, String key, String defaultValue) {
-		if (map.containsKey(key))
-			return (String)map.get(key);
-		else
-			return defaultValue;
+		if (map.containsKey(key)) return (String) map.get(key);
+		else return defaultValue;
 	}
-	
+
 	public String getServerAddress() {
 		return this.serverAddress;
 	}
@@ -455,11 +459,9 @@ public class ServerInfo implements IServerInfo {
 	}
 
 	public boolean isEncrypted() {
-		return (this.serverEncrypted ||
-				this.proxyEncrypted ||
-				this.brokerEncrypted);
+		return (this.serverEncrypted || this.proxyEncrypted || this.brokerEncrypted);
 	}
-	
+
 	public String getServerId() {
 		return serverId;
 	}

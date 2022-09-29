@@ -23,13 +23,15 @@ public class ClientHelper {
 	/**
 	 * Send back the data bytes written (accumulated)
 	 * This is for the progress indicator
+	 *
+	 * @param cmdEnv      cmdEnv
+	 * @param filePath    filePath
+	 * @param fileSize    fileSize
+	 * @param currentSize currentSize
+	 * @param bytesRead   bytesRead
+	 * @return bytes written
 	 */
-	public static long sendBackWrittenDataBytes(
-			final CommandEnv cmdEnv,
-			final String filePath,
-			final long fileSize,
-			final long currentSize,
-			final long bytesRead) {
+	public static long sendBackWrittenDataBytes(final CommandEnv cmdEnv, final String filePath, final long fileSize, final long currentSize, final long bytesRead) {
 		long totalReadSize = currentSize;
 		if (cmdEnv.getProtocolSpecs().isEnableProgress()) {
 			if (fileSize > 0 && bytesRead > 0) {
@@ -48,12 +50,14 @@ public class ClientHelper {
 	/**
 	 * Helper method that build the parallel sync options
 	 *
-	 * @param pSyncOpts
-	 * @return String
-	 * @throws P4JavaException
+	 * @param serverImpl  serverImpl
+	 * @param fileSpecs fileSpecs
+	 * @param syncOpts syncOpts
+	 * @param pSyncOpts pSyncOpts
+	 * @return options
+	 * @throws P4JavaException on error
 	 */
-	public static String[] buildParallelOptions(IServer serverImpl, List<IFileSpec> fileSpecs, SyncOptions syncOpts,
-	                                            ParallelSyncOptions pSyncOpts) throws P4JavaException {
+	public static String[] buildParallelOptions(IServer serverImpl, List<IFileSpec> fileSpecs, SyncOptions syncOpts, ParallelSyncOptions pSyncOpts) throws P4JavaException {
 
 		StringBuilder parallelOptionsBuilder = new StringBuilder();
 		parallelOptionsBuilder.append("--parallel=");

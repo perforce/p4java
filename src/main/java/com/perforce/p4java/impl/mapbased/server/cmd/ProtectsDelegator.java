@@ -80,12 +80,7 @@ public class ProtectsDelegator extends BaseDelegator implements IProtectsDelegat
         final AtomicInteger order = new AtomicInteger(-1);
         return buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, IProtectionEntry>() {
-                    @Override
-                    public IProtectionEntry apply(Map map) {
-                        return new ProtectionEntry(map, order.incrementAndGet());
-                    }
-                }
+                map -> new ProtectionEntry(map, order.incrementAndGet())
         );
     }
 }

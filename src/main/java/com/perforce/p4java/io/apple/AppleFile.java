@@ -11,109 +11,142 @@ import com.perforce.p4java.exception.FileDecoderException;
  * method to verify the Apple file, and figure out if it is an AppleSingle or
  * AppleDouble formatted file.
  * <p>
- * 
  * The AppleSingle format is a representation of Macintosh files as one
  * consecutive stream of bytes. AppleSingle combines the data fork, resource
  * fork and the related Finder meta-file information into a single file.
  * <p>
- * 
  * The AppleDouble format stores the data fork, resource fork as two separate
  * files. AppleDouble leaves the data fork in its original format, and the
  * resource fork and Finder information were combined into a second file.
  * <p>
- * 
  * Apple defined the magic number for the AppleSingle format as 0x00051600, and
  * the magic number for the AppleDouble format as 0x00051607.
- * 
+ *
  * <pre>
- * AppleSingle file header: 
- * 
+ * AppleSingle file header:
+ *
  * Field Length
  * ----- ------
- * Magic number ------- 4 bytes
+ * Magic number -------- 4 bytes
  * Version number ------ 4 bytes
  * Filler ------------- 16 bytes
- * Number of entries ----- 2 bytes
- * 
+ * Number of entries --- 2 bytes
+ *
  * Entry descriptor for each entry:
  * Entry ID ------ 4 bytes
  * Offset -------- 4 bytes
  * Length -------- 4 bytes
- * 
+ *
  * Apple reserved entry IDs:
- * 
- * Data Fork -------- 1 Data fork
- * Resource Fork ----- 2 Resource fork
- * Real Name -------- 3 File's name as created on home file system
- * Comment --------- 4 Standard Macintosh comment
- * Icon, B&W -------- 5 Standard Macintosh black and white icon
- * Icon, Color -------- 6 Macintosh color icon
- * File Dates Info ------8 File creation date, modification date, and so on
- * Finder Info -------- 9 Standard Macintosh Finder information
- * Macintosh File Info ---10 Macintosh file information, attributes, and so on
- * ProDOS File Info -----11 ProDOS file information, attributes, and so on
- * MS-DOS File Info ----12 MS-DOS file information, attributes, and so on
- * Short Name --------13 AFP short name
- * AFP File Info ------- 14 AFP file information, attributes, and so on
- * Directory ID --------15 AFP directory ID
+ *
+ * Data Fork -------------- 1 Data fork
+ * Resource Fork ---------- 2 Resource fork
+ * Real Name -------------- 3 File's name as created on home file system
+ * Comment ---------------- 4 Standard Macintosh comment
+ * Icon, B and W ---------- 5 Standard Macintosh black and white icon
+ * Icon, Color ------------ 6 Macintosh color icon
+ * File Dates Info -------- 8 File creation date, modification date, and so on
+ * Finder Info ------------ 9 Standard Macintosh Finder information
+ * Macintosh File Info --- 10 Macintosh file information, attributes, and so on
+ * ProDOS File Info ------ 11 ProDOS file information, attributes, and so on
+ * MS-DOS File Info ------ 12 MS-DOS file information, attributes, and so on
+ * Short Name ------------ 13 AFP short name
+ * AFP File Info --------- 14 AFP file information, attributes, and so on
+ * Directory ID ---------- 15 AFP directory ID
  * </pre>
- * 
+ * <p>
  * See RFC 1740 for reference: http://tools.ietf.org/html/rfc1740
  */
 public abstract class AppleFile {
 
-	/** The Apple file format: AppleSingle, AppleDouble, default to unknown. */
+	/**
+	 * The Apple file format: AppleSingle, AppleDouble, default to unknown.
+	 */
 	protected FileFormat format = FileFormat.UNKNOWN;
 
-	/** The raw Apple file. */
+	/**
+	 * The raw Apple file.
+	 */
 	protected AppleFileData fileData = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 1: Data fork. */
+	/**
+	 * Entry 1: Data fork.
+	 */
 	protected AppleFileData dataFork = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 2: Resource fork. */
+	/**
+	 * Entry 2: Resource fork.
+	 */
 	protected AppleFileData resourceFork = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 3: File's name as created on home file system. */
+	/**
+	 * Entry 3: File's name as created on home file system.
+	 */
 	protected AppleFileData realName = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 4: Standard Macintosh comment. */
+	/**
+	 * Entry 4: Standard Macintosh comment.
+	 */
 	protected AppleFileData comment = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 5: Standard Macintosh black and white icon. */
+	/**
+	 * Entry 5: Standard Macintosh black and white icon.
+	 */
 	protected AppleFileData iconBW = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 6: Macintosh color icon. */
+	/**
+	 * Entry 6: Macintosh color icon.
+	 */
 	protected AppleFileData iconColor = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 8: File creation date, modification date, and so on. */
+	/**
+	 * Entry 8: File creation date, modification date, and so on.
+	 */
 	protected AppleFileData fileDatesInfo = AppleFileData.EMPTY_FILE_DATA;
 
-	/** The file dates info entry. */
+	/**
+	 * The file dates info entry.
+	 */
 	protected FileDatesInfoEntry fileDatesInfoEntry = null;
 
-	/** Entry 9: Standard Macintosh Finder information. */
+	/**
+	 * Entry 9: Standard Macintosh Finder information.
+	 */
 	protected AppleFileData finderInfo = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 10: Macintosh file information, attributes, and so on. */
+	/**
+	 * Entry 10: Macintosh file information, attributes, and so on.
+	 */
 	protected AppleFileData macintoshInfo = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 11: ProDOS file information, attributes, and so on. */
+	/**
+	 * Entry 11: ProDOS file information, attributes, and so on.
+	 */
 	protected AppleFileData proDOSFileInfo = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 12: MS-DOS file information, attributes, and so on. */
+	/**
+	 * Entry 12: MS-DOS file information, attributes, and so on.
+	 */
 	protected AppleFileData msDOSFileInfo = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 13: AFP short name. */
+	/**
+	 * Entry 13: AFP short name.
+	 */
 	protected AppleFileData shortName = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 14: AFP file information, attributes, and so on. */
+	/**
+	 * Entry 14: AFP file information, attributes, and so on.
+	 */
 	protected AppleFileData afpFileInfo = AppleFileData.EMPTY_FILE_DATA;
 
-	/** Entry 15: AFP directory ID. */
+	/**
+	 * Entry 15: AFP directory ID.
+	 */
 	protected AppleFileData directoryID = AppleFileData.EMPTY_FILE_DATA;
 
-	/** The num entries. */
+	/**
+	 * The num entries.
+	 */
 	protected int numEntries = 0;
 
 	/**
@@ -121,16 +154,13 @@ public abstract class AppleFile {
 	 */
 	public enum FileFormat {
 
-		APPLE_SINGLE,
-		APPLE_DOUBLE,
-		UNKNOWN;
+		APPLE_SINGLE, APPLE_DOUBLE, UNKNOWN;
 
 		/**
 		 * Return a suitable Apple file format as inferred from the passed-in
 		 * string. Otherwise return the UNKNOWN file format.
-		 * 
-		 * @param fileFormat
-		 *            the file format
+		 *
+		 * @param fileFormat the file format
 		 * @return the FileFormat
 		 */
 		public static FileFormat fromString(String fileFormat) {
@@ -141,29 +171,38 @@ public abstract class AppleFile {
 			try {
 				return FileFormat.valueOf(fileFormat.toUpperCase());
 			} catch (IllegalArgumentException iae) {
-				Log.error("Bad conversion attempt in FileFormat.fromString; string: "
-						+ fileFormat + "; message: " + iae.getMessage());
+				Log.error("Bad conversion attempt in FileFormat.fromString; string: " + fileFormat + "; message: " + iae.getMessage());
 				Log.exception(iae);
 				return UNKNOWN;
 			}
 		}
-	};
+	}
+
+	;
 
 	/**
 	 * This class represents the file dates.
 	 */
 	public class FileDatesInfoEntry {
 
-		/** The create time. */
+		/**
+		 * The create time.
+		 */
 		private int createTime = Integer.MIN_VALUE;
 
-		/** The modify time. */
+		/**
+		 * The modify time.
+		 */
 		private int modifyTime = Integer.MIN_VALUE;
 
-		/** The backup time. */
+		/**
+		 * The backup time.
+		 */
 		private int backupTime = Integer.MIN_VALUE;
 
-		/** The access time. */
+		/**
+		 * The access time.
+		 */
 		private int accessTime = Integer.MIN_VALUE;
 
 		/**
@@ -175,7 +214,7 @@ public abstract class AppleFile {
 
 		/**
 		 * Gets the creates the time.
-		 * 
+		 *
 		 * @return the creates the time
 		 */
 		public int getCreateTime() {
@@ -184,9 +223,8 @@ public abstract class AppleFile {
 
 		/**
 		 * Sets the creates the time.
-		 * 
-		 * @param createTime
-		 *            the new creates the time
+		 *
+		 * @param createTime the new creates the time
 		 */
 		public void setCreateTime(int createTime) {
 			this.createTime = createTime;
@@ -194,7 +232,7 @@ public abstract class AppleFile {
 
 		/**
 		 * Gets the modify time.
-		 * 
+		 *
 		 * @return the modify time
 		 */
 		public int getModifyTime() {
@@ -203,9 +241,8 @@ public abstract class AppleFile {
 
 		/**
 		 * Sets the modify time.
-		 * 
-		 * @param modifyTime
-		 *            the new modify time
+		 *
+		 * @param modifyTime the new modify time
 		 */
 		public void setModifyTime(int modifyTime) {
 			this.modifyTime = modifyTime;
@@ -213,7 +250,7 @@ public abstract class AppleFile {
 
 		/**
 		 * Gets the backup time.
-		 * 
+		 *
 		 * @return the backup time
 		 */
 		public int getBackupTime() {
@@ -222,9 +259,8 @@ public abstract class AppleFile {
 
 		/**
 		 * Sets the backup time.
-		 * 
-		 * @param backupTime
-		 *            the new backup time
+		 *
+		 * @param backupTime the new backup time
 		 */
 		public void setBackupTime(int backupTime) {
 			this.backupTime = backupTime;
@@ -232,7 +268,7 @@ public abstract class AppleFile {
 
 		/**
 		 * Gets the access time.
-		 * 
+		 *
 		 * @return the access time
 		 */
 		public int getAccessTime() {
@@ -241,9 +277,8 @@ public abstract class AppleFile {
 
 		/**
 		 * Sets the access time.
-		 * 
-		 * @param accessTime
-		 *            the new access time
+		 *
+		 * @param accessTime the new access time
 		 */
 		public void setAccessTime(int accessTime) {
 			this.accessTime = accessTime;
@@ -252,9 +287,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the num entries.
-	 * 
-	 * @param numEntries
-	 *            the new num entries
+	 *
+	 * @param numEntries the new num entries
 	 */
 	public void setNumEntries(int numEntries) {
 		this.numEntries = numEntries;
@@ -262,9 +296,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Verify the validity of the Apple file.
-	 * 
-	 * @throws FileDecoderException
-	 *             the file decoder exception
+	 *
+	 * @throws FileDecoderException the file decoder exception
 	 */
 	@SuppressWarnings("unused")
 	protected void verify() throws FileDecoderException {
@@ -358,8 +391,7 @@ public abstract class AppleFile {
 			entryLength <<= 8;
 			entryLength |= data[(position++)] & 0xFF;
 			entryLength &= 0x7FFFFFFF;
-			if ((entryOffset < contentPosition)
-					|| (length < entryOffset + entryLength)) {
+			if ((entryOffset < contentPosition) || (length < entryOffset + entryLength)) {
 				throw new FileDecoderException("Corrupt Apple file data.");
 			}
 		}
@@ -368,61 +400,59 @@ public abstract class AppleFile {
 	/**
 	 * Extract file dates.
 	 *
-	 * @param data the data
+	 * @param data   the data
 	 * @param offset the offset
 	 * @param length the length
 	 */
 	protected void extractFileDates(byte[] data, int offset, int length) {
-		if ((0 > offset) || (offset > data.length))
-			throw new IndexOutOfBoundsException();
-		if ((0 > length) || (length > data.length - offset))
-			throw new IndexOutOfBoundsException();
+		if ((0 > offset) || (offset > data.length)) throw new IndexOutOfBoundsException();
+		if ((0 > length) || (length > data.length - offset)) throw new IndexOutOfBoundsException();
 
-		  int position = offset;
-		
-		  int createTime = 0;
-	      createTime |= data[(position++)] & 0xFF;
-	      createTime <<= 8;
-	      createTime |= data[(position++)] & 0xFF;
-	      createTime <<= 8;
-	      createTime |= data[(position++)] & 0xFF;
-	      createTime <<= 8;
-	      createTime |= data[(position++)] & 0xFF;
-	      int modifyTime = 0;
-	      modifyTime |= data[(position++)] & 0xFF;
-	      modifyTime <<= 8;
-	      modifyTime |= data[(position++)] & 0xFF;
-	      modifyTime <<= 8;
-	      modifyTime |= data[(position++)] & 0xFF;
-	      modifyTime <<= 8;
-	      modifyTime |= data[(position++)] & 0xFF;
-	      int backupTime = 0;
-	      backupTime |= data[(position++)] & 0xFF;
-	      backupTime <<= 8;
-	      backupTime |= data[(position++)] & 0xFF;
-	      backupTime <<= 8;
-	      backupTime |= data[(position++)] & 0xFF;
-	      backupTime <<= 8;
-	      backupTime |= data[(position++)] & 0xFF;
-	      int accessTime = 0;
-	      accessTime |= data[(position++)] & 0xFF;
-	      accessTime <<= 8;
-	      accessTime |= data[(position++)] & 0xFF;
-	      accessTime <<= 8;
-	      accessTime |= data[(position++)] & 0xFF;
-	      accessTime <<= 8;
-	      accessTime |= data[(position++)] & 0xFF;
+		int position = offset;
 
-	      this.fileDatesInfoEntry = new FileDatesInfoEntry();
-	      fileDatesInfoEntry.setCreateTime(createTime);
-	      fileDatesInfoEntry.setModifyTime(modifyTime);
-	      fileDatesInfoEntry.setBackupTime(backupTime);
-	      fileDatesInfoEntry.setAccessTime(accessTime);
+		int createTime = 0;
+		createTime |= data[(position++)] & 0xFF;
+		createTime <<= 8;
+		createTime |= data[(position++)] & 0xFF;
+		createTime <<= 8;
+		createTime |= data[(position++)] & 0xFF;
+		createTime <<= 8;
+		createTime |= data[(position++)] & 0xFF;
+		int modifyTime = 0;
+		modifyTime |= data[(position++)] & 0xFF;
+		modifyTime <<= 8;
+		modifyTime |= data[(position++)] & 0xFF;
+		modifyTime <<= 8;
+		modifyTime |= data[(position++)] & 0xFF;
+		modifyTime <<= 8;
+		modifyTime |= data[(position++)] & 0xFF;
+		int backupTime = 0;
+		backupTime |= data[(position++)] & 0xFF;
+		backupTime <<= 8;
+		backupTime |= data[(position++)] & 0xFF;
+		backupTime <<= 8;
+		backupTime |= data[(position++)] & 0xFF;
+		backupTime <<= 8;
+		backupTime |= data[(position++)] & 0xFF;
+		int accessTime = 0;
+		accessTime |= data[(position++)] & 0xFF;
+		accessTime <<= 8;
+		accessTime |= data[(position++)] & 0xFF;
+		accessTime <<= 8;
+		accessTime |= data[(position++)] & 0xFF;
+		accessTime <<= 8;
+		accessTime |= data[(position++)] & 0xFF;
+
+		this.fileDatesInfoEntry = new FileDatesInfoEntry();
+		fileDatesInfoEntry.setCreateTime(createTime);
+		fileDatesInfoEntry.setModifyTime(modifyTime);
+		fileDatesInfoEntry.setBackupTime(backupTime);
+		fileDatesInfoEntry.setAccessTime(accessTime);
 	}
 
 	/**
 	 * Gets the format.
-	 * 
+	 *
 	 * @return the format
 	 */
 	public FileFormat getFormat() {
@@ -431,9 +461,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the format.
-	 * 
-	 * @param format
-	 *            the new format
+	 *
+	 * @param format the new format
 	 */
 	public void setFormat(FileFormat format) {
 		this.format = format;
@@ -441,7 +470,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the file data.
-	 * 
+	 *
 	 * @return the file data
 	 */
 	public AppleFileData getFileData() {
@@ -450,9 +479,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the file data.
-	 * 
-	 * @param fileData
-	 *            the new file data
+	 *
+	 * @param fileData the new file data
 	 */
 	public void setFileData(AppleFileData fileData) {
 		this.fileData = fileData;
@@ -460,7 +488,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the data fork.
-	 * 
+	 *
 	 * @return the data fork
 	 */
 	public AppleFileData getDataFork() {
@@ -469,9 +497,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the data fork.
-	 * 
-	 * @param dataFork
-	 *            the new data fork
+	 *
+	 * @param dataFork the new data fork
 	 */
 	public void setDataFork(AppleFileData dataFork) {
 		this.dataFork = dataFork;
@@ -479,7 +506,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the resource fork.
-	 * 
+	 *
 	 * @return the resource fork
 	 */
 	public AppleFileData getResourceFork() {
@@ -488,9 +515,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the resource fork.
-	 * 
-	 * @param resourceFork
-	 *            the new resource fork
+	 *
+	 * @param resourceFork the new resource fork
 	 */
 	public void setResourceFork(AppleFileData resourceFork) {
 		this.resourceFork = resourceFork;
@@ -498,7 +524,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the real name.
-	 * 
+	 *
 	 * @return the real name
 	 */
 	public AppleFileData getRealName() {
@@ -507,9 +533,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the real name.
-	 * 
-	 * @param realName
-	 *            the new real name
+	 *
+	 * @param realName the new real name
 	 */
 	public void setRealName(AppleFileData realName) {
 		this.realName = realName;
@@ -517,7 +542,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the comment.
-	 * 
+	 *
 	 * @return the comment
 	 */
 	public AppleFileData getComment() {
@@ -526,9 +551,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the comment.
-	 * 
-	 * @param comment
-	 *            the new comment
+	 *
+	 * @param comment the new comment
 	 */
 	public void setComment(AppleFileData comment) {
 		this.comment = comment;
@@ -536,7 +560,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the icon bw.
-	 * 
+	 *
 	 * @return the icon bw
 	 */
 	public AppleFileData getIconBW() {
@@ -545,9 +569,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the icon bw.
-	 * 
-	 * @param iconBW
-	 *            the new icon bw
+	 *
+	 * @param iconBW the new icon bw
 	 */
 	public void setIconBW(AppleFileData iconBW) {
 		this.iconBW = iconBW;
@@ -555,7 +578,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the icon color.
-	 * 
+	 *
 	 * @return the icon color
 	 */
 	public AppleFileData getIconColor() {
@@ -564,9 +587,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the icon color.
-	 * 
-	 * @param iconColor
-	 *            the new icon color
+	 *
+	 * @param iconColor the new icon color
 	 */
 	public void setIconColor(AppleFileData iconColor) {
 		this.iconColor = iconColor;
@@ -574,7 +596,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the file dates info.
-	 * 
+	 *
 	 * @return the file dates info
 	 */
 	public AppleFileData getFileDatesInfo() {
@@ -583,9 +605,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the file dates info.
-	 * 
-	 * @param fileDatesInfo
-	 *            the new file dates info
+	 *
+	 * @param fileDatesInfo the new file dates info
 	 */
 	public void setFileDatesInfo(AppleFileData fileDatesInfo) {
 		this.fileDatesInfo = fileDatesInfo;
@@ -593,7 +614,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the finder info.
-	 * 
+	 *
 	 * @return the finder info
 	 */
 	public AppleFileData getFinderInfo() {
@@ -602,9 +623,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the finder info.
-	 * 
-	 * @param finderInfo
-	 *            the new finder info
+	 *
+	 * @param finderInfo the new finder info
 	 */
 	public void setFinderInfo(AppleFileData finderInfo) {
 		this.finderInfo = finderInfo;
@@ -612,7 +632,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the macintosh info.
-	 * 
+	 *
 	 * @return the macintosh info
 	 */
 	public AppleFileData getMacintoshInfo() {
@@ -621,9 +641,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the macintosh info.
-	 * 
-	 * @param macintoshInfo
-	 *            the new macintosh info
+	 *
+	 * @param macintoshInfo the new macintosh info
 	 */
 	public void setMacintoshInfo(AppleFileData macintoshInfo) {
 		this.macintoshInfo = macintoshInfo;
@@ -631,7 +650,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the pro dos file info.
-	 * 
+	 *
 	 * @return the pro dos file info
 	 */
 	public AppleFileData getProDOSFileInfo() {
@@ -640,9 +659,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the pro dos file info.
-	 * 
-	 * @param proDOSFileInfo
-	 *            the new pro dos file info
+	 *
+	 * @param proDOSFileInfo the new pro dos file info
 	 */
 	public void setProDOSFileInfo(AppleFileData proDOSFileInfo) {
 		this.proDOSFileInfo = proDOSFileInfo;
@@ -650,7 +668,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the ms dos file info.
-	 * 
+	 *
 	 * @return the ms dos file info
 	 */
 	public AppleFileData getMsDOSFileInfo() {
@@ -659,9 +677,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the ms dos file info.
-	 * 
-	 * @param msDOSFileInfo
-	 *            the new ms dos file info
+	 *
+	 * @param msDOSFileInfo the new ms dos file info
 	 */
 	public void setMsDOSFileInfo(AppleFileData msDOSFileInfo) {
 		this.msDOSFileInfo = msDOSFileInfo;
@@ -669,7 +686,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the short name.
-	 * 
+	 *
 	 * @return the short name
 	 */
 	public AppleFileData getShortName() {
@@ -678,9 +695,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the short name.
-	 * 
-	 * @param shortName
-	 *            the new short name
+	 *
+	 * @param shortName the new short name
 	 */
 	public void setShortName(AppleFileData shortName) {
 		this.shortName = shortName;
@@ -688,7 +704,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the afp file info.
-	 * 
+	 *
 	 * @return the afp file info
 	 */
 	public AppleFileData getAfpFileInfo() {
@@ -697,9 +713,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the afp file info.
-	 * 
-	 * @param afpFileInfo
-	 *            the new afp file info
+	 *
+	 * @param afpFileInfo the new afp file info
 	 */
 	public void setAfpFileInfo(AppleFileData afpFileInfo) {
 		this.afpFileInfo = afpFileInfo;
@@ -707,7 +722,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the directory id.
-	 * 
+	 *
 	 * @return the directory id
 	 */
 	public AppleFileData getDirectoryID() {
@@ -716,9 +731,8 @@ public abstract class AppleFile {
 
 	/**
 	 * Sets the directory id.
-	 * 
-	 * @param directoryID
-	 *            the new directory id
+	 *
+	 * @param directoryID the new directory id
 	 */
 	public void setDirectoryID(AppleFileData directoryID) {
 		this.directoryID = directoryID;
@@ -726,7 +740,7 @@ public abstract class AppleFile {
 
 	/**
 	 * Gets the num entries.
-	 * 
+	 *
 	 * @return the num entries
 	 */
 	public int getNumEntries() {

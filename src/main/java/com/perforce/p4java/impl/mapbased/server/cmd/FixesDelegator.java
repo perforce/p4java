@@ -68,12 +68,7 @@ public class FixesDelegator extends BaseDelegator implements IFixesDelegator {
                 processParameters(opts, fileSpecs, server), null);
 
         return ResultListBuilder.buildNonNullObjectListFromCommandResultMaps(resultMaps,
-                new Function<Map, IFix>() {
-                    @Override
-                    public IFix apply(Map map) {
-                        return new Fix(map);
-                    }
-                }
-        );
+				map -> new Fix(map)
+		);
     }
 }

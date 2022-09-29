@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.impl.mapbased.rpc.func.helper;
 
@@ -11,36 +11,37 @@ import java.util.Random;
  */
 
 public class StringHelper {
-	
+
 	private static final Random rand = new Random(System.currentTimeMillis());
-	
+
 	/**
 	 * Return the integer value of the passed-in char interpreted
 	 * as a hex digit.
-	 * 
+	 *
 	 * FIXME: return -1 on bad conversion -- HR.
+	 * @param c char
+	 * @return integer value
 	 */
-	
 	public static int hexcharToInt(char c) {
-		return c - ( c > '9' ? ( c >= 'a' ? 'a' - 10 : 'A' - 10 ) : '0' );
+		return c - (c > '9' ? (c >= 'a' ? 'a' - 10 : 'A' - 10) : '0');
 	}
-	
+
 	/**
 	 * Return a plausibly-random number string in hex form.
 	 * Used mostly for temp filename generation.<p>
-	 * 
+	 *
 	 * Not (yet) synchronised as unlikely to be problem
 	 * with threads and contention.
+	 * @return hex string
 	 */
-
 	public static String getRandomHexString() {
 		long n = rand.nextLong();
-        if (n == Long.MIN_VALUE) {
-            n = 0;      // corner case
-        } else {
-            n = Math.abs(n);
-        }
-        
-        return Long.toString(n, 16);
+		if (n == Long.MIN_VALUE) {
+			n = 0;      // corner case
+		} else {
+			n = Math.abs(n);
+		}
+
+		return Long.toString(n, 16);
 	}
 }

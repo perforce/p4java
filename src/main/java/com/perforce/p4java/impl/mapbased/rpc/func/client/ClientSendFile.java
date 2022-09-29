@@ -56,30 +56,30 @@ public class ClientSendFile {
 
 	/**
 	 * Create a new rpc file sender
+	 *
+	 * @param props props
 	 */
 	protected ClientSendFile(Properties props) {
 		this.props = props;
 	}
-	
-	private long sendStream(InputStream stream, RpcConnection connection, String handle, String write,
-			MD5Digester digester, CommandEnv cmdEnv) throws ConnectionException, IOException {
+
+	private long sendStream(InputStream stream, RpcConnection connection, String handle, String write, MD5Digester digester, CommandEnv cmdEnv) throws ConnectionException, IOException {
 		long fileLength = 0;
-		
+
 		Map<String, Object> sendMap = new HashMap<String, Object>();
 		byte[] bytes = new byte[1024 * 64];
 		int bytesRead;
 		while ((bytesRead = stream.read(bytes)) > 0) {
 			byte[] readBytes = new byte[bytesRead];
-			
+
 			System.arraycopy(bytes, 0, readBytes, 0, bytesRead);
 			fileLength += bytesRead;
 			sendMap.clear();
 			sendMap.put(RpcFunctionMapKey.DATA, readBytes);
 			sendMap.put(RpcFunctionMapKey.HANDLE, handle);
 
-			RpcPacket sendPacket = RpcPacket.constructRpcPacket(write,
-					sendMap, null);
-			
+			RpcPacket sendPacket = RpcPacket.constructRpcPacket(write, sendMap, null);
+
 			connection.putRpcPacket(sendPacket);
 			digester.update(readBytes);
 
@@ -87,20 +87,23 @@ public class ClientSendFile {
 		}
 		return fileLength;
 	}
-	
+
 	/**
 	 * Send a file's contents back to the Perforce server. Notably assumes a
 	 * late model server...
-	 *
+	 * <p>
 	 * FIXME: digest stuff is not yet implemented -- HR.
 	 * FIXME: error handling is typically nearly non-existent -- HR.
 	 * FIXME: charset issues -- HR.
 	 * FIXME: rework to use proper flush protocol implementation -- HR.
 	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
 	 * @return - result
+	 * @throws ConnectionException on error
 	 */
-	protected RpcPacketDispatcherResult sendFile(RpcConnection rpcConnection, CommandEnv cmdEnv,
-			Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult sendFile(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		cmdEnv.newHandler();
 		String clientPath = (String) resultsMap.get(RpcFunctionMapKey.PATH);
@@ -129,13 +132,12 @@ public class ClientSendFile {
 		InputStream inStream = null;
 		MD5Digester digester = null;
 
-		String sProto = cmdEnv.getServerProtocolSpecsMap().containsKey(RpcFunctionMapKey.SERVER2) ?
-				(String)cmdEnv.getServerProtocolSpecsMap().get(RpcFunctionMapKey.SERVER2) :
-				(String)cmdEnv.getServerProtocolSpecsMap().get(RpcFunctionMapKey.SERVER);
+		String sProto = cmdEnv.getServerProtocolSpecsMap().containsKey(RpcFunctionMapKey.SERVER2) ? (String) cmdEnv.getServerProtocolSpecsMap().get(RpcFunctionMapKey.SERVER2) : (String) cmdEnv.getServerProtocolSpecsMap().get(RpcFunctionMapKey.SERVER);
 		int serverProtocol = 0;
 		try {
 			serverProtocol = Integer.parseInt(sProto);
-		} catch (NumberFormatException nfe) {}
+		} catch (NumberFormatException nfe) {
+		}
 
 
 		// 2016.2 submit + reopen chmod +RW upon success
@@ -145,10 +147,9 @@ public class ClientSendFile {
 		// 2014.2 submit --forcenoretransfer skips file transfer to call
 		// dmsubmitfile directly, only fixing up file perms as needed.
 
-		if( skipDigestCheck != null )
-		{
-			resultsMap.put( RpcFunctionMapKey.STATUS, "same" );
-			resultsMap.put( RpcFunctionMapKey.SHA, skipDigestCheck );
+		if (skipDigestCheck != null) {
+			resultsMap.put(RpcFunctionMapKey.STATUS, "same");
+			resultsMap.put(RpcFunctionMapKey.SHA, skipDigestCheck);
 			rpcConnection.clientConfirm(confirm, resultsMap);
 
 			// Ignore failure to chmod file since the file may not exist
@@ -195,7 +196,7 @@ public class ClientSendFile {
 				modTime = System.currentTimeMillis();
 			}
 		}
-		if( modTime != 0) {
+		if (modTime != 0) {
 			modTime = modTime / 1000;
 		}
 
@@ -204,20 +205,17 @@ public class ClientSendFile {
 		// 2014.1 server sends digest for shelve -a leaveunchanged
 		// 2017.2 server sends sha1 for submit and digestType
 
-		if( digestType != null )
-		{
+		if (digestType != null) {
 			String localDigest = rpcConnection.getDigest(file.getFileType(), file, RpcPerforceDigestType.GetType(digestType));
-			if( localDigest != null && localDigest.equals( serverDigest ) )
-			{
-				resultsMap.put( RpcFunctionMapKey.STATUS, "same" );
-				resultsMap.put( RpcFunctionMapKey.SHA, localDigest );
+			if (localDigest != null && localDigest.equals(serverDigest)) {
+				resultsMap.put(RpcFunctionMapKey.STATUS, "same");
+				resultsMap.put(RpcFunctionMapKey.SHA, localDigest);
 				rpcConnection.clientConfirm(confirm, resultsMap);
 
 				// We differ from classic here as
 				// with 'submitunchanged' in the submitoptions set we
 				// don't send a digest.
-				if( perms != null && revertUnchanged != null )
-				{
+				if (perms != null && revertUnchanged != null) {
 					//TODO npoole: Still to port
 					/*if( depotTime && ( f->Stat() & FSF_WRITEABLE ) )
 					{
@@ -268,7 +266,7 @@ public class ClientSendFile {
 */
 		// pre-2003.2 server, send modTime on open
 
-		if( modTime != 0 && !sendDigest ) {
+		if (modTime != 0 && !sendDigest) {
 			resultsMap.put(RpcFunctionMapKey.TIME, "" + modTime);
 		}
 
@@ -303,9 +301,7 @@ public class ClientSendFile {
 					// early protocol and state machine design -- HR.
 					if (!file.exists() && file.getFileType() != RpcPerforceFileType.FST_SYMLINK) {
 						handler.setError(true);
-						cmdEnv.handleResult(new RpcMessage(ClientMessageId.OS_FILE_READ_ERROR,
-								MessageSeverityCode.E_INFO, MessageGenericCode.EV_CLIENT,
-								new String[] { "open for read", clientPath + ": No such file or directory" }).toMap());
+						cmdEnv.handleResult(new RpcMessage(ClientMessageId.OS_FILE_READ_ERROR, MessageSeverityCode.E_INFO, MessageGenericCode.EV_CLIENT, new String[]{"open for read", clientPath + ": No such file or directory"}).toMap());
 					} else {
 						// Now to send the file contents:
 						String symbolicLinkTarget = null;
@@ -324,43 +320,31 @@ public class ClientSendFile {
 
 							if (symbolicLinkTarget == null) {
 								handler.setError(true);
-								cmdEnv.handleResult(
-										new RpcMessage(ClientMessageId.FILE_SEND_ERROR, MessageSeverityCode.E_FAILED,
-												MessageGenericCode.EV_CLIENT, new String[] { "symlink", clientPath })
-														.toMap());
+								cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_SEND_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"symlink", clientPath}).toMap());
 								return RpcPacketDispatcherResult.CONTINUE_LOOP;
 							}
 						}
 
 						digester = new MD5Digester();
-						
+
 						Charset fileCharset = null;
-						if (RpcPerforceFileType.FST_UTF16 == file.getFileType()
-								|| RpcPerforceFileType.FST_XUTF16 == file.getFileType()) {
+						if (RpcPerforceFileType.FST_UTF16 == file.getFileType() || RpcPerforceFileType.FST_XUTF16 == file.getFileType()) {
 							fileCharset = CharsetDefs.UTF16;
-						} else if (RpcPerforceFileType.FST_UTF8 == file.getFileType()
-								|| RpcPerforceFileType.FST_XUTF8 == file.getFileType()) {
+						} else if (RpcPerforceFileType.FST_UTF8 == file.getFileType() || RpcPerforceFileType.FST_XUTF8 == file.getFileType()) {
 							fileCharset = CharsetDefs.UTF8;
-						} else if (RpcPerforceFileType.FST_UNICODE == file.getFileType()
-								|| RpcPerforceFileType.FST_XUNICODE == file.getFileType()) {
+						} else if (RpcPerforceFileType.FST_UNICODE == file.getFileType() || RpcPerforceFileType.FST_XUNICODE == file.getFileType()) {
 							// Server might have sent explicit charset here...
 							fileCharset = rpcConnection.getClientCharset();
 						}
-						if ((!rpcConnection.isUnicodeServer() && fileCharset != CharsetDefs.UTF16)
-								|| fileCharset == null
-								|| fileCharset.equals(CharsetDefs.UTF8) ) {
-							/* 
+						if ((!rpcConnection.isUnicodeServer() && fileCharset != CharsetDefs.UTF16) || fileCharset == null || fileCharset.equals(CharsetDefs.UTF8)) {
+							/*
 							 * Not unicode enabled p4d server and filetype is utf-16
 							 * Or unicode enabled p4d server and filetype is not unicode or we're already in the target charset
 							 */
-							inStream = symbolicLinkTarget == null
-									? new RpcInputStream(file, null)
-									: new ByteArrayInputStream(symbolicLinkTarget.getBytes()); // need to convert symbolicLinkTarget to utf8
+							inStream = symbolicLinkTarget == null ? new RpcInputStream(file, null) : new ByteArrayInputStream(symbolicLinkTarget.getBytes()); // need to convert symbolicLinkTarget to utf8
 						} else {
-							
-							inStream = symbolicLinkTarget == null
-									? new RpcInputStream(file, fileCharset)
-									: new ByteArrayInputStream(symbolicLinkTarget.getBytes());
+
+							inStream = symbolicLinkTarget == null ? new RpcInputStream(file, fileCharset) : new ByteArrayInputStream(symbolicLinkTarget.getBytes());
 						}
 
 						fileLength = sendStream(inStream, rpcConnection, handle, write, digester, cmdEnv);
@@ -416,8 +400,7 @@ public class ClientSendFile {
 		} catch (Exception exc) {
 			Log.exception(exc);
 			handler.setError(true);
-			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_SEND_ERROR, MessageSeverityCode.E_FAILED,
-					MessageGenericCode.EV_CLIENT, new String[] { clientPath, exc.getLocalizedMessage() }).toMap());
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_SEND_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{clientPath, exc.getLocalizedMessage()}).toMap());
 		}
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;

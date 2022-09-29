@@ -31,11 +31,7 @@ import com.perforce.p4java.server.callback.IParallelCallback;
 import com.perforce.p4java.server.callback.ISSOCallback;
 import com.perforce.p4java.server.callback.ISSOCallback.Status;
 
-import java.awt.*;
-import java.io.IOException;
 import java.io.InputStream;
-import java.net.URI;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -72,7 +68,7 @@ public class ClientUserInteraction {
 	 * Prompt the end-user (i.e. the upper-levels of P4Java...) in response to a
 	 * server request. The various parameters in resultsMap determine things like
 	 * whether the prompt uses echoing, what digest to use (if any), what prompt
-	 * string to use, etc., many of which aren't relevant in our context.<p>
+	 * string to use, etc., many of which aren't relevant in our context.
 	 * <p>
 	 * In the most common usage -- password extraction from the user -- we
 	 * follow a fairly simple scheme where we first hash the password with
@@ -80,20 +76,24 @@ public class ClientUserInteraction {
 	 * MD5 cycle and hash it against the "digest" string passed in from
 	 * the server. Everything else that's sent to us from the server is
 	 * simply echoed for the server's own purposes (i.e. I still don't know
-	 * what some of this stuff does...).<p>
+	 * what some of this stuff does...).
 	 * <p>
 	 * Note that we have to do what the C++ API does in the same circumstances;
 	 * this means converting the hash hex string results into upper-case, etc.,
 	 * and several other mild quirks whose use or motivation aren't always
-	 * obvious.<p>
+	 * obvious.
 	 * <p>
 	 * Note also that we're not currently implementing the full panoply of
 	 * possible processing here, just the subset that's useful to us for P4WSAD
 	 * and that presumes a 2003.2 or later server in not-too-strict mode.
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult clientPrompt(RpcConnection rpcConnection,
-													 CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientPrompt(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientPrompt().");
@@ -146,8 +146,7 @@ public class ClientUserInteraction {
 			}
 			RpcFunctionSpec funcSpec = RpcFunctionSpec.decode(confirm);
 			if (funcSpec == RpcFunctionSpec.NONE) {
-				throw new ProtocolError("Unable to decode confirm server function '"
-						+ confirm + "' in clientPrompt.");
+				throw new ProtocolError("Unable to decode confirm server function '" + confirm + "' in clientPrompt.");
 			}
 
 			if (noprompt) {
@@ -205,8 +204,7 @@ public class ClientUserInteraction {
 						}
 						break;
 					default:
-						throw new UnimplementedError("Unimplemented confirmation to server function '"
-								+ funcSpec.getEncoding() + "' in clientPrompt.");
+						throw new UnimplementedError("Unimplemented confirmation to server function '" + funcSpec.getEncoding() + "' in clientPrompt.");
 				}
 			}
 
@@ -281,26 +279,27 @@ public class ClientUserInteraction {
 			return rpcConnection.clientConfirm(confirm, resultsMap);
 		} catch (Exception exc) {
 			Log.exception(exc);
-			throw new P4JavaError(
-					"Unexpected exception in ClientUserInteraction.clientPrompt:"
-							+ exc.getLocalizedMessage(),
-					exc);
+			throw new P4JavaError("Unexpected exception in ClientUserInteraction.clientPrompt:" + exc.getLocalizedMessage(), exc);
 		}
 	}
 
 	/**
 	 * Set the client-side password in response to a Perforce server command
 	 * telling us to do just that, usually as a result of an earlier
-	 * successful login attempt in the same session.<p>
+	 * successful login attempt in the same session.
 	 * <p>
 	 * In this context setting the password really just means performing a few
 	 * sanity and consistency checks, then returning a suitable ticket for use
 	 * with the -P option in future commands. This can be an arbitrarily
-	 * complex process...<p>
+	 * complex process...
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult clientSetPassword(RpcConnection rpcConnection,
-														  CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientSetPassword(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientSetPassword().");
@@ -353,7 +352,7 @@ public class ClientUserInteraction {
 
 					String secretKey = sameUser ? this.server.getSecretKey(userName) : null; // from the earlier clientGetPrompt() call...
 					if (secretKey == null) {
-						secretKey = this.server.getAuthTicket(userName);
+						secretKey = this.server.getAuthTicket(userName, serverId);
 					}
 					if (secretKey == null) {
 						secretKey = this.server.getAuthTicket();
@@ -375,8 +374,7 @@ public class ClientUserInteraction {
 						ticket = new String(data);
 					}
 					this.server.setAuthTicket(userName, serverId, ticket);
-					if (!cmdEnv.isDontWriteTicket() ||
-							!resultsMap.containsKey(RpcFunctionMapKey.OUTPUT)) { // skip if "login -p"
+					if (!cmdEnv.isDontWriteTicket() || !resultsMap.containsKey(RpcFunctionMapKey.OUTPUT)) { // skip if "login -p"
 						try {
 							this.server.saveTicket(userName, serverId, ticket);
 						} catch (ConfigException e) {
@@ -407,10 +405,14 @@ public class ClientUserInteraction {
 	 * Implements the client-side of the Perforce single sign on (SSO) protocol.
 	 * Basically defers to the registered SSO callback (if it exists) and simply
 	 * responds back to the server appropriately.
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult clientSingleSignon(RpcConnection rpcConnection,
-														   CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientSingleSignon(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientSingleSignon().");
@@ -429,28 +431,24 @@ public class ClientUserInteraction {
 		if (this.server != null) {
 			ISSOCallback ssoCallback = this.server.getSSOCallback();
 			if (ssoCallback != null) {
-				status = ssoCallback.getSSOCredentials(credBuf,
-						this.server.getSSOKey(), this.server.getUserName());
+				status = ssoCallback.getSSOCredentials(credBuf, this.server.getSSOKey(), this.server.getUserName());
 			}
 		} else {
 			// How did this happen?!
-			Log.error(
-					"null server object in ClientUserInteraction.clientSingleSignon method");
+			Log.error("null server object in ClientUserInteraction.clientSingleSignon method");
 		}
 
 		if (status == null) {
 			status = Status.UNSET;
 		}
 
-		resultsMap.put(RpcFunctionMapKey.STATUS, status.toString()
-				.toLowerCase());
+		resultsMap.put(RpcFunctionMapKey.STATUS, status.toString().toLowerCase());
 
 		String sso = null;
 		// If not unset then set the SSO key based on the buffered passed to
 		// the sso callback
 		if (status != Status.UNSET) {
-			if ((credBuf != null)
-					&& (credBuf.length() > ISSOCallback.MAX_CRED_LENGTH)) {
+			if ((credBuf != null) && (credBuf.length() > ISSOCallback.MAX_CRED_LENGTH)) {
 				sso = credBuf.substring(0, ISSOCallback.MAX_CRED_LENGTH);
 			} else {
 				// Note: credBuf could be null, which is OK in this context
@@ -464,8 +462,7 @@ public class ClientUserInteraction {
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
-	protected RpcPacketDispatcherResult clientReceiveFiles(RpcConnection rpcConnection,
-														   CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientReceiveFiles(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientReceiveFiles().");
@@ -539,10 +536,14 @@ public class ClientUserInteraction {
 	 * I guess; we just decline automatically if anything went wrong,
 	 * and say yes ("dm-OpenFile") if things went fine... in effect, we
 	 * just do a pass-through. This may change as we gain experience.
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult clientAck(RpcConnection rpcConnection,
-												  CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientAck(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientAck().");
@@ -585,15 +586,19 @@ public class ClientUserInteraction {
 	/**
 	 * Process the client-Crypto command from the Perforce server. This is typically
 	 * called in response to an earlier login using the ticket feature (which is how
-	 * we normally do logins in P4Java).<p>
+	 * we normally do logins in P4Java).
 	 * <p>
 	 * In the P4Java context, this really means first MD5-hashing the incoming token, then
 	 * hashing the previously-returned ticket, then returning the results to the server for
 	 * inspection.
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult clientCrypto(RpcConnection rpcConnection,
-													 CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientCrypto(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientCrypto().");
@@ -618,9 +623,7 @@ public class ClientUserInteraction {
 		String token = (String) resultsMap.get(RpcFunctionMapKey.TOKEN);
 		Map<String, Object> respMap = new HashMap<>();
 
-		boolean proxy = props.containsKey(RpcFunctionMapKey.IPADDR) &&
-				props.containsKey(RpcFunctionMapKey.SVRNAME) &&
-				props.containsKey(RpcFunctionMapKey.PORT);
+		boolean proxy = props.containsKey(RpcFunctionMapKey.IPADDR) && props.containsKey(RpcFunctionMapKey.SVRNAME) && props.containsKey(RpcFunctionMapKey.PORT);
 
 		String svcUser = props.getProperty(RpcFunctionMapKey.SVRNAME);
 
@@ -695,8 +698,7 @@ public class ClientUserInteraction {
 			}
 
 			if (proxy) {
-				respMap.put(RpcFunctionMapKey.CADDR,
-						props.getProperty(RpcFunctionMapKey.IPADDR));
+				respMap.put(RpcFunctionMapKey.CADDR, props.getProperty(RpcFunctionMapKey.IPADDR));
 			}
 
 			if (daddr0 != null) {
@@ -714,18 +716,12 @@ public class ClientUserInteraction {
 				respMap.put("dhash0", resp);
 			}
 
-			RpcPacket respPacket = RpcPacket.constructRpcPacket(
-					confirm,
-					respMap,
-					null);
+			RpcPacket respPacket = RpcPacket.constructRpcPacket(confirm, respMap, null);
 
 			rpcConnection.putRpcPacket(respPacket);
 		} catch (Exception exc) {
 			Log.exception(exc);
-			throw new P4JavaError(
-					"Unexpected exception in ClientUserInteraction.clientCrypto:"
-							+ exc.getLocalizedMessage(),
-					exc);
+			throw new P4JavaError("Unexpected exception in ClientUserInteraction.clientCrypto:" + exc.getLocalizedMessage(), exc);
 		}
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
@@ -753,8 +749,7 @@ public class ClientUserInteraction {
 		return ticketStr;
 	}
 
-	protected RpcPacketDispatcherResult clientOpenURL(RpcConnection rpcConnection,
-													  CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientOpenURL(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientOpenURL).");
@@ -785,10 +780,14 @@ public class ClientUserInteraction {
 	 * Get some requested data (typically something like a submit form) from
 	 * somewhere (typically a map passed in from the upper levels of the API) and
 	 * pass it back to the server, properly munged.
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult clientInputData(RpcConnection rpcConnection,
-														CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientInputData(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientInputData().");
@@ -894,6 +893,10 @@ public class ClientUserInteraction {
 
 	/**
 	 * Get bytes from the stream passed in.
+	 *
+	 * @param cmdName  cmdName
+	 * @param inStream inStream
+	 * @return bytes
 	 */
 	protected byte[] getStreamBytes(String cmdName, InputStream inStream) {
 
@@ -924,8 +927,7 @@ public class ClientUserInteraction {
 		return null;
 	}
 
-	protected RpcPacketDispatcherResult clientPing(RpcConnection rpcConnection,
-												   CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientPing(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientPing().");
@@ -951,8 +953,7 @@ public class ClientUserInteraction {
 			try {
 				int size = Integer.parseInt(payloadSize);
 
-				if (size > 1000000)
-					size = 1000000;
+				if (size > 1000000) size = 1000000;
 
 				StringBuffer sbuf = new StringBuffer();
 				for (int i = 0; i < size; i++) {
@@ -972,18 +973,14 @@ public class ClientUserInteraction {
 			respMap.put(RpcFunctionMapKey.TIME, timer);
 		}
 
-		RpcPacket respPacket = RpcPacket.constructRpcPacket(
-				"dm-Ping",
-				respMap,
-				null);
+		RpcPacket respPacket = RpcPacket.constructRpcPacket("dm-Ping", respMap, null);
 
 		rpcConnection.putRpcPacket(respPacket);
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
-	protected RpcPacketDispatcherResult clientErrorPause(RpcConnection rpcConnection,
-														 CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientErrorPause(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientPing().");
@@ -1010,8 +1007,7 @@ public class ClientUserInteraction {
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
-	protected RpcPacketDispatcherResult clientHandleError(RpcConnection rpcConnection,
-														  CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientHandleError(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientPing().");
@@ -1054,8 +1050,7 @@ public class ClientUserInteraction {
 	}
 
 
-	protected RpcPacketDispatcherResult clientActionResolve(RpcConnection rpcConnection,
-															CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientActionResolve(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientPing().");
@@ -1212,8 +1207,7 @@ public class ClientUserInteraction {
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
-	protected RpcPacketDispatcherResult clientEditData(RpcConnection rpcConnection,
-													   CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult clientEditData(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in clientPing().");

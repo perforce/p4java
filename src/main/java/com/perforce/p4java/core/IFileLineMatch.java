@@ -30,11 +30,11 @@ public interface IFileLineMatch {
 
 		/**
 		 * Get a match type enumeration for the specified server value.
-		 * 
+		 * <p>
 		 * The returned value will be {@link MatchType#MATCH} when the
 		 * serverValue specified is null.
-		 * 
-		 * @param serverValue
+		 *
+		 * @param serverValue serverValue
 		 * @return type
 		 */
 		public static MatchType fromServerString(String serverValue) {
@@ -49,35 +49,35 @@ public interface IFileLineMatch {
 
 	/**
 	 * Get depot file path of match
-	 * 
+	 *
 	 * @return depot file path
 	 */
 	String getDepotFile();
 
 	/**
 	 * Get revision number of match
-	 * 
+	 *
 	 * @return revision number
 	 */
 	int getRevision();
 
 	/**
 	 * Get line text of match
-	 * 
+	 *
 	 * @return line text
 	 */
 	String getLine();
 
 	/**
 	 * Get line number of match
-	 * 
+	 *
 	 * @return line number
 	 */
 	int getLineNumber();
 
 	/**
 	 * Get match type
-	 * 
+	 *
 	 * @return - type
 	 */
 	MatchType getType();

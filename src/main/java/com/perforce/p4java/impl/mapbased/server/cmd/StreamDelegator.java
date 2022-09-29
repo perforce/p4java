@@ -63,13 +63,8 @@ public class StreamDelegator extends BaseDelegator implements IStreamDelegator {
 
         return buildNullableObjectFromNonInfoMessageCommandResultMaps(
                 resultMaps,
-                new Function<Map, IStream>() {
-                    @Override
-                    public IStream apply(Map map) {
-                        return new Stream(map, server);
-                    }
-                }
-        );
+				(Function<Map<String, Object>, IStream>) map -> new Stream(map, server)
+		);
     }
 
     @Override

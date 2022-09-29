@@ -8,11 +8,11 @@ import static com.perforce.p4java.mapapi.MapFlag.MfUnmap;
 
 public class MapItem {
 
-    /*
-     * chain - linked list
-     * mapFlag - represent +map, or -map
-     * slot - precedence (higher is better) on the chain
-     */
+	/*
+	 * chain - linked list
+	 * mapFlag - represent +map, or -map
+	 * slot - precedence (higher is better) on the chain
+	 */
 
 	public MapItem chain;
 	public MapFlag mapFlag;
@@ -53,8 +53,7 @@ public class MapItem {
 	}
 
 	public boolean isParent(MapItem other, MapTableT dir) {
-		return ths(dir).getFixedLen() ==
-				ths(dir).getCommonLen(other.ths(dir));
+		return ths(dir).getFixedLen() == ths(dir).getCommonLen(other.ths(dir));
 	}
 
 	/**
@@ -63,9 +62,14 @@ public class MapItem {
 	 * A MapItem holds two MapHalfs that constitute a single entry in
 	 * a MapTable.  MapItem also implement fast searching for entries
 	 * for MapTable::Check() and MapTable::Translate().
+	 *
+	 * @param c chain
+	 * @param l left mapping
+	 * @param r right mapping
+	 * @param f map flags
+	 * @param s slot
 	 */
-	public MapItem(MapItem c, String l,
-	               String r, MapFlag f, int s) {
+	public MapItem(MapItem c, String l, String r, MapFlag f, int s) {
 		lhs().set(l);
 		rhs().set(r);
 		mapFlag = f;
@@ -85,10 +89,15 @@ public class MapItem {
 	 * A MapItem holds two MapHalfs that constitute a single entry in
 	 * a MapTable.  MapItem also implement fast searching for entries
 	 * for MapTable::Check() and MapTable::Translate().
+	 *
+	 * @param c        chain
+	 * @param l        left mapping
+	 * @param r        right mapping
+	 * @param f        map flags
+	 * @param s        slot
+	 * @param caseMode case mode
 	 */
-	public MapItem(MapItem c, String l,
-	               String r, MapFlag f, int s,
-	               int caseMode) {
+	public MapItem(MapItem c, String l, String r, MapFlag f, int s, int caseMode) {
 		lhs().set(l);
 		rhs().set(r);
 		mapFlag = f;
@@ -136,6 +145,8 @@ public class MapItem {
 
 	/**
 	 * MapItem::Reverse - reverse the chain, to swap precedence
+	 *
+	 * @return map item
 	 */
 	public MapItem reverse() {
 		MapItem m = this;
@@ -155,6 +166,9 @@ public class MapItem {
 
 	/**
 	 * MapItem::Move - moves an item up the chain
+	 *
+	 * @param slot slot position
+	 * @return map item
 	 */
 	MapItem move(int slot) {
 		MapItem m = this;
@@ -164,11 +178,9 @@ public class MapItem {
 
 		// This has no error state, but this is bad
 		// We can't go below 0 and we can't go back up either
-		if (start <= slot)
-			return m;
+		if (start <= slot) return m;
 
-		if (slot < 0)
-			slot = 0;
+		if (slot < 0) slot = 0;
 
 		MapItem n = m.chain;
 		while (n != null) {
@@ -192,43 +204,36 @@ public class MapItem {
 	/**
 	 * MapItem::Tree - recursively construct a trinary sort tree
 	 */
-	static MapItem tree(
-			ArrayList<MapItem> items,
-			int start,
-			int end,
-			MapTableT dir,
-			MapItem parent,
-			AtomicInteger depth) {
+	static MapItem tree(ArrayList<MapItem> items, int start, int end, MapTableT dir, MapItem parent, AtomicInteger depth) {
 		/* No empties */
 
-		if (items.size() == 0 || start == end)
-			return null;
+		if (items.size() == 0 || start == end) return null;
 
-        /*
-         * start li (middle) ri end
-         *
-         * (middle) is halfway between start and end.
-         * li is first item that is a parent of middle.
-         * ri is last item li is a parent of.
-         *
-         * We return
-         *
-         *	           *li
-         *           /  |  \
-         *          /   |   \
-         *         /    |    \
-         *        /     |     \
-         * start.li   li+1.ri  ri.end
-         */
+		/*
+		 * start li (middle) ri end
+		 *
+		 * (middle) is halfway between start and end.
+		 * li is first item that is a parent of middle.
+		 * ri is last item li is a parent of.
+		 *
+		 * We return
+		 *
+		 *	           *li
+		 *           /  |  \
+		 *          /   |   \
+		 *         /    |    \
+		 *        /     |     \
+		 * start.li   li+1.ri  ri.end
+		 */
 
 		int li = start;
 		int ri = -1;
 
-        /*
-         * Quick check: the center tree often ends up in the
-         * shape of a linked list (due to identical entries).
-         * This is an optimization for that case.
-         */
+		/*
+		 * Quick check: the center tree often ends up in the
+		 * shape of a linked list (due to identical entries).
+		 * This is an optimization for that case.
+		 */
 
 		if (start == end - 1 || items.get(start).isParent(items.get(end - 1), dir)) {
 			ri = end;
@@ -263,14 +268,11 @@ public class MapItem {
 
 				t.center = tree(items, ri + 1, end, dir, items.get(ri), depthBelow);
 
-				if (maxSlot < t.maxSlot)
-					maxSlot = t.maxSlot;
+				if (maxSlot < t.maxSlot) maxSlot = t.maxSlot;
 
-				if (maxSlotNoAnds < t.maxSlotNoAnds)
-					maxSlotNoAnds = t.maxSlotNoAnds;
+				if (maxSlotNoAnds < t.maxSlotNoAnds) maxSlotNoAnds = t.maxSlotNoAnds;
 
-				if (t.hasands)
-					hasands = true;
+				if (t.hasands) hasands = true;
 
 				if (parent != null && (items.get(ri).mapFlag == MfAndmap || t.hasands)) {
 					parent.whole(dir).hasands = true;
@@ -324,11 +326,11 @@ public class MapItem {
 			return items.get(li);
 		} else
 
-        /*
-         * Start in middle.
-         * Move li from start until we find first parent of ri.
-         * Move ri right until we find last child of li.
-         */
+			/*
+			 * Start in middle.
+			 * Move li from start until we find first parent of ri.
+			 * Move ri right until we find last child of li.
+			 */
 
 			ri = start + (end - start) / 2;
 
@@ -340,11 +342,11 @@ public class MapItem {
 			++ri;
 		}
 
-        /*
-         * Fill in the *li node, which we will return.
-         *
-         * left, right, center computed recursively.
-         */
+		/*
+		 * Fill in the *li node, which we will return.
+		 *
+		 * left, right, center computed recursively.
+		 */
 
 		MapItem.MapWhole t = items.get(li).whole(dir);
 
@@ -359,31 +361,27 @@ public class MapItem {
 		t.center = tree(items, li + 1, ri, dir, items.get(li), depthBelow);
 		t.right = tree(items, ri, end, dir, items.get(li), depthBelow);
 
-        /*
-         * Current depth is 1 + what's below us, as long as one of
-         * our peers isn't deeper.
-         */
+		/*
+		 * Current depth is 1 + what's below us, as long as one of
+		 * our peers isn't deeper.
+		 */
 
-		if (depth.get() < depthBelow.get() + 1)
-			depth.set(depthBelow.get() + 1);
+		if (depth.get() < depthBelow.get() + 1) depth.set(depthBelow.get() + 1);
 
-        /*
-         * Relationship to parent:
-         * parent's maxSlot includes our maxSlot.
-         * our initial substring overlap with our parent.
-         */
+		/*
+		 * Relationship to parent:
+		 * parent's maxSlot includes our maxSlot.
+		 * our initial substring overlap with our parent.
+		 */
 
 		if (parent != null) {
-			if (parent.whole(dir).maxSlot < t.maxSlot)
-				parent.whole(dir).maxSlot = t.maxSlot;
+			if (parent.whole(dir).maxSlot < t.maxSlot) parent.whole(dir).maxSlot = t.maxSlot;
 
-			if (parent.whole(dir).maxSlotNoAnds < t.maxSlotNoAnds)
-				parent.whole(dir).maxSlotNoAnds = t.maxSlotNoAnds;
+			if (parent.whole(dir).maxSlotNoAnds < t.maxSlotNoAnds) parent.whole(dir).maxSlotNoAnds = t.maxSlotNoAnds;
 
 			t.overlap = t.half.getCommonLen(parent.ths(dir));
 
-			if (items.get(li).mapFlag == MfAndmap || t.hasands)
-				parent.whole(dir).hasands = true;
+			if (items.get(li).mapFlag == MfAndmap || t.hasands) parent.whole(dir).hasands = true;
 		}
 
 		return items.get(li);
@@ -428,15 +426,15 @@ public class MapItem {
 			ands = new MapItemArray();
 		}
 
-        /* Decend */
+		/* Decend */
 
 		while (tree != null) {
 			MapItem.MapWhole t = tree.whole(dir);
 
-            /*
-             * No better precendence below?  Bail.
-             * Unless we're looking for andmaps
-             */
+			/*
+			 * No better precendence below?  Bail.
+			 * Unless we're looking for andmaps
+			 */
 
 			if (best > t.maxSlot &&        // Have we already got the best?
 					!t.hasands &&            // Are there andmaps down the tree?
@@ -444,87 +442,72 @@ public class MapItem {
 					bestnotands > t.maxSlotNoAnds) // We prefer a real mapping
 				break;
 
-            /*
-             * Match with prev map greater than overlap?  trim.
-             */
+			/*
+			 * Match with prev map greater than overlap?  trim.
+			 */
 
-			if (coff > t.overlap)
-				coff = t.overlap;
+			if (coff > t.overlap) coff = t.overlap;
 
-            /*
-             * Match initial substring (by which the tree is ordered).
-             * Can skip match if same initial substring as previous map.
-             */
+			/*
+			 * Match initial substring (by which the tree is ordered).
+			 * Can skip match if same initial substring as previous map.
+			 */
 
 			int r = 0;
 
-			if (coff < t.half.getFixedLen())
-				r = t.half.match1(from, coff);
+			if (coff < t.half.getFixedLen()) r = t.half.match1(from, coff);
 
-            /*
-             * Match?  Higher precedence?  Wildcard match?  Save.
-             */
+			/*
+			 * Match?  Higher precedence?  Wildcard match?  Save.
+			 */
 
-			if (r == 0 &&
-					best < tree.slot &&
-					t.half.match2(from, params)) {
+			if (r == 0 && best < tree.slot && t.half.match2(from, params)) {
 				map = tree;
 				best = map.slot;
-				if (ands != null)
-					ands.put(tree, null);
-				if (tree.flag() != MfAndmap)
-					bestnotands = tree.slot;
+				if (ands != null) ands.put(tree, null);
+				if (tree.flag() != MfAndmap) bestnotands = tree.slot;
 			}
 
-            /*
-             * Not higher precedence? AndMap Array? Wildcard match? Save
-             */
+			/*
+			 * Not higher precedence? AndMap Array? Wildcard match? Save
+			 */
 
-			if (r == 0 &&
-					ands != null &&
-					map != tree &&
-					best >= tree.slot &&
-					t.half.match2(from, params)) {
+			if (r == 0 && ands != null && map != tree && best >= tree.slot && t.half.match2(from, params)) {
 				ands.put(tree, null);
-				if (tree.flag() != MfAndmap)
-					bestnotands = tree.slot;
+				if (tree.flag() != MfAndmap) bestnotands = tree.slot;
 			}
 
-            /*
-             * Follow to appropriate child.
-             */
+			/*
+			 * Follow to appropriate child.
+			 */
 
 			if (r < 0) tree = t.left;
 			else if (r > 0) tree = t.right;
 			else tree = t.center;
 		}
 
-        /*
-         * If we were dealing with & maps, we need to make sure we either:
-         *   1. return the highest precedence non-andmap mapping
-         *   2. return the highest precedence andmap mapping
-         */
+		/*
+		 * If we were dealing with & maps, we need to make sure we either:
+		 *   1. return the highest precedence non-andmap mapping
+		 *   2. return the highest precedence andmap mapping
+		 */
 
 		if (map != null && ands != null) {
 			MapItem m0 = null;
 			int i = 0;
-			while ((m0 = ands.getItem(i++)) != null)
-				if (m0.flag() != MfAndmap) {
-					if (m0.mapFlag == MfUnmap)
-						break; // Take the best & mapping and break
+			while ((m0 = ands.getItem(i++)) != null) if (m0.flag() != MfAndmap) {
+				if (m0.mapFlag == MfUnmap) break; // Take the best & mapping and break
 
-					map = m0; // Take the best non-& mapping and break
-					break;
-				} else if (i == 1)
-					map = m0; // Take the best & mapping; keep going
+				map = m0; // Take the best non-& mapping and break
+				break;
+			} else if (i == 1) map = m0; // Take the best & mapping; keep going
 		}
 
-        /*
-         * Best mapping an unmapping?  That's no mapping.
-         */
+		/*
+		 * Best mapping an unmapping?  That's no mapping.
+		 */
 
-		if (map == null || map.mapFlag == MfUnmap)
-			return null;
+		if (map == null || map.mapFlag == MfUnmap) return null;
 
 		return map;
 	}
@@ -543,23 +526,17 @@ public class MapItem {
 		}
 
 		if (l == 0) {
-			if (buf == null)
-				System.out.print("MapTree\n");
-			else
-				buf.append("MapTree\n");
+			if (buf == null) System.out.print("MapTree\n");
+			else buf.append("MapTree\n");
 		}
 
 		if (whole(d).left != null) {
 			whole(d).left.dump(buf, d, "<<<", l + 1);
 		}
 
-		String out = String.format("%s%s %c%s <-> %s%s (maxslot %d (%d))\n", indent, name,
-				" -+$@&    123456789".charAt(mapFlag.code), ths(d).get(), ohs(d).get(),
-				whole(d).hasands ? " (has &)" : "", whole(d).maxSlot, whole(d).maxSlotNoAnds);
-		if (buf == null)
-			System.out.print(out);
-		else
-			buf.append(out);
+		String out = String.format("%s%s %c%s <-> %s%s (maxslot %d (%d))\n", indent, name, " -+$@&    123456789".charAt(mapFlag.code), ths(d).get(), ohs(d).get(), whole(d).hasands ? " (has &)" : "", whole(d).maxSlot, whole(d).maxSlotNoAnds);
+		if (buf == null) System.out.print(out);
+		else buf.append(out);
 
 		if (whole(d).center != null) {
 			whole(d).center.dump(buf, d, "===", l + 1);

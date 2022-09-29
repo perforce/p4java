@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.impl.generic.client;
 
@@ -10,25 +10,31 @@ import com.perforce.p4java.client.IClientSummary.IClientOptions;
  */
 
 public class ClientOptions implements IClientOptions {
-	
+
 	private boolean allWrite = false;
 	private boolean clobber = false;
 	private boolean compress = false;
 	private boolean locked = false;
 	private boolean modtime = false;
 	private boolean rmdir = false;
-	
+
 	/**
 	 * Default constructor; sets all fields to false.
 	 */
 	public ClientOptions() {
 	}
-	
+
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param allWrite allWrite
+	 * @param clobber  clobber
+	 * @param compress compress
+	 * @param locked   locked
+	 * @param modtime  modtime
+	 * @param rmdir    rmdir
 	 */
-	public ClientOptions(boolean allWrite, boolean clobber,
-			boolean compress, boolean locked, boolean modtime, boolean rmdir) {
+	public ClientOptions(boolean allWrite, boolean clobber, boolean compress, boolean locked, boolean modtime, boolean rmdir) {
 		this.allWrite = allWrite;
 		this.clobber = clobber;
 		this.compress = compress;
@@ -36,14 +42,16 @@ public class ClientOptions implements IClientOptions {
 		this.modtime = modtime;
 		this.rmdir = rmdir;
 	}
-	
+
 	/**
 	 * Attempts to construct a ClientOptions object from a typical p4 cmd options string,
 	 * e.g. "noallwrite noclobber nocompress unlocked nomodtime normdir". If optionsString
 	 * is null, this is equivalent to calling the default constructor.
+	 *
+	 * @param optionsString options
 	 */
 	public ClientOptions(String optionsString) {
-		
+
 		if (optionsString != null) {
 			String opts[] = optionsString.split(" ");
 			for (String str : opts) {
@@ -70,49 +78,53 @@ public class ClientOptions implements IClientOptions {
 	 * constructor.
 	 */
 	public String toString() {
-		return
-			(this.allWrite ? "allwrite" : "noallwrite") +
-			(this.clobber ? " clobber" : " noclobber") +
-			(this.compress ? " compress" : " nocompress") +
-			(this.locked ? " locked" : " nolocked") +
-			(this.modtime ? " modtime" : " nomodtime") +
-			(this.rmdir ? " rmdir" : " normdir")
-			;
+		return (this.allWrite ? "allwrite" : "noallwrite") + (this.clobber ? " clobber" : " noclobber") + (this.compress ? " compress" : " nocompress") + (this.locked ? " locked" : " nolocked") + (this.modtime ? " modtime" : " nomodtime") + (this.rmdir ? " rmdir" : " normdir");
 	}
-	
+
 	public boolean isAllWrite() {
 		return allWrite;
 	}
+
 	public void setAllWrite(boolean allWrite) {
 		this.allWrite = allWrite;
 	}
+
 	public boolean isClobber() {
 		return clobber;
 	}
+
 	public void setClobber(boolean clobber) {
 		this.clobber = clobber;
 	}
+
 	public boolean isCompress() {
 		return compress;
 	}
+
 	public void setCompress(boolean compress) {
 		this.compress = compress;
 	}
+
 	public boolean isLocked() {
 		return locked;
 	}
+
 	public void setLocked(boolean locked) {
 		this.locked = locked;
 	}
+
 	public boolean isModtime() {
 		return modtime;
 	}
+
 	public void setModtime(boolean modtime) {
 		this.modtime = modtime;
 	}
+
 	public boolean isRmdir() {
 		return rmdir;
 	}
+
 	public void setRmdir(boolean rmdir) {
 		this.rmdir = rmdir;
 	}

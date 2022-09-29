@@ -42,11 +42,6 @@ public class DiskspaceDelegator extends BaseDelegator implements IDiskspaceDeleg
 
         return buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, IDiskSpace>() {
-                    @Override
-                    public IDiskSpace apply(Map map) {
-                        return new DiskSpace(map);
-                    }
-                });
+				map -> new DiskSpace(map));
     }
 }

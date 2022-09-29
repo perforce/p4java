@@ -46,6 +46,7 @@ public class RpcSSLSocketFactory extends SSLSocketFactory {
 	/**
 	 * Gets the single instance of RpcSSLSocketFactory.
 	 * 
+	 * @param properties properties
 	 * @return single instance of RpcSSLSocketFactory
 	 */
 	public static synchronized RpcSSLSocketFactory getInstance(Properties properties) {

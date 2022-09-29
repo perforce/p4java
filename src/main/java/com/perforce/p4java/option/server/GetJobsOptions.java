@@ -1,50 +1,50 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option.server;
-
-import java.util.List;
 
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
  * Options class for the IOptionsServer getJobs method.
  */
 public class GetJobsOptions extends Options {
-	
+
 	/**
 	 * Options: -e[jobview], -i, -l, -m[max], -r
 	 */
 	public static final String OPTIONS_SPECS = "s:e b:i b:l i:m:gtz b:r";
-	
+
 	/**
 	 * If greater than zero, limit the output to the first maxJobs jobs.
 	 * Corresponds to the -m flag.
 	 */
 	protected int maxJobs = 0;
-	
+
 	/**
 	 * If true, return full descriptions, otherwise show
 	 * only a subset (typically the first 128 characters, but
 	 * this is not guaranteed). Corresponds to the -l flag.
 	 */
 	protected boolean longDescriptions = false;
-	
+
 	/**
 	 * If true, reverse the normal sort order.
 	 * Corresponds to the -r flag.
 	 */
 	protected boolean reverseOrder = false;
-	
+
 	/**
 	 * If true, include any fixes made by changelists
 	 * integrated into the specified files. Corresponds to
 	 * the -i flag.
 	 */
 	protected boolean includeIntegrated = false;
-	
+
 	/**
 	 * If not null, this should be a string in format detailed by "p4 help jobview"
 	 * used to restrict jobs to those satisfying the job view expression.
@@ -62,19 +62,20 @@ public class GetJobsOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public GetJobsOptions(String... options) {
@@ -83,9 +84,14 @@ public class GetJobsOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param maxJobs           maxJobs
+	 * @param longDescriptions  longDescriptions
+	 * @param reverseOrder      reverseOrder
+	 * @param includeIntegrated includeIntegrated
+	 * @param jobView           jobView
 	 */
-	public GetJobsOptions(int maxJobs, boolean longDescriptions,
-			boolean reverseOrder, boolean includeIntegrated, String jobView) {
+	public GetJobsOptions(int maxJobs, boolean longDescriptions, boolean reverseOrder, boolean includeIntegrated, String jobView) {
 		super();
 		this.maxJobs = maxJobs;
 		this.longDescriptions = longDescriptions;
@@ -98,12 +104,7 @@ public class GetJobsOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-								this.getJobView(),
-								this.isIncludeIntegrated(),
-								this.isLongDescriptions(),
-								this.getMaxJobs(),
-								this.isReverseOrder());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.getJobView(), this.isIncludeIntegrated(), this.isLongDescriptions(), this.getMaxJobs(), this.isReverseOrder());
 		return this.optionList;
 	}
 

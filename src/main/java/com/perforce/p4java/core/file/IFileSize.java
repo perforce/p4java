@@ -12,63 +12,75 @@ package com.perforce.p4java.core.file;
  */
 public interface IFileSize {
 
-  /**
-   * Get the depot file.
-   */
-  String getDepotFile();
+	/**
+	 * @return the depot file.
+	 */
+	String getDepotFile();
 
-  /**
-   * Set the depot file.
-   */
-  void setDepotFile(String depotFile);
+	/**
+	 * Set the depot file.
+	 *
+	 * @param depotFile depotFile
+	 */
+	void setDepotFile(String depotFile);
 
-  /**
-   * Get the file revision ID.
-   */
-  long getRevisionId();
+	/**
+	 * @return the file revision ID.
+	 */
+	long getRevisionId();
 
-  /**
-   * Set the file revision ID.
-   */
-  void setRevisionId(long revisionId);
+	/**
+	 * Set the file revision ID.
+	 *
+	 * @param revisionId revisionId
+	 */
+	void setRevisionId(long revisionId);
 
-  /**
-   * Get the file size.
-   */
-  long getFileSize();
+	/**
+	 * @return the file size.
+	 */
+	long getFileSize();
 
-  /**
-   * Set the file size.
-   */
-  void setFileSize(long fileSize);
+	/**
+	 * Set the file size.
+	 *
+	 * @param fileSize fileSize
+	 */
+	void setFileSize(long fileSize);
 
-  /**
-   * Get the path.
-   */
-  String getPath();
+	/**
+	 * @return the path.
+	 */
+	String getPath();
 
-  /**
-   * Set the path.
-   */
-  void setPath(String path);
+	/**
+	 * Set the path.
+	 *
+	 * @param path path
+	 */
+	void setPath(String path);
 
-  /**
-   * Get the file count.
-   */
-  long getFileCount();
+	/**
+	 * @return the file count.
+	 */
+	long getFileCount();
 
-  /**
-   * Set the file count.
-   */
-  void setFileCount(long fileCount);
+	/**
+	 * Set the file count.
+	 *
+	 * @param fileCount fileCount
+	 */
+	void setFileCount(long fileCount);
 
-  /**
-   * Get the shelved changelist ID.
-   */
-  long getChangelistId();
+	/**
+	 * @return the shelved changelist ID.
+	 */
+	long getChangelistId();
 
-  /**
-   * Set the shelved changelist ID.
-   */
-  void setChangelistId(long changeListId);
+	/**
+	 * Set the shelved changelist ID.
+	 *
+	 * @param changeListId changeListId
+	 */
+	void setChangelistId(long changeListId);
 }

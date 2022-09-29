@@ -21,6 +21,9 @@ public class ReviewSubscription extends MapEntry implements IReviewSubscription 
 	 * Explicit value constructor -- calls super(order, subscription).
 	 * Note that this probably won't do what you expect it to if
 	 * there's more than one element in the subscription.
+	 *
+	 * @param order        order
+	 * @param subscription subscription
 	 */
 	public ReviewSubscription(int order, String subscription) {
 		super(order, subscription);

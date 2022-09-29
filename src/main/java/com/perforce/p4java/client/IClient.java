@@ -34,11 +34,11 @@ import com.perforce.p4java.option.client.ResolvedFilesOptions;
 import com.perforce.p4java.option.client.RevertFilesOptions;
 import com.perforce.p4java.option.client.ShelveFilesOptions;
 import com.perforce.p4java.option.client.SyncOptions;
+import com.perforce.p4java.option.client.UndoFilesOptions;
 import com.perforce.p4java.option.client.UnlockFilesOptions;
 import com.perforce.p4java.option.client.UnshelveFilesOptions;
 import com.perforce.p4java.option.server.ListOptions;
 import com.perforce.p4java.option.server.OpenedFilesOptions;
-import com.perforce.p4java.option.client.UndoFilesOptions;
 import com.perforce.p4java.server.IServer;
 import com.perforce.p4java.server.callback.IStreamingCallback;
 
@@ -49,13 +49,13 @@ import java.util.List;
 /**
  * Extends the lightweight IClientSummary interface to provide a "heavyweight" Perforce
  * client object that has an associated Perforce client views and has the full panoply
- * of Perforce operations defined against it.<p>
+ * of Perforce operations defined against it.
  * <p>
  * Perforce clients are described in detail elsewhere, but in summary, a Perforce client object
  * is returned from the Perforce server using one of the getClient(s) methods or by creating a
  * new Perforce client through the newClient server method. Some Perforce operations are done
  * through a Perforce client; some are associated with a Perforce client; and some are done
- * directly through the Perforce server itself.<p>
+ * directly through the Perforce server itself.
  * <p>
  * IClient objects are complete, refreshable, and updateable (unlike IClientSummary objects,
  * which are not updateable).
@@ -69,7 +69,6 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @return the Perforce client view associated with this client, if any;
 	 * null otherwise.
 	 */
-
 	ClientView getClientView();
 
 	/**
@@ -85,7 +84,6 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @return the Perforce change view associated with this client, if any;
 	 * null otherwise.
 	 */
-
 	ArrayList<String> getChangeView();
 
 	/**
@@ -93,7 +91,6 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *
 	 * @param changeView new List of change views for the client.
 	 */
-
 	void setChangeView(ArrayList<String> changeView);
 
 	/**
@@ -103,7 +100,6 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @return the IServer object representing the server associated with this
 	 * client, or null if no such server exists or has been set for this client.
 	 */
-
 	IServer getServer();
 
 	/**
@@ -115,7 +111,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	void setServer(IServer server);
 
 	/**
-	 * Sync a Perforce client workspace against the Perforce server.<p>
+	 * Sync a Perforce client workspace against the Perforce server.
 	 * <p>
 	 * Note that this method will fail (throw a RequestException) unless the client
 	 * is the associated IServer object's current client.
@@ -140,10 +136,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             its processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> sync(List<IFileSpec> fileSpecs, boolean forceUpdate, boolean noUpdate,
-	                     boolean clientBypass, boolean serverBypass)
-			throws ConnectionException, RequestException, AccessException;
+	List<IFileSpec> sync(List<IFileSpec> fileSpecs, boolean forceUpdate, boolean noUpdate, boolean clientBypass, boolean serverBypass) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Sync a Perforce client workspace against the Perforce server.<p>
@@ -154,8 +147,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if any processing errors occur during exection.
 	 * @see com.perforce.p4java.option.client.SyncOptions
 	 */
-	List<IFileSpec> sync(List<IFileSpec> fileSpecs, SyncOptions syncOpts)
-			throws P4JavaException;
+	List<IFileSpec> sync(List<IFileSpec> fileSpecs, SyncOptions syncOpts) throws P4JavaException;
 
 	/**
 	 * Sync a Perforce client workspace against the Perforce server in parallel.<p>
@@ -164,16 +156,15 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @param syncOpts  SyncOptions object describing sync options; see SyncOptions comments.
 	 * @param psyncOpts Options related to parallalisation of sync
 	 * @return non-null list of affected files as IFileSpec elements
-	 * @throws P4JavaException
+	 * @throws P4JavaException on error
 	 * @see com.perforce.p4java.option.client.SyncOptions
 	 * @see com.perforce.p4java.option.client.ParallelSyncOptions
 	 * @since 2017.2
 	 */
-	List<IFileSpec> syncParallel(List<IFileSpec> fileSpecs, SyncOptions syncOpts, ParallelSyncOptions psyncOpts)
-			throws P4JavaException;
+	List<IFileSpec> syncParallel(List<IFileSpec> fileSpecs, SyncOptions syncOpts, ParallelSyncOptions psyncOpts) throws P4JavaException;
 
 	/**
-	 * Sync a Perforce client workspace against the Perforce server.<p>
+	 * Sync a Perforce client workspace against the Perforce server.
 	 * <p>
 	 * Note that this method takes an IStreamingCallback parameter, and the results
 	 * are sent to the user using the IStreamingCallback handleResult method; see
@@ -193,12 +184,11 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @see com.perforce.p4java.option.client.SyncOptions
 	 * @since 2012.3
 	 */
-	void sync(List<IFileSpec> fileSpecs, SyncOptions syncOpts, IStreamingCallback callback, int key)
-			throws P4JavaException;
+	void sync(List<IFileSpec> fileSpecs, SyncOptions syncOpts, IStreamingCallback callback, int key) throws P4JavaException;
 
 	/**
-	 * Sync a Perforce client workspace against the Perforce server in parallel.<p>
-	 *
+	 * Sync a Perforce client workspace against the Perforce server in parallel.
+	 * <p>
 	 * Note that this method takes an IStreamingCallback parameter, and the results
 	 * are sent to the user using the IStreamingCallback handleResult method; see
 	 * the IStreamingCallback Javadoc for details. The payload passed to handleResult
@@ -214,11 +204,10 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                  methods to identify the action as being associated with this specific
 	 *                  call.
 	 * @param pSyncOpts The --parallel flag specifies options for for parallel file transfer
-	 * @throws P4JavaException
+	 * @throws P4JavaException on error
 	 * @since 2017.2
 	 */
-	 void syncParallel(List<IFileSpec> fileSpecs, SyncOptions syncOpts, IStreamingCallback callback,
-	                         int key, ParallelSyncOptions pSyncOpts) throws P4JavaException;
+	void syncParallel(List<IFileSpec> fileSpecs, SyncOptions syncOpts, IStreamingCallback callback, int key, ParallelSyncOptions pSyncOpts) throws P4JavaException;
 
 	/**
 	 * Perform a label sync operation for this client. See the main Perforce
@@ -238,9 +227,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
 
-	List<IFileSpec> labelSync(List<IFileSpec> fileSpecs, String labelName, boolean noUpdate,
-	                          boolean addFiles, boolean deleteFiles)
-			throws ConnectionException, RequestException, AccessException;
+	List<IFileSpec> labelSync(List<IFileSpec> fileSpecs, String labelName, boolean noUpdate, boolean addFiles, boolean deleteFiles) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Perform a label sync operation for this client. See the main Perforce
@@ -254,16 +241,14 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @see com.perforce.p4java.option.client.LabelSyncOptions
 	 */
-
-	List<IFileSpec> labelSync(List<IFileSpec> fileSpecs, String labelName, LabelSyncOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> labelSync(List<IFileSpec> fileSpecs, String labelName, LabelSyncOptions opts) throws P4JavaException;
 
 	/**
 	 * Create a new changelist for this Perforce client in the associated Perforce server.
 	 * The newly-created changelist has no files associated with it (regardless of
 	 * whether the passed-in changelist spec has files associated with it); if you
 	 * wish to add files to the new changelist, you need to do a reopen on them
-	 * explictly after the new changelist is returned.<p>
+	 * explictly after the new changelist is returned.
 	 * <p>
 	 * The new changelist is returned if the command is successful; this changelist object
 	 * will include the new changelist ID.
@@ -278,9 +263,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             its processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	IChangelist createChangelist(IChangelist newChangelist)
-			throws ConnectionException, RequestException, AccessException;
+	IChangelist createChangelist(IChangelist newChangelist) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Open one or more Perforce client workspace files for adding to the Perforce server.
@@ -304,10 +287,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> addFiles(List<IFileSpec> fileSpecs, boolean noUpdate, int changeListId,
-	                         String fileType, boolean useWildcards)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> addFiles(List<IFileSpec> fileSpecs, boolean noUpdate, int changeListId, String fileType, boolean useWildcards) throws ConnectionException, AccessException;
 
 	/**
 	 * Open one or more Perforce client workspace files for adding to the Perforce server.
@@ -321,8 +301,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @see com.perforce.p4java.option.client.AddFilesOptions
 	 */
-	List<IFileSpec> addFiles(List<IFileSpec> fileSpecs, AddFilesOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> addFiles(List<IFileSpec> fileSpecs, AddFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Open one or more Perforce client workspace files for editing.
@@ -354,10 +333,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> editFiles(List<IFileSpec> fileSpecs, boolean noUpdate, boolean bypassClientUpdate,
-	                          int changeListId, String fileType)
-			throws RequestException, ConnectionException, AccessException;
+	List<IFileSpec> editFiles(List<IFileSpec> fileSpecs, boolean noUpdate, boolean bypassClientUpdate, int changeListId, String fileType) throws RequestException, ConnectionException, AccessException;
 
 	/**
 	 * Open one or more Perforce client workspace files for editing.
@@ -371,7 +347,6 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @see com.perforce.p4java.option.client.EditFilesOptions
 	 */
-
 	List<IFileSpec> editFiles(List<IFileSpec> fileSpecs, EditFilesOptions opts) throws P4JavaException;
 
 	/**
@@ -394,10 +369,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> revertFiles(List<IFileSpec> fileSpecs, boolean noUpdate, int changeListId,
-	                            boolean revertOnlyUnchanged, boolean noRefresh)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> revertFiles(List<IFileSpec> fileSpecs, boolean noUpdate, int changeListId, boolean revertOnlyUnchanged, boolean noRefresh) throws ConnectionException, AccessException;
 
 	/**
 	 * Revert open Perforce client workspace files back to the revision previously synced
@@ -412,57 +384,54 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @see com.perforce.p4java.option.client.RevertFilesOptions
 	 */
-
 	List<IFileSpec> revertFiles(List<IFileSpec> fileSpecs, RevertFilesOptions opts) throws P4JavaException;
 
-    /**
-     * Undo one or more previously submitted files. The 'undone' changes remain a
-     * part of the history, but the new revisions submitted after 'p4 undo' will
-     * reverse their effect.
-     * <p>
-     * If a single revision is specified, the specified revision is undone.
-     * If a revision range is specified, the entire range is undone.
-     * <p>
-     *
-     * @param fileSpecs    if non-empty, undo the specified files;
-     *                     otherwise undo all qualifying files
-     * @param changelistId - if not IChangelist.UNKNOWN, the files are opened
-     *                     in the numbered pending changelist instead of the
-     *                     'default' changelist.
-     * @param listOnly     – if true, don't actually perform the move, just
-     *                     return what would happen if the move was performed
-     * @return list of IFileSpec objects representing the results of this undo
-     * @throws ConnectionException - if the Perforce server is unreachable or
-     *                             is not connected.
-     * @throws RequestException    – if the Perforce server encounters an error
-     *                             during its processing of the request
-     * @throws AccessException     – if the Perforce server denies access to the
-     *                             caller
-     */
-    List<IFileSpec> undoFiles(List<IFileSpec> fileSpecs, int changelistId, boolean listOnly)
-            throws ConnectionException, RequestException, AccessException;
+	/**
+	 * Undo one or more previously submitted files. The 'undone' changes remain a
+	 * part of the history, but the new revisions submitted after 'p4 undo' will
+	 * reverse their effect.
+	 * <p>
+	 * If a single revision is specified, the specified revision is undone.
+	 * If a revision range is specified, the entire range is undone.
+	 * <p>
+	 *
+	 * @param fileSpecs    if non-empty, undo the specified files;
+	 *                     otherwise undo all qualifying files
+	 * @param changelistId - if not IChangelist.UNKNOWN, the files are opened
+	 *                     in the numbered pending changelist instead of the
+	 *                     'default' changelist.
+	 * @param listOnly     – if true, don't actually perform the move, just
+	 *                     return what would happen if the move was performed
+	 * @return list of IFileSpec objects representing the results of this undo
+	 * @throws ConnectionException - if the Perforce server is unreachable or
+	 *                             is not connected.
+	 * @throws RequestException    – if the Perforce server encounters an error
+	 *                             during its processing of the request
+	 * @throws AccessException     – if the Perforce server denies access to the
+	 *                             caller
+	 */
+	List<IFileSpec> undoFiles(List<IFileSpec> fileSpecs, int changelistId, boolean listOnly) throws ConnectionException, RequestException, AccessException;
 
-    /**
-     * Undo one or more previously submitted files. The 'undone' changes remain a
-     * part of the history, but the new revisions submitted after 'p4 undo' will
-     * reverse their effect.
-     * <p>
-     * If a single revision is specified, the specified revision is undone.
-     * If a revision range is specified, the entire range is undone.
-     * <p>
-     *
-     * @param fileSpecs if non-empty, undo the specified files;
-     *                  otherwise undo all qualifying files
-     * @param opts      possibly-null UndoFilesOptions object object specifying
-     *                  method options.
-     * @return non-null but possibly-empty list of qualifying files to undo. Not
-     * all fields in individual file specs will be valid or make sense
-     * to be accessed.
-     * @throws P4JavaException if an error occurs processing this method and its
-     *                         parameters.
-     */
-    List<IFileSpec> undoFiles(List<IFileSpec> fileSpecs, UndoFilesOptions opts)
-            throws P4JavaException;
+	/**
+	 * Undo one or more previously submitted files. The 'undone' changes remain a
+	 * part of the history, but the new revisions submitted after 'p4 undo' will
+	 * reverse their effect.
+	 * <p>
+	 * If a single revision is specified, the specified revision is undone.
+	 * If a revision range is specified, the entire range is undone.
+	 * <p>
+	 *
+	 * @param fileSpecs if non-empty, undo the specified files;
+	 *                  otherwise undo all qualifying files
+	 * @param opts      possibly-null UndoFilesOptions object object specifying
+	 *                  method options.
+	 * @return non-null but possibly-empty list of qualifying files to undo. Not
+	 * all fields in individual file specs will be valid or make sense
+	 * to be accessed.
+	 * @throws P4JavaException if an error occurs processing this method and its
+	 *                         parameters.
+	 */
+	List<IFileSpec> undoFiles(List<IFileSpec> fileSpecs, UndoFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Open Perforce client workspace files for deletion from a Perforce depot.
@@ -481,9 +450,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> deleteFiles(List<IFileSpec> fileSpecs, int changeListId, boolean noUpdate)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> deleteFiles(List<IFileSpec> fileSpecs, int changeListId, boolean noUpdate) throws ConnectionException, AccessException;
 
 	/**
 	 * Open Perforce client workspace files for deletion from a Perforce depot.
@@ -496,14 +463,12 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @see com.perforce.p4java.option.client.DeleteFilesOptions
 	 */
-
-	List<IFileSpec> deleteFiles(List<IFileSpec> fileSpecs, DeleteFilesOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> deleteFiles(List<IFileSpec> fileSpecs, DeleteFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * If one or more Perforce file specs is passed-in, return the opened / locked status
 	 * of each file (if known) within an IFileSpec object; otherwise
-	 * return a list of all files known to be open for this Perforce client workspace.<p>
+	 * return a list of all files known to be open for this Perforce client workspace.
 	 * <p>
 	 * The returned list can be modified with the other arguments as described below.
 	 *
@@ -518,13 +483,11 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> openedFiles(List<IFileSpec> fileSpecs, int maxFiles, int changeListId)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> openedFiles(List<IFileSpec> fileSpecs, int maxFiles, int changeListId) throws ConnectionException, AccessException;
 
 	/**
 	 * Return a list of files open for this client, optionally restricted to a
-	 * specific path and / or changelist.<p>
+	 * specific path and / or changelist.
 	 * <p>
 	 * Note that if a non-null OpenedFilesOptions object is passed to this method,
 	 * the object's clientName field is ignored and the name of the client whose
@@ -538,17 +501,15 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * in individual file specs will be valid or make sense to be accessed.
 	 * @throws P4JavaException if an error occurs processing this method and its parameters.
 	 */
-
-	List<IFileSpec> openedFiles(List<IFileSpec> fileSpecs, OpenedFilesOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> openedFiles(List<IFileSpec> fileSpecs, OpenedFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Return a list of all Perforce-managed files and versions that the Perforce server
 	 * believes this Perforce client workspace has as of the latest sync. If fileSpecs
-	 * is given, this method returns, only information on those files is returned.<p>
+	 * is given, this method returns, only information on those files is returned.
 	 * <p>
 	 * <b>Note that this method will return an empty list unless the client is the
-	 * IServer object's current client.</b><p>
+	 * IServer object's current client.</b>
 	 * <p>
 	 * Only the depotFile, revision, clientPath, and localPath fields of the returned
 	 * file specs are guaranteed to be valid.
@@ -560,17 +521,15 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.t
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> haveList(List<IFileSpec> fileSpecs)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> haveList(List<IFileSpec> fileSpecs) throws ConnectionException, AccessException;
 
 	/**
 	 * Return a list of all Perforce-managed repos that the Perforce server believes
 	 * this Perforce client workspace has as of the latest sync. If fileSpecs is given,
-	 * this method returns, only information on those files is returned.<p>
+	 * this method returns, only information on those files is returned.
 	 * <p>
 	 * <b>Note that this method will return an empty list unless the client is the
-	 * IServer object's current client.</b><p>
+	 * IServer object's current client.</b>
 	 * <p>
 	 * Only the sha, repo name, and branch name fields of the returned file specs
 	 * are guaranteed to be valid.
@@ -582,9 +541,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.t
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> graphHaveList(List<IFileSpec> fileSpecs)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> graphHaveList(List<IFileSpec> fileSpecs) throws ConnectionException, AccessException;
 
 	/**
 	 * Reopen Perforce files in a new changelist.
@@ -600,9 +557,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> reopenFiles(List<IFileSpec> fileSpecs, int changeListId, String fileType)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> reopenFiles(List<IFileSpec> fileSpecs, int changeListId, String fileType) throws ConnectionException, AccessException;
 
 	/**
 	 * Reopen Perforce files in a new changelist.
@@ -612,8 +567,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @return list of IFileSpec for each specified file.
 	 * @throws P4JavaException if an error occurs processing this method and its parameters.
 	 */
-	List<IFileSpec> reopenFiles(List<IFileSpec> fileSpecs, ReopenFilesOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> reopenFiles(List<IFileSpec> fileSpecs, ReopenFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Integrate ("merge") from one Perforce filespec to another. The semantics
@@ -637,11 +591,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> integrateFiles(int changeListId, boolean showActionsOnly,
-	                               IntegrationOptions integOpts, String branchSpec,
-	                               IFileSpec fromFile, IFileSpec toFile)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> integrateFiles(int changeListId, boolean showActionsOnly, IntegrationOptions integOpts, String branchSpec, IFileSpec fromFile, IFileSpec toFile) throws ConnectionException, AccessException;
 
 	/**
 	 * Integrate ("merge") from one Perforce filespec to another. The semantics
@@ -659,16 +609,14 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @see com.perforce.p4java.option.client.IntegrateFilesOptions
 	 */
-
-	List<IFileSpec> integrateFiles(IFileSpec fromFile, IFileSpec toFile, String branchSpec,
-	                               IntegrateFilesOptions opts) throws P4JavaException;
+	List<IFileSpec> integrateFiles(IFileSpec fromFile, IFileSpec toFile, String branchSpec, IntegrateFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Integrate one set of files (the 'source') into another (the 'target').
 	 * The semantics of Perforce integrate are complex and are not explained here;
 	 * please consult the main Perforce documentation for file integrations and
 	 * the IntegrateFilesOptions Javdoc comments for details of the less-commonly-used
-	 * options.<p>
+	 * options.
 	 * <p>
 	 * Note that depending on the specific options passed-in the fromFile can be
 	 * null or one file spec; the toFiles list can be null, one or more file specs.
@@ -680,17 +628,15 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters.
 	 * @since 2011.2
 	 */
-
-	List<IFileSpec> integrateFiles(IFileSpec fromFile, List<IFileSpec> toFiles,
-	                               IntegrateFilesOptions opts) throws P4JavaException;
+	List<IFileSpec> integrateFiles(IFileSpec fromFile, List<IFileSpec> toFiles, IntegrateFilesOptions opts) throws P4JavaException;
 
 	/**
-	 * Automatically resolve the results of a previousPerforce file integration.<p>
+	 * Automatically resolve the results of a previousPerforce file integration.
 	 * <p>
 	 * Note that this is currently a very limited version of the full Perforce resolve feature,
 	 * corresponding only to (some of) the various auto-resolve features, meaning this method
 	 * will never invoke (or need to invoke) end user interaction. More extensive versions
-	 * of the resolve command will be surfaced as needed.<p>
+	 * of the resolve command will be surfaced as needed.
 	 * <p>
 	 * This method notionally returns an IFileSpec, as it's closely
 	 * related to the integ method and shares many of its return values, but
@@ -703,7 +649,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * case, since the info messages do NOT correspond one-to-one with the input
 	 * file specs that caused the messages, consumers need to explicitly search each
 	 * returned info message string for the relevant file path or name. This is an
-	 * unfortunate artifact of the Perforce server's implementation of this command.<p>
+	 * unfortunate artifact of the Perforce server's implementation of this command.
 	 * <p>
 	 * Note: results and behavior are undefined if clashing or inconsistent options
 	 * are used with this method. In general, the behavior of (e.g.) setting both
@@ -733,19 +679,15 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> resolveFilesAuto(List<IFileSpec> fileSpecs, boolean safeMerge,
-	                                 boolean acceptTheirs, boolean acceptYours, boolean showActionsOnly,
-	                                 boolean forceResolve)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> resolveFilesAuto(List<IFileSpec> fileSpecs, boolean safeMerge, boolean acceptTheirs, boolean acceptYours, boolean showActionsOnly, boolean forceResolve) throws ConnectionException, AccessException;
 
 	/**
-	 * Automatically resolve the results of a previousPerforce file integration.<p>
+	 * Automatically resolve the results of a previousPerforce file integration.
 	 * <p>
 	 * Note that this is currently a very limited version of the full Perforce resolve feature,
 	 * corresponding only to (some of) the various auto-resolve features, meaning this method
 	 * will never invoke (or need to invoke) end user interaction. More extensive versions
-	 * of the resolve command will be surfaced as needed.<p>
+	 * of the resolve command will be surfaced as needed.
 	 * <p>
 	 * This method notionally returns an IFileSpec, as it's closely
 	 * related to the integ method and shares many of its return values, but
@@ -758,7 +700,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * case, since the info messages do NOT correspond one-to-one with the input
 	 * file specs that caused the messages, consumers need to explicitly search each
 	 * returned info message string for the relevant file path or name. This is an
-	 * unfortunate artifact of the Perforce server's implementation of this command.<p>
+	 * unfortunate artifact of the Perforce server's implementation of this command.
 	 * <p>
 	 * Note: results and behavior are undefined if clashing or inconsistent options
 	 * are used with this method. In general, the behavior of (e.g.) setting both
@@ -777,13 +719,11 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @see com.perforce.p4java.option.client.ResolveFilesAutoOptions
 	 */
-
-	List<IFileSpec> resolveFilesAuto(List<IFileSpec> fileSpecs, ResolveFilesAutoOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> resolveFilesAuto(List<IFileSpec> fileSpecs, ResolveFilesAutoOptions opts) throws P4JavaException;
 
 	/**
 	 * Resolve a file integration by using the contents of the sourceStream InputStream
-	 * as the resolve result.<p>
+	 * as the resolve result.
 	 * <p>
 	 * Note that this method assumes that the target and source resolve makes
 	 * sense, and does little or no sanity- or error-checking. In particular, it
@@ -791,13 +731,13 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * make sense or not; you should check the getHowResolved() method on the
 	 * returned filespec to ensure that it did what you expected (typically this
 	 * means checking that it was resolved using the "edit from" resolution rather
-	 * than, say "ignored").<p>
+	 * than, say "ignored").
 	 * <p>
 	 * Use of this method will normally result in an integration edit record
 	 * in the target file's history whether you've actually done an edit or not, so
 	 * it is up to the consumer to weed out the various straight copy resolve cases
 	 * and only use this for cases of more complex merges that actually did involve
-	 * an edit (in reality or not).<p>
+	 * an edit (in reality or not).
 	 * <p>
 	 * Note that the IFileSpec returned will generally not have a
 	 * valid depot or client file paths -- you must use the toFile and fromFile methods
@@ -812,13 +752,11 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws RequestException    if the Perforce server encounters an error during
 	 *                             its processing of the request
 	 */
-
-	IFileSpec resolveFile(IFileSpec targetFile, InputStream sourceStream)
-			throws ConnectionException, RequestException, AccessException;
+	IFileSpec resolveFile(IFileSpec targetFile, InputStream sourceStream) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Resolve a file integration by using the contents of the sourceStream InputStream
-	 * as the resolve result.<p>
+	 * as the resolve result.
 	 * <p>
 	 * Note that this method assumes that the target and source resolve makes
 	 * sense, and does little or no sanity- or error-checking. In particular, it
@@ -826,13 +764,13 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * make sense or not; you should check the getHowResolved() method on the
 	 * returned filespec to ensure that it did what you expected (typically this
 	 * means checking that it was resolved using the "edit from" resolution rather
-	 * than, say "ignored").<p>
+	 * than, say "ignored").
 	 * <p>
 	 * Use of this method will normally result in an integration edit record
 	 * in the target file's history whether you've actually done an edit or not, so
 	 * it is up to the consumer to weed out the various straight copy resolve cases
 	 * and only use this for cases of more complex merges that actually did involve
-	 * an edit (in reality or not).<p>
+	 * an edit (in reality or not).
 	 * <p>
 	 * Note that the IFileSpec returned will generally not have a
 	 * valid depot or client file paths -- you must use the toFile and fromFile methods
@@ -850,20 +788,17 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws RequestException    if the Perforce server encounters an error during
 	 *                             its processing of the request
 	 */
-
-	IFileSpec resolveFile(IFileSpec targetFile, InputStream sourceStream, boolean useTextualMerge,
-	                      int startFromRev, int endFromRev)
-			throws ConnectionException, RequestException, AccessException;
+	IFileSpec resolveFile(IFileSpec targetFile, InputStream sourceStream, boolean useTextualMerge, int startFromRev, int endFromRev) throws ConnectionException, RequestException, AccessException;
 
 	/**
-	 * Automatically resolve the results of a previous Perforce file integration.<p>
+	 * Automatically resolve the results of a previous Perforce file integration.
 	 * Allows for resolving Streams.
 	 * <p>
 	 * Note that this is currently a very limited version of the full Perforce resolve feature,
 	 * corresponding only to (some of) the various auto-resolve features, meaning this method
 	 * will never invoke (or need to invoke) end user interaction. More extensive versions
-	 * of the resolve command will be surfaced as needed.<p>
-	 *
+	 * of the resolve command will be surfaced as needed.
+	 * <p>
 	 * Note: results and behavior are undefined if clashing or inconsistent options
 	 * are used with this method. In general, the behavior of (e.g.) setting both
 	 * acceptYours and acceptTheirs true will be whatever the Perforce server makes
@@ -878,8 +813,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @since 2021.2
 	 */
-	String resolveStreamAuto(ResolveFilesAutoOptions opts)
-			throws P4JavaException;
+	String resolveStreamAuto(ResolveFilesAutoOptions opts) throws P4JavaException;
 
 	/**
 	 * Return a list of files resolved but not submitted for this client. Note that
@@ -895,9 +829,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> resolvedFiles(List<IFileSpec> fileSpecs, boolean showBaseRevision)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> resolvedFiles(List<IFileSpec> fileSpecs, boolean showBaseRevision) throws ConnectionException, AccessException;
 
 	/**
 	 * Return a list of files resolved but not submitted for this client. Note that
@@ -911,19 +843,17 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @see com.perforce.p4java.option.client.ResolvedFilesOptions
 	 */
-
-	List<IFileSpec> resolvedFiles(List<IFileSpec> fileSpecs, ResolvedFilesOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> resolvedFiles(List<IFileSpec> fileSpecs, ResolvedFilesOptions opts) throws P4JavaException;
 
 	/**
-	 * Lock an opened file against changelist submission.<p>
+	 * Lock an opened file against changelist submission.
 	 * <p>
 	 * The open files named are locked in the Perforce depot, preventing any
 	 * user other than the current user on the current client from
 	 * submitting changes to the files.  If a file is already locked
 	 * then the lock request is rejected.  If no file specs are given
 	 * then lock all files currently open in the changelist number given
-	 * if it is IChangelist.DEFAULT or > 0.<p>
+	 * if it is IChangelist.DEFAULT or &gt; 0.
 	 * <p>
 	 * Note that the file specs returned are only partially filled out; the
 	 * Perforce server seems to only return path information for this command.
@@ -936,19 +866,17 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> lockFiles(List<IFileSpec> fileSpecs, int changeListId)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> lockFiles(List<IFileSpec> fileSpecs, int changeListId) throws ConnectionException, AccessException;
 
 	/**
-	 * Lock an opened file against changelist submission.<p>
+	 * Lock an opened file against changelist submission.
 	 * <p>
 	 * The open files named are locked in the Perforce depot, preventing any
 	 * user other than the current user on the current client from
 	 * submitting changes to the files.  If a file is already locked
 	 * then the lock request is rejected.  If no file specs are given
 	 * then lock all files currently open in the changelist number given
-	 * if it is IChangelist.DEFAULT or > 0.<p>
+	 * if it is IChangelist.DEFAULT or &gt; 0.
 	 * <p>
 	 * Note that the file specs returned are only partially filled out; the
 	 * Perforce server seems to only return path information for this command.
@@ -959,17 +887,15 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @see com.perforce.p4java.option.client.LockFilesOptions
 	 */
-
-	List<IFileSpec> lockFiles(List<IFileSpec> fileSpecs, LockFilesOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> lockFiles(List<IFileSpec> fileSpecs, LockFilesOptions opts) throws P4JavaException;
 
 	/**
-	 * Release locked files but leave them open.<p>
+	 * Release locked files but leave them open.
 	 * <p>
 	 * If the files are open in a specific pending changelist other than
 	 * 'default', then the changeListId parameter is required to specify the
 	 * pending changelist.  If no file name is given then all files in the
-	 * designated changelist are unlocked.<p>
+	 * designated changelist are unlocked.
 	 * <p>
 	 * Note that the file specs returned are only partially filled out; the
 	 * Perforce server seems to only return path information for this command.
@@ -984,12 +910,10 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             connected.
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> unlockFiles(List<IFileSpec> fileSpecs, int changeListId, boolean force)
-			throws ConnectionException, AccessException;
+	List<IFileSpec> unlockFiles(List<IFileSpec> fileSpecs, int changeListId, boolean force) throws ConnectionException, AccessException;
 
 	/**
-	 * Release locked files but leave them open.<p>
+	 * Release locked files but leave them open.
 	 * <p>
 	 * Note that the file specs returned are only partially filled out; the
 	 * Perforce server seems to only return path information for this command.
@@ -999,26 +923,24 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @return non-null but possibly-empty list of unlocked file specs or errors
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 */
-
-	List<IFileSpec> unlockFiles(List<IFileSpec> fileSpecs, UnlockFilesOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> unlockFiles(List<IFileSpec> fileSpecs, UnlockFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Return a list of files that differ in some (arbitrarily complex)
 	 * way from depot. See the help documentation for the p4 diff command
 	 * using the "-sx" (-sa, -sl, etc.) options for a full discussion
-	 * of the options used below.<p>
+	 * of the options used below.
 	 * <p>
 	 * Note that this method returns lists of files, and is not useful
-	 * to get the diffs themselves (at least not directly).<p>
+	 * to get the diffs themselves (at least not directly).
 	 * <p>
 	 * Note that the diff status returned for the unopenedWithStatus option
-	 * is retrievable from the filespec with the getDiffStatus() method.<p>
+	 * is retrievable from the filespec with the getDiffStatus() method.
 	 * <p>
 	 * Note that you must have at least one of the various "-s" options set
 	 * to true.
 	 *
-	 * @param maxFiles
+	 * @param maxFiles               max files
 	 * @param fileSpecs              candidate file specs; may be null.
 	 * @param diffNonTextFiles       include non-text files in the diff lists
 	 * @param openedDifferentMissing corresponds to the "-sa" option for the p4 command line.
@@ -1034,23 +956,19 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             its processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IFileSpec> getDiffFiles(List<IFileSpec> fileSpecs, int maxFiles, boolean diffNonTextFiles,
-	                             boolean openedDifferentMissing, boolean openedForIntegrate, boolean unopenedMissing,
-	                             boolean unopenedDifferent, boolean unopenedWithStatus, boolean openedSame)
-			throws ConnectionException, RequestException, AccessException;
+	List<IFileSpec> getDiffFiles(List<IFileSpec> fileSpecs, int maxFiles, boolean diffNonTextFiles, boolean openedDifferentMissing, boolean openedForIntegrate, boolean unopenedMissing, boolean unopenedDifferent, boolean unopenedWithStatus, boolean openedSame) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Return a list of files that differ in some (arbitrarily complex)
 	 * way from depot. See the help documentation for the p4 diff command
 	 * using the "-sx" (-sa, -sl, etc.) options for a full discussion
-	 * of the options used below.<p>
+	 * of the options used below.
 	 * <p>
 	 * Note that this method returns lists of files, and is not useful
-	 * to get the diffs themselves (at least not directly).<p>
+	 * to get the diffs themselves (at least not directly).
 	 * <p>
 	 * Note that the diff status returned for the unopenedWithStatus option
-	 * is retrievable from the filespec with the getDiffStatus() method.<p>
+	 * is retrievable from the filespec with the getDiffStatus() method.
 	 * <p>
 	 * Note that you must have at least one of the various "-s" options set
 	 * to true.
@@ -1060,9 +978,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @return non-null but possibly-empty list of qualifying filepecs.
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 */
-
-	List<IFileSpec> getDiffFiles(List<IFileSpec> fileSpecs, GetDiffFilesOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> getDiffFiles(List<IFileSpec> fileSpecs, GetDiffFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Shelve files in a changelist.
@@ -1078,9 +994,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @see com.perforce.p4java.option.client.ShelveFilesOptions
 	 */
-
-	List<IFileSpec> shelveFiles(List<IFileSpec> fileSpecs, int changelistId, ShelveFilesOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> shelveFiles(List<IFileSpec> fileSpecs, int changelistId, ShelveFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Unshelve file(s) from a shelf.
@@ -1094,9 +1008,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * server's response
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 */
-
-	List<IFileSpec> unshelveFiles(List<IFileSpec> fileSpecs, int sourceChangelistId,
-	                              int targetChangelistId, UnshelveFilesOptions opts) throws P4JavaException;
+	List<IFileSpec> unshelveFiles(List<IFileSpec> fileSpecs, int sourceChangelistId, int targetChangelistId, UnshelveFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Update/replace/delete shelved file(s) from a pending changelist.
@@ -1117,13 +1029,10 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             its processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-	List<IFileSpec> shelveChangelist(int changelistId,
-	                                 List<IFileSpec> fileSpecs, boolean forceUpdate, boolean replace,
-	                                 boolean discard) throws ConnectionException, RequestException,
-			AccessException;
+	List<IFileSpec> shelveChangelist(int changelistId, List<IFileSpec> fileSpecs, boolean forceUpdate, boolean replace, boolean discard) throws ConnectionException, RequestException, AccessException;
 
 	/**
-	 * Shelve the file(s) in a pending changelist.<p>
+	 * Shelve the file(s) in a pending changelist.
 	 * <p>
 	 * This performs a 'p4 shelve -i' command when called.
 	 *
@@ -1136,8 +1045,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             its processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-	List<IFileSpec> shelveChangelist(IChangelist list)
-			throws ConnectionException, RequestException, AccessException;
+	List<IFileSpec> shelveChangelist(IChangelist list) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Unshelve file(s) from a shelved changelist
@@ -1156,10 +1064,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 *                             its processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-	List<IFileSpec> unshelveChangelist(int shelveChangelistId,
-	                                   List<IFileSpec> fileSpecs, int clientChangelistId,
-	                                   boolean forceOverwrite, boolean previewOnly)
-			throws ConnectionException, RequestException, AccessException;
+	List<IFileSpec> unshelveChangelist(int shelveChangelistId, List<IFileSpec> fileSpecs, int clientChangelistId, boolean forceOverwrite, boolean previewOnly) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Submit a shelved changelist without transferring files or modifying the
@@ -1172,7 +1077,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * be open in any workspace at the same change number. Client submit options
 	 * (ie revertUnchanged, etc) will be ignored. If the submit is successful,
 	 * the shelved change and files are cleaned up, and are no longer available
-	 * to be unshelved or submitted.<p>
+	 * to be unshelved or submitted.
 	 * <p>
 	 * This performs a 'p4 submit -e shelvedChange#' command when called.
 	 *
@@ -1187,7 +1092,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	/**
 	 * Schedule resolve and integration actions to make the target file identical to
 	 * the source file based only on the differences between the two (i.e. ignoring
-	 * prior integration history).<p>
+	 * prior integration history).
 	 * <p>
 	 * Corresponds to the 'p4 copy' command.
 	 *
@@ -1199,11 +1104,10 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters.
 	 * @since 2011.1
 	 */
-	List<IFileSpec> copyFiles(IFileSpec fromFile, IFileSpec toFile, String branchSpec,
-	                          CopyFilesOptions opts) throws P4JavaException;
+	List<IFileSpec> copyFiles(IFileSpec fromFile, IFileSpec toFile, String branchSpec, CopyFilesOptions opts) throws P4JavaException;
 
 	/**
-	 * Copies one set of files (the 'source') into another (the	'target').<p>
+	 * Copies one set of files (the 'source') into another (the	'target').
 	 * <p>
 	 * Note that depending on the specific options passed-in the fromFile can be
 	 * null or one file spec; the toFiles list can be null, one or more file specs.
@@ -1217,15 +1121,14 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters.
 	 * @since 2011.2
 	 */
-	List<IFileSpec> copyFiles(IFileSpec fromFile, List<IFileSpec> toFiles,
-	                          CopyFilesOptions opts) throws P4JavaException;
+	List<IFileSpec> copyFiles(IFileSpec fromFile, List<IFileSpec> toFiles, CopyFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Merges changes from one set of files (the 'source') into another (the 'target').
 	 * It is a simplified form of the 'p4 integrate' command. The semantics of
 	 * Perforce merges are complex and are not explained here; please consult
 	 * the main Perforce documentation for file merges and the MergeFilesOptions
-	 * Javdoc comments for details of the less-commonly-used options.<p>
+	 * Javdoc comments for details of the less-commonly-used options.
 	 * <p>
 	 * Note that depending on the specific options passed-in the fromFile can be
 	 * null or one file spec; the toFiles list can be null, one or more file specs.
@@ -1238,20 +1141,20 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @since 2011.2
 	 */
-
-	List<IFileSpec> mergeFiles(IFileSpec fromFile, List<IFileSpec> toFiles,
-	                           MergeFilesOptions opts) throws P4JavaException;
+	List<IFileSpec> mergeFiles(IFileSpec fromFile, List<IFileSpec> toFiles, MergeFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Open files for add, delete, and/or edit to reconcile client with workspace
-	 * changes made outside of Perforce.<p>
+	 * changes made outside of Perforce.
 	 * <p>
 	 * 'p4 reconcile' finds unopened files in a client's workspace and detects the
-	 * following:<p>
+	 * following:
 	 * <p>
-	 * 1. files in depot missing from workspace, but still on have list.<p>
-	 * 2. files on workspace that are not in depot.<p>
-	 * 3. files modified in workpace that are not opened for edit.<p>
+	 * 1. files in depot missing from workspace, but still on have list.
+	 * <p>
+	 * 2. files on workspace that are not in depot.
+	 * <p>
+	 * 3. files modified in workpace that are not opened for edit.
 	 * <p>
 	 * By default, the files matching each condition above in the path are reconciled
 	 * by opening files for delete (scenario 1), add (scenario 2), and/or edit (scenario 3).
@@ -1269,19 +1172,20 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @see com.perforce.p4java.option.client.ReconcileFilesOptions
 	 * @since 2012.2
 	 */
-	List<IFileSpec> reconcileFiles(List<IFileSpec> fileSpecs, ReconcileFilesOptions opts)
-			throws P4JavaException;
+	List<IFileSpec> reconcileFiles(List<IFileSpec> fileSpecs, ReconcileFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Open files for add, delete, and/or edit to reconcile client with workspace
-	 * changes made outside of Perforce.<p>
+	 * changes made outside of Perforce.
 	 * <p>
 	 * 'p4 reconcile' finds unopened files in a client's workspace and detects the
-	 * following:<p>
+	 * following:
 	 * <p>
-	 * 1. files in depot missing from workspace, but still on have list.<p>
-	 * 2. files on workspace that are not in depot.<p>
-	 * 3. files modified in workpace that are not opened for edit.<p>
+	 * 1. files in depot missing from workspace, but still on have list.
+	 * <p>
+	 * 2. files on workspace that are not in depot.
+	 * <p>
+	 * 3. files modified in workpace that are not opened for edit.
 	 * <p>
 	 * By default, the files matching each condition above in the path are reconciled
 	 * by opening files for delete (scenario 1), add (scenario 2), and/or edit (scenario 3).
@@ -1303,13 +1207,12 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @see com.perforce.p4java.option.client.ReconcileFilesOptions
 	 * @since 2012.3
 	 */
-	void reconcileFiles(List<IFileSpec> fileSpecs, ReconcileFilesOptions opts, IStreamingCallback callback, int key)
-			throws P4JavaException;
+	void reconcileFiles(List<IFileSpec> fileSpecs, ReconcileFilesOptions opts, IStreamingCallback callback, int key) throws P4JavaException;
 
 	/**
 	 * Branches a set of files (the 'source') into another depot location (the
 	 * 'target') in a single step. The new files are created immediately, without
-	 * requiring a 'p4 submit' or a client workspace.<p>
+	 * requiring a 'p4 submit' or a client workspace.
 	 * <p>
 	 * Note that depending on the specific options passed-in the fromFile can be
 	 * null or one file spec; the toFiles list can be null, one or more file specs.
@@ -1323,16 +1226,15 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @throws P4JavaException if an error occurs processing this method and its parameters.
 	 * @since 2012.3
 	 */
-	List<IFileSpec> populateFiles(IFileSpec fromFile, List<IFileSpec> toFiles,
-	                              PopulateFilesOptions opts) throws P4JavaException;
+	List<IFileSpec> populateFiles(IFileSpec fromFile, List<IFileSpec> toFiles, PopulateFilesOptions opts) throws P4JavaException;
 
 	/**
 	 * Gets the repos mapped within the client's view.
 	 *
 	 * @return list of repos
-	 * @throws ConnectionException
-	 * @throws RequestException
-	 * @throws AccessException
+	 * @throws ConnectionException on error
+	 * @throws RequestException    on error
+	 * @throws AccessException     on error
 	 * @since 2017.1
 	 */
 	List<IRepo> getRepos() throws ConnectionException, RequestException, AccessException;
@@ -1351,7 +1253,7 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @param fileSpecs List of File specs
 	 * @param options List options
 	 * @return ListData
-	 * @throws P4JavaException
+	 * @throws P4JavaException on error
 	 * @since 2017.2
 	 */
 	ListData getListData(List<IFileSpec> fileSpecs, ListOptions options) throws P4JavaException;
@@ -1363,9 +1265,9 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	 * @param parentView NOINHERIT or INHERIT
 	 * @param sourceComments If true add inline source comments to ViewMaps when changing the ParentView field
 	 * from inherit to noinherit.
-	 * @return
-	 * @throws P4JavaException
+	 * @return response
+	 * @throws P4JavaException  on error
 	 * @since 2021.2
 	 */
-	String setStreamParentView(IStreamSummary.ParentView parentView, boolean sourceComments) throws P4JavaException ;
+	String setStreamParentView(IStreamSummary.ParentView parentView, boolean sourceComments) throws P4JavaException;
 }

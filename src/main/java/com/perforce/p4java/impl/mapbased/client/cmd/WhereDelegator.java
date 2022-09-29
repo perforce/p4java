@@ -121,6 +121,10 @@ public class WhereDelegator implements IWhereDelegator {
 	private IFileSpec localPathToClientPath(IFileSpec spec, IClient client) {
 		String localPath = spec.getLocalPathString();
 		String clientPath = localPath.replace(client.getRoot(), "//" + client.getName());
+
+		// Replace windows \ back-slashes with / forward slashes.
+		clientPath = clientPath.replace("\\", "/");
+
 		spec.setClientPath(clientPath);
 		return spec;
 	}

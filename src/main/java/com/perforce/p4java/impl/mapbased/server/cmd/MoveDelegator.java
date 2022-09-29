@@ -103,11 +103,7 @@ public class MoveDelegator extends BaseDelegator implements IMoveDelegator {
                 null);
 
         return buildNonNullObjectListFromCommandResultMaps(resultMaps,
-                rethrowFunction(new FunctionWithException<Map, IFileSpec>() {
-                    public IFileSpec apply(Map map) throws P4JavaException {
-                        return ResultListBuilder.handleFileReturn(map, server);
-                    }
-                })
+                rethrowFunction(map -> ResultListBuilder.handleFileReturn(map, server))
         );
     }
 }

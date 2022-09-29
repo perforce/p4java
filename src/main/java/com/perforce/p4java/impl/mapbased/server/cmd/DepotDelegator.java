@@ -75,12 +75,7 @@ public class DepotDelegator extends BaseDelegator implements IDepotDelegator {
                 null);
         return ResultListBuilder.buildNullableObjectFromNonInfoMessageCommandResultMaps(
                 resultMaps,
-                new Function<Map, IDepot>() {
-                    @Override
-                    public IDepot apply(Map map) {
-                        return new Depot(map);
-                    }
-                }
-        );
+				(Function<Map<String, Object>, IDepot>) map -> new Depot(map)
+		);
     }
 }

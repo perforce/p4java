@@ -11,33 +11,33 @@ import com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey;
  * as a string or bytes; most fields are strings, but things like worKRec
  * or depotRec fields are binary pass-throughs from the point of view of
  * the client (they're state keys and / or state records used by the server).
- * 
- *
  */
 
 public enum RpcPacketFieldType {
-	
+
 	/**
 	 * Field type is unknown. Field should probably not be used.
 	 */
 	NONE,
-	
+
 	/**
 	 * Field is text; possibly UTF-8 encoded.
 	 */
 	TEXT,
-	
+
 	/**
 	 * Field is bytes, not interpreted.
 	 */
 	BINARY;
-	
+
 	/**
 	 * Return the field type associated with the passed-in name, if any.
+	 *
+	 * @param fieldName fieldName
+	 * @return RpcPacketFieldType
 	 */
-	
 	public static RpcPacketFieldType getFieldType(String fieldName) {
-		
+
 		if (fieldName != null) {
 			if (fieldName.equalsIgnoreCase(RpcFunctionMapKey.DATA)) {
 				return BINARY;
@@ -52,14 +52,14 @@ public enum RpcPacketFieldType {
 			} else if (fieldName.equalsIgnoreCase(RpcFunctionMapKey.BASEDEPOTREC)) {
 				return BINARY;
 			} else if (fieldName.equalsIgnoreCase(RpcFunctionMapKey.HAVEREC)) {
-			    return BINARY;
-			} else if (fieldName.startsWith(RpcFunctionMapKey.ATTR_PREFIX)){
+				return BINARY;
+			} else if (fieldName.startsWith(RpcFunctionMapKey.ATTR_PREFIX)) {
 				return BINARY;
 			} else {
 				return TEXT;
 			}
 		}
-		
+
 		return NONE;
 	}
 }

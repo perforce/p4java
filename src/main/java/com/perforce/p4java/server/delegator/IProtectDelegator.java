@@ -15,7 +15,6 @@ public interface IProtectDelegator {
      * Create or replace the protections table data on the Perforce server with
      * these new protection entries.
      * <p>
-     * <p>
      * Each entry in the table contains a protection mode, a group/user
      * indicator, the group/user name, client host ID and a depot file path
      * pattern. Users receive the highest privilege that is granted on any
@@ -35,12 +34,10 @@ public interface IProtectDelegator {
      * Replace the protections table data on the Perforce server with these new
      * protection entries.
      * <p>
-     * <p>
      * Each entry in the table contains a protection mode, a group/user
      * indicator, the group/user name, client host ID and a depot file path
      * pattern. Users receive the highest privilege that is granted on any
      * entry.
-     * <p>
      * <p>
      * Warning: this will overwrite the existing protections table data.
      *

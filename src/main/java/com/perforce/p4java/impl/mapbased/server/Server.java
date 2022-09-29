@@ -366,11 +366,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Generic abstract superclass for implementation-specific server
  * implementations that use a command-style server interface implementation.
  * <p>
- * <p>
  * Normal users should not be creating this class or subclasses of this class
  * directly; you should use the ServerFactory server factory methods to get a
  * suitable server implementation class.
- * <p>
  */
 public abstract class Server extends HelixCommandExecutor implements IServerControl, IOptionsServer {
 	// The _FIELD_NAME names below MUST correspond to the names of the
@@ -586,15 +584,12 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 		return (str == null ? nullStr : str);
 	}
 
-	public static String[] getPreferredPathArray(final String[] preamble,
-												 final List<IFileSpec> specList) {
+	public static String[] getPreferredPathArray(final String[] preamble, final List<IFileSpec> specList) {
 		return getPreferredPathArray(preamble, specList, true);
 	}
 
-	public static String[] getPreferredPathArray(final String[] preamble,
-												 final List<IFileSpec> specList, final boolean annotate) {
-		int pathArraySize = (isNull(preamble) ? 0 : preamble.length)
-				+ (isNull(specList) ? 0 : specList.size());
+	public static String[] getPreferredPathArray(final String[] preamble, final List<IFileSpec> specList, final boolean annotate) {
+		int pathArraySize = (isNull(preamble) ? 0 : preamble.length) + (isNull(specList) ? 0 : specList.size());
 		String[] pathArray = new String[pathArraySize];
 		int i = 0;
 		if (nonNull(preamble)) {
@@ -620,8 +615,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 		return pathArray;
 	}
 
-	public static String[] populatePathArray(final String[] pathArray, final int start,
-											 final List<IFileSpec> fileSpecList) {
+	public static String[] populatePathArray(final String[] pathArray, final int start, final List<IFileSpec> fileSpecList) {
 
 		if (isNull(pathArray)) {
 			return null;
@@ -630,11 +624,8 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 			return pathArray;
 		}
 
-		throwP4JavaErrorIfConditionFails(start >= 0,
-				"negative start index in populatePathArray: %s", start);
-		throwP4JavaErrorIfConditionFails(
-				start <= pathArray.length && (start + fileSpecList.size() <= pathArray.length),
-				"pathArray too small in populatePathArray");
+		throwP4JavaErrorIfConditionFails(start >= 0, "negative start index in populatePathArray: %s", start);
+		throwP4JavaErrorIfConditionFails(start <= pathArray.length && (start + fileSpecList.size() <= pathArray.length), "pathArray too small in populatePathArray");
 
 		int i = start;
 		for (IFileSpec fSpec : fileSpecList) {
@@ -650,7 +641,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	/**
-	 * Return true if the JVM indicates that we're running on a Windows
+	 * @return true if the JVM indicates that we're running on a Windows
 	 * platform. Not entirely reliable, but good enough for our purposes.
 	 */
 	public static boolean isRunningOnWindows() {
@@ -805,6 +796,8 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	/**
 	 * Check if the server is secure (SSL) or not.
+	 *
+	 * @return if secure
 	 */
 	protected boolean isSecure() {
 		return secure;
@@ -812,21 +805,13 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	/**
 	 * Sets the server to secure (SSL) or non-secure mode.
+	 *
+	 * @param secure secure
 	 */
 	protected void setSecure(boolean secure) {
 		this.secure = secure;
 	}
 
-	// Try to get the Perforce server version. This is likely to be the first
-	// time
-	// actual connectivity is tested for the server...
-	// Since this is called before we know much about the state or type of the
-	// Perforce server, we do virtually no real error checking or recovery -- we
-	// either get a suitable response and dig out the server version, or we just
-	// leave things alone.
-	//
-	// NOTE: has the side effect of setting the server impl's serverVersion
-	// field.
 	@Override
 	public int getServerVersion() throws ConnectionException {
 		if (serverVersion != UNKNOWN_SERVER_VERSION) {
@@ -865,8 +850,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public void connect()
-			throws ConnectionException, AccessException, RequestException, ConfigException {
+	public void connect() throws ConnectionException, AccessException, RequestException, ConfigException {
 		connected = true;
 		status = ServerStatus.READY;
 
@@ -874,15 +858,9 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 		// Try to get and then verify the server version:
 		int serverVersion = getServerVersion();
-		throwConnectionExceptionIfConditionFails(serverVersion != UNKNOWN_SERVER_VERSION,
-				"Unable to determine Perforce server version for connection; "
-						+ "check network connection, connection character set setting, "
-						+ "and / or server status");
+		throwConnectionExceptionIfConditionFails(serverVersion != UNKNOWN_SERVER_VERSION, "Unable to determine Perforce server version for connection; " + "check network connection, connection character set setting, " + "and / or server status");
 
-		throwConnectionExceptionIfConditionFails(serverVersion >= minimumSupportedServerVersion,
-				"Attempted to connect to an unsupported Perforce server version; "
-						+ "target server version: %s; minimum supported version: %s",
-				serverVersion, minimumSupportedServerVersion);
+		throwConnectionExceptionIfConditionFails(serverVersion >= minimumSupportedServerVersion, "Attempted to connect to an unsupported Perforce server version; " + "target server version: %s; minimum supported version: %s", serverVersion, minimumSupportedServerVersion);
 
 		if (loginOnConnect && isNotBlank(userName) && isNotBlank(password)) {
 			login(password);
@@ -901,8 +879,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 		// "none" (same as unsetting P4CHARSET)
 		if (serverInfo.isUnicodeEnabled() && (p4Charset == null || p4Charset.getCharset() == null)) {
 			String p4CharsetStr = getP4Charset();
-			if (isBlank(p4CharsetStr) || "none".equalsIgnoreCase(p4CharsetStr)
-					|| "auto".equalsIgnoreCase(p4CharsetStr)) {
+			if (isBlank(p4CharsetStr) || "none".equalsIgnoreCase(p4CharsetStr) || "auto".equalsIgnoreCase(p4CharsetStr)) {
 				// Get the first matching Perforce charset for the Java default
 				// charset
 				String p4CharsetName = getP4CharsetName(CharsetDefs.DEFAULT_NAME);
@@ -1031,9 +1008,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public ServerStatus init(final String host, final int port, final Properties properties,
-							 final UsageOptions opts, final boolean secure)
-			throws ConfigException, ConnectionException {
+	public ServerStatus init(final String host, final int port, final Properties properties, final UsageOptions opts, final boolean secure) throws ConfigException, ConnectionException {
 		serverHost = host;
 		serverPort = port;
 		this.secure = secure;
@@ -1045,8 +1020,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 		// form keys for
 		// program name and version (done as a favour to testers and users
 		// everywhere...).
-		tmpDirName = RpcPropertyDefs.getProperty(props, P4JAVA_TMP_DIR_KEY,
-				System.getProperty("java.io.tmpdir"));
+		tmpDirName = RpcPropertyDefs.getProperty(props, P4JAVA_TMP_DIR_KEY, System.getProperty("java.io.tmpdir"));
 
 		if (isBlank(tmpDirName)) {
 			// This can really only happen if someone has nuked or played with
@@ -1055,12 +1029,10 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 			// work for most non-Windows boxes in most cases, and may not be
 			// needed in many cases anyway.
 			tmpDirName = "/tmp";
-			Log.warn("Unable to get tmp name from P4 properties or System; using %s instead",
-					tmpDirName);
+			Log.warn("Unable to get tmp name from P4 properties or System; using %s instead", tmpDirName);
 		}
 
-		Log.info("Using program name: '%s'; program version: '%s'", usageOptions.getProgramName(),
-				usageOptions.getProgramVersion());
+		Log.info("Using program name: '%s'; program version: '%s'", usageOptions.getProgramName(), usageOptions.getProgramVersion());
 		Log.info("Using tmp file directory: %s", tmpDirName);
 
 		setUserName(getPropertyByKeys(props, USER_NAME_KEY_SHORTFORM, USER_NAME_KEY, getP4User()));
@@ -1081,8 +1053,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 		// Attempt to get the P4IGNORE file name from the passed-in properties
 		// or the system environment variable 'P4IGNORE'
-		ignoreFileName = getPropertyByKeys(props, IGNORE_FILE_NAME_KEY_SHORT_FORM,
-				IGNORE_FILE_NAME_KEY, System.getenv(P4IGNORE_ENV_VAR));
+		ignoreFileName = getPropertyByKeys(props, IGNORE_FILE_NAME_KEY_SHORT_FORM, IGNORE_FILE_NAME_KEY, System.getenv(P4IGNORE_ENV_VAR));
 		// Instantiate the delegators
 		attributeDelegator = new AttributeDelegator(this);
 		branchDelegator = new BranchDelegator(this);
@@ -1166,15 +1137,13 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public ServerStatus init(final String host, final int port, final Properties props,
-							 final UsageOptions opts) throws ConfigException, ConnectionException {
+	public ServerStatus init(final String host, final int port, final Properties props, final UsageOptions opts) throws ConfigException, ConnectionException {
 
 		return init(host, port, props, opts, false);
 	}
 
 	@Override
-	public ServerStatus init(final String host, final int port, final Properties props)
-			throws ConfigException, ConnectionException {
+	public ServerStatus init(final String host, final int port, final Properties props) throws ConfigException, ConnectionException {
 
 		return init(host, port, props, null);
 	}
@@ -1248,6 +1217,9 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * version string. Instead of using regex or anything too complex we just
 	 * keep splitting the string and recombining; this could be optimised or
 	 * flexibilised fairly easily on one of those long rainy days... (HR).
+	 *
+	 * @param versionString versionString
+	 * @return version
 	 */
 	protected int parseVersionString(final String versionString) {
 		// Format: P4D/LINUX26X86/2007.3/142194 (2007/12/17),
@@ -1264,8 +1236,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 					try {
 						return Integer.parseInt(candidateParts[0] + candidateParts[1]);
 					} catch (NumberFormatException nfe) {
-						Log.error("Unexpected exception in P4CmdServerImpl.parseVersionString: %s",
-								nfe);
+						Log.error("Unexpected exception in P4CmdServerImpl.parseVersionString: %s", nfe);
 					}
 				}
 			}
@@ -1275,7 +1246,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	/**
-	 * Returns the next positive pseudo random int.
+	 * @return the next positive pseudo random int.
 	 */
 	protected int getRandomInt() {
 		return Math.abs(rand.nextInt(Integer.MAX_VALUE));
@@ -1302,12 +1273,37 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * (non-Javadoc)
 	 *
 	 * @see com.perforce.p4java.server.delegator.IAttributeDelegator#
+	 * unsetFileAttribute(java.util.List, java.util.Map,
+	 * com.perforce.p4java.option.server.SetFileAttributesOptions)
+	 */
+	@Override
+	public List<IFileSpec> unsetFileAttribute(List<IFileSpec> files, String attribute, SetFileAttributesOptions opts) throws P4JavaException {
+		return attributeDelegator.unsetFileAttribute(files, attribute, opts);
+	}
+
+	// Command delegators
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.perforce.p4java.server.delegator.IAttributeDelegator#
+	 * unsetFileAttributes(java.util.List, java.util.Map,
+	 * com.perforce.p4java.option.server.SetFileAttributesOptions)
+	 */
+	@Override
+	public List<IFileSpec> unsetFileAttributes(List<IFileSpec> files, List<String> attributes, SetFileAttributesOptions opts) throws P4JavaException {
+		return attributeDelegator.unsetFileAttributes(files, attributes, opts);
+	}
+
+	// Command delegators
+	/*
+	 * (non-Javadoc)
+	 *
+	 * @see com.perforce.p4java.server.delegator.IAttributeDelegator#
 	 * setFileAttributes(java.util.List, java.util.Map,
 	 * com.perforce.p4java.option.server.SetFileAttributesOptions)
 	 */
 	@Override
-	public List<IFileSpec> setFileAttributes(List<IFileSpec> files, Map<String, String> attributes,
-											 SetFileAttributesOptions opts) throws P4JavaException {
+	public List<IFileSpec> setFileAttributes(List<IFileSpec> files, Map<String, String> attributes, SetFileAttributesOptions opts) throws P4JavaException {
 		return attributeDelegator.setFileAttributes(files, attributes, opts);
 	}
 
@@ -1319,11 +1315,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * com.perforce.p4java.option.server.SetFileAttributesOptions)
 	 */
 	@Override
-	public List<IFileSpec> setFileAttributes(
-			List<IFileSpec> files,
-			@Nonnull String attributeName,
-			@Nonnull InputStream inStream,
-			SetFileAttributesOptions opts) throws P4JavaException {
+	public List<IFileSpec> setFileAttributes(List<IFileSpec> files, @Nonnull String attributeName, @Nonnull InputStream inStream, SetFileAttributesOptions opts) throws P4JavaException {
 		return attributeDelegator.setFileAttributes(files, attributeName, inStream, opts);
 	}
 
@@ -1335,8 +1327,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * com.perforce.p4java.option.server.GetBranchSpecsOptions)
 	 */
 	@Override
-	public List<IBranchSpecSummary> getBranchSpecs(GetBranchSpecsOptions opts)
-			throws P4JavaException {
+	public List<IBranchSpecSummary> getBranchSpecs(GetBranchSpecsOptions opts) throws P4JavaException {
 		return branchesDelegator.getBranchSpecs(opts);
 	}
 
@@ -1347,8 +1338,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * java.lang.String, int)
 	 */
 	@Override
-	public List<IBranchSpecSummary> getBranchSpecs(String userName, String nameFilter,
-												   int maxReturns) throws ConnectionException, RequestException, AccessException {
+	public List<IBranchSpecSummary> getBranchSpecs(String userName, String nameFilter, int maxReturns) throws ConnectionException, RequestException, AccessException {
 		return branchesDelegator.getBranchSpecs(userName, nameFilter, maxReturns);
 	}
 
@@ -1359,8 +1349,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * String, com.perforce.p4java.option.server.GetBranchSpecOptions)
 	 */
 	@Override
-	public IBranchSpec getBranchSpec(String name, GetBranchSpecOptions opts)
-			throws P4JavaException {
+	public IBranchSpec getBranchSpec(String name, GetBranchSpecOptions opts) throws P4JavaException {
 		return branchDelegator.getBranchSpec(name, opts);
 	}
 
@@ -1372,8 +1361,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * String, com.perforce.p4java.option.server.DeleteBranchSpecOptions)
 	 */
 	@Override
-	public String deleteBranchSpec(String branchSpecName, DeleteBranchSpecOptions opts)
-			throws P4JavaException {
+	public String deleteBranchSpec(String branchSpecName, DeleteBranchSpecOptions opts) throws P4JavaException {
 		return branchDelegator.deleteBranchSpec(branchSpecName, opts);
 	}
 
@@ -1384,8 +1372,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * String)
 	 */
 	@Override
-	public IBranchSpec getBranchSpec(String name)
-			throws ConnectionException, RequestException, AccessException {
+	public IBranchSpec getBranchSpec(String name) throws ConnectionException, RequestException, AccessException {
 		return branchDelegator.getBranchSpec(name);
 	}
 
@@ -1397,8 +1384,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * .p4java.core.IBranchSpec)
 	 */
 	@Override
-	public String createBranchSpec(@Nonnull IBranchSpec branchSpec)
-			throws ConnectionException, RequestException, AccessException {
+	public String createBranchSpec(@Nonnull IBranchSpec branchSpec) throws ConnectionException, RequestException, AccessException {
 		return branchDelegator.createBranchSpec(branchSpec);
 	}
 
@@ -1410,24 +1396,21 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * .p4java.core.IBranchSpec)
 	 */
 	@Override
-	public String updateBranchSpec(@Nonnull IBranchSpec branchSpec)
-			throws ConnectionException, RequestException, AccessException {
+	public String updateBranchSpec(@Nonnull IBranchSpec branchSpec) throws ConnectionException, RequestException, AccessException {
 		return branchDelegator.updateBranchSpec(branchSpec);
 	}
 
 	/*
 	 * (non-Javadoc)
 	 *
-	 * @see
-	 * com.perforce.p4java.server.IBranchDelegator#deleteBranchSpec(java.lang.
-	 * String, boolean)
+	 * @see com.perforce.p4java.server.IBranchDelegator#deleteBranchSpec(java.lang.String, boolean)
+	 * @deprecated use {@link IBranchDelegator#deleteBranchSpec(String, DeleteBranchSpecOptions)} instead
 	 */
+	@Deprecated
 	@Override
-	public String deleteBranchSpec(String branchSpecName, boolean force)
-			throws ConnectionException, RequestException, AccessException {
+	public String deleteBranchSpec(String branchSpecName, boolean force) throws ConnectionException, RequestException, AccessException {
 		try {
-			return branchDelegator.deleteBranchSpec(branchSpecName,
-					new DeleteBranchSpecOptions(force));
+			return branchDelegator.deleteBranchSpec(branchSpecName, new DeleteBranchSpecOptions(force));
 		} catch (P4JavaException p4je) {
 			throw new RequestException(p4je);
 		}
@@ -1439,8 +1422,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * @see com.perforce.p4java.server.IServer#deletePendingChangelist(int)
 	 */
 	@Override
-	public String deletePendingChangelist(int id)
-			throws ConnectionException, RequestException, AccessException {
+	public String deletePendingChangelist(int id) throws ConnectionException, RequestException, AccessException {
 		return changeDelegator.deletePendingChangelist(id);
 	}
 
@@ -1450,8 +1432,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * @see com.perforce.p4java.server.IServer#getChangelist(int)
 	 */
 	@Override
-	public IChangelist getChangelist(int id)
-			throws ConnectionException, RequestException, AccessException {
+	public IChangelist getChangelist(int id) throws ConnectionException, RequestException, AccessException {
 		return changeDelegator.getChangelist(id);
 	}
 
@@ -1487,12 +1468,8 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * com.perforce.p4java.core.IChangelist.Type, boolean)
 	 */
 	@Override
-	public List<IChangelistSummary> getChangelists(final int maxMostRecent,
-												   final List<IFileSpec> fileSpecs, final String clientName, final String userName,
-												   final boolean includeIntegrated, final Type type, final boolean longDesc)
-			throws ConnectionException, RequestException, AccessException {
-		return changesDelegator.getChangelists(maxMostRecent, fileSpecs, clientName, userName,
-				includeIntegrated, type, longDesc);
+	public List<IChangelistSummary> getChangelists(final int maxMostRecent, final List<IFileSpec> fileSpecs, final String clientName, final String userName, final boolean includeIntegrated, final Type type, final boolean longDesc) throws ConnectionException, RequestException, AccessException {
+		return changesDelegator.getChangelists(maxMostRecent, fileSpecs, clientName, userName, includeIntegrated, type, longDesc);
 	}
 
 	/*
@@ -1503,13 +1480,9 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * boolean, boolean)
 	 */
 	@Override
-	public List<IChangelistSummary> getChangelists(final int maxMostRecent,
-												   final List<IFileSpec> fileSpecs, final String clientName, final String userName,
-												   final boolean includeIntegrated, final boolean submittedOnly, final boolean pendingOnly,
-												   final boolean longDesc) throws ConnectionException, RequestException, AccessException {
+	public List<IChangelistSummary> getChangelists(final int maxMostRecent, final List<IFileSpec> fileSpecs, final String clientName, final String userName, final boolean includeIntegrated, final boolean submittedOnly, final boolean pendingOnly, final boolean longDesc) throws ConnectionException, RequestException, AccessException {
 
-		return changesDelegator.getChangelists(maxMostRecent, fileSpecs, clientName, userName,
-				includeIntegrated, submittedOnly, pendingOnly, longDesc);
+		return changesDelegator.getChangelists(maxMostRecent, fileSpecs, clientName, userName, includeIntegrated, submittedOnly, pendingOnly, longDesc);
 	}
 
 	/*
@@ -1519,8 +1492,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * com.perforce.p4java.server.delegator.IChangesDelegator#getChangelists(
 	 * java.util.List, com.perforce.p4java.option.server.GetChangelistsOptions)
 	 */
-	public List<IChangelistSummary> getChangelists(final List<IFileSpec> fileSpecs,
-												   final GetChangelistsOptions opts) throws P4JavaException {
+	public List<IChangelistSummary> getChangelists(final List<IFileSpec> fileSpecs, final GetChangelistsOptions opts) throws P4JavaException {
 		return changesDelegator.getChangelists(fileSpecs, opts);
 	}
 
@@ -1532,8 +1504,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * com.perforce.p4java.option.server.GetChangelistDiffsOptions)
 	 */
 	@Override
-	public InputStream getChangelistDiffs(int id, GetChangelistDiffsOptions opts)
-			throws P4JavaException {
+	public InputStream getChangelistDiffs(int id, GetChangelistDiffsOptions opts) throws P4JavaException {
 		return describeDelegator.getChangelistDiffs(id, opts);
 	}
 
@@ -1545,8 +1516,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * com.perforce.p4java.option.server.DescribeOptions)
 	 */
 	@Override
-	public InputStream getChangelistDiffsStream(int id, DescribeOptions options)
-			throws ConnectionException, RequestException, AccessException {
+	public InputStream getChangelistDiffsStream(int id, DescribeOptions options) throws ConnectionException, RequestException, AccessException {
 		return describeDelegator.getChangelistDiffsStream(id, options);
 	}
 
@@ -1581,8 +1551,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * com.perforce.p4java.core.file.DiffType)
 	 */
 	@Override
-	public InputStream getChangelistDiffs(int id, DiffType diffType)
-			throws ConnectionException, RequestException, AccessException {
+	public InputStream getChangelistDiffs(int id, DiffType diffType) throws ConnectionException, RequestException, AccessException {
 		return describeDelegator.getChangelistDiffs(id, diffType);
 	}
 
@@ -1592,8 +1561,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * @see com.perforce.p4java.server.IServer#getChangelistFiles(int)
 	 */
 	@Override
-	public List<IFileSpec> getChangelistFiles(int id)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IFileSpec> getChangelistFiles(int id) throws ConnectionException, RequestException, AccessException {
 		return describeDelegator.getChangelistFiles(id);
 	}
 
@@ -1603,8 +1571,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * @see com.perforce.p4java.server.IServer#getChangelistFiles(int, int)
 	 */
 	@Override
-	public List<IFileSpec> getChangelistFiles(int id, int max)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IFileSpec> getChangelistFiles(int id, int max) throws ConnectionException, RequestException, AccessException {
 		return describeDelegator.getChangelistFiles(id, max);
 	}
 
@@ -1614,8 +1581,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * @see com.perforce.p4java.server.IServer#getChangelistExtendedFiles(int)
 	 */
 	@Override
-	public List<IExtendedFileSpec> getChangelistExtendedFiles(int id)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IExtendedFileSpec> getChangelistExtendedFiles(int id) throws ConnectionException, RequestException, AccessException {
 		return describeDelegator.getChangelistExtendedFiles(id);
 	}
 
@@ -1625,8 +1591,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * @see com.perforce.p4java.server.IServer#getChangelistExtendedFiles(int, int)
 	 */
 	@Override
-	public List<IExtendedFileSpec> getChangelistExtendedFiles(int id, int max)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IExtendedFileSpec> getChangelistExtendedFiles(int id, int max) throws ConnectionException, RequestException, AccessException {
 		return describeDelegator.getChangelistExtendedFiles(id, max);
 	}
 
@@ -1636,8 +1601,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * @see com.perforce.p4java.server.IServer#getCommitFiles(String, String)
 	 */
 	@Override
-	public List<IFileSpec> getCommitFiles(final String repo, final String commit)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IFileSpec> getCommitFiles(final String repo, final String commit) throws ConnectionException, RequestException, AccessException {
 		return describeDelegator.getCommitFiles(repo, commit);
 	}
 
@@ -1648,8 +1612,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * setOrUnsetServerConfigurationValue(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public String setOrUnsetServerConfigurationValue(@Nonnull final String name,
-													 @Nullable final String value) throws P4JavaException {
+	public String setOrUnsetServerConfigurationValue(@Nonnull final String name, @Nullable final String value) throws P4JavaException {
 		return configureDelegator.setOrUnsetServerConfigurationValue(name, value);
 	}
 
@@ -1660,8 +1623,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * showServerConfiguration(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public List<ServerConfigurationValue> showServerConfiguration(final String serverName,
-																  final String variableName) throws P4JavaException {
+	public List<ServerConfigurationValue> showServerConfiguration(final String serverName, final String variableName) throws P4JavaException {
 		return configureDelegator.showServerConfiguration(serverName, variableName);
 	}
 
@@ -1676,32 +1638,27 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public IClient getClient(String clientName)
-			throws ConnectionException, RequestException, AccessException {
+	public IClient getClient(String clientName) throws ConnectionException, RequestException, AccessException {
 		return clientDelegator.getClient(clientName);
 	}
 
 	@Override
-	public IClient getClient(@Nonnull IClientSummary clientSummary)
-			throws ConnectionException, RequestException, AccessException {
+	public IClient getClient(@Nonnull IClientSummary clientSummary) throws ConnectionException, RequestException, AccessException {
 		return clientDelegator.getClient(clientSummary);
 	}
 
 	@Override
-	public IClient getClientTemplate(String clientName)
-			throws ConnectionException, RequestException, AccessException {
+	public IClient getClientTemplate(String clientName) throws ConnectionException, RequestException, AccessException {
 		return clientDelegator.getClientTemplate(clientName);
 	}
 
 	@Override
-	public IClient getClientTemplate(String clientName, boolean allowExistent)
-			throws ConnectionException, RequestException, AccessException {
+	public IClient getClientTemplate(String clientName, boolean allowExistent) throws ConnectionException, RequestException, AccessException {
 		return clientDelegator.getClientTemplate(clientName, allowExistent);
 	}
 
 	@Override
-	public IClient getClientTemplate(String clientName, GetClientTemplateOptions opts)
-			throws P4JavaException {
+	public IClient getClientTemplate(String clientName, GetClientTemplateOptions opts) throws P4JavaException {
 		return clientDelegator.getClientTemplate(clientName, opts);
 	}
 
@@ -1715,8 +1672,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * com.perforce.p4java.option.server.GetInterchangesOptions)
 	 */
 	@Override
-	public List<IChangelist> getInterchanges(IFileSpec fromFile, IFileSpec toFile,
-											 GetInterchangesOptions opts) throws P4JavaException {
+	public List<IChangelist> getInterchanges(IFileSpec fromFile, IFileSpec toFile, GetInterchangesOptions opts) throws P4JavaException {
 		return interchangesDelegator.getInterchanges(fromFile, toFile, opts);
 	}
 
@@ -1729,10 +1685,8 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * com.perforce.p4java.option.server.GetInterchangesOptions)
 	 */
 	@Override
-	public List<IChangelist> getInterchanges(String branchSpecName, List<IFileSpec> fromFileList,
-											 List<IFileSpec> toFileList, GetInterchangesOptions opts) throws P4JavaException {
-		return interchangesDelegator.getInterchanges(branchSpecName, fromFileList, toFileList,
-				opts);
+	public List<IChangelist> getInterchanges(String branchSpecName, List<IFileSpec> fromFileList, List<IFileSpec> toFileList, GetInterchangesOptions opts) throws P4JavaException {
+		return interchangesDelegator.getInterchanges(branchSpecName, fromFileList, toFileList, opts);
 	}
 
 	/*
@@ -1744,11 +1698,8 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * boolean, int)
 	 */
 	@Override
-	public List<IChangelist> getInterchanges(IFileSpec fromFile, IFileSpec toFile,
-											 boolean showFiles, boolean longDesc, int maxChangelistId)
-			throws ConnectionException, RequestException, AccessException {
-		return interchangesDelegator.getInterchanges(fromFile, toFile, showFiles, longDesc,
-				maxChangelistId);
+	public List<IChangelist> getInterchanges(IFileSpec fromFile, IFileSpec toFile, boolean showFiles, boolean longDesc, int maxChangelistId) throws ConnectionException, RequestException, AccessException {
+		return interchangesDelegator.getInterchanges(fromFile, toFile, showFiles, longDesc, maxChangelistId);
 	}
 
 	/*
@@ -1758,35 +1709,27 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * java.util.List, java.util.List, boolean, boolean, int, boolean, boolean)
 	 */
 	@Override
-	public List<IChangelist> getInterchanges(String branchSpecName, List<IFileSpec> fromFileList,
-											 List<IFileSpec> toFileList, boolean showFiles, boolean longDesc, int maxChangelistId,
-											 boolean reverseMapping, boolean biDirectional)
-			throws ConnectionException, RequestException, AccessException {
-		return interchangesDelegator.getInterchanges(branchSpecName, fromFileList, toFileList,
-				showFiles, longDesc, maxChangelistId, reverseMapping, biDirectional);
+	public List<IChangelist> getInterchanges(String branchSpecName, List<IFileSpec> fromFileList, List<IFileSpec> toFileList, boolean showFiles, boolean longDesc, int maxChangelistId, boolean reverseMapping, boolean biDirectional) throws ConnectionException, RequestException, AccessException {
+		return interchangesDelegator.getInterchanges(branchSpecName, fromFileList, toFileList, showFiles, longDesc, maxChangelistId, reverseMapping, biDirectional);
 	}
 
 	@Override
-	public String createClient(@Nonnull IClient newClient)
-			throws ConnectionException, RequestException, AccessException {
+	public String createClient(@Nonnull IClient newClient) throws ConnectionException, RequestException, AccessException {
 		return clientDelegator.createClient(newClient);
 	}
 
 	@Override
-	public void createTempClient(@Nonnull IClient newClient)
-			throws ConnectionException, RequestException, AccessException {
+	public void createTempClient(@Nonnull IClient newClient) throws ConnectionException, RequestException, AccessException {
 		clientDelegator.createTempClient(newClient);
 	}
 
 	@Override
-	public String updateClient(@Nonnull IClient client)
-			throws ConnectionException, RequestException, AccessException {
+	public String updateClient(@Nonnull IClient client) throws ConnectionException, RequestException, AccessException {
 		return clientDelegator.updateClient(client);
 	}
 
 	@Override
-	public String updateClient(IClient client, boolean force)
-			throws ConnectionException, RequestException, AccessException {
+	public String updateClient(IClient client, boolean force) throws ConnectionException, RequestException, AccessException {
 		return clientDelegator.updateClient(client, force);
 	}
 
@@ -1796,8 +1739,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public String deleteClient(String clientName, boolean force)
-			throws ConnectionException, RequestException, AccessException {
+	public String deleteClient(String clientName, boolean force) throws ConnectionException, RequestException, AccessException {
 
 		return clientDelegator.deleteClient(clientName, force);
 	}
@@ -1808,14 +1750,12 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public String switchClientView(String templateClientName, String targetClientName,
-								   SwitchClientViewOptions opts) throws P4JavaException {
+	public String switchClientView(String templateClientName, String targetClientName, SwitchClientViewOptions opts) throws P4JavaException {
 		return clientDelegator.switchClientView(templateClientName, targetClientName, opts);
 	}
 
 	@Override
-	public String switchStreamView(String streamPath, String targetClientName,
-								   SwitchClientViewOptions opts) throws P4JavaException {
+	public String switchStreamView(String streamPath, String targetClientName, SwitchClientViewOptions opts) throws P4JavaException {
 		return clientDelegator.switchStreamView(streamPath, targetClientName, opts);
 	}
 
@@ -1825,42 +1765,33 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public List<IClientSummary> getClients(
-			final String userName,
-			final String nameFilter,
-			final int maxResults) throws ConnectionException, RequestException, AccessException {
+	public List<IClientSummary> getClients(final String userName, final String nameFilter, final int maxResults) throws ConnectionException, RequestException, AccessException {
 
 		return clientsDelegator.getClients(userName, nameFilter, maxResults);
 	}
 
 	@Override
-	public String getCounter(final String counterName)
-			throws ConnectionException, RequestException, AccessException {
+	public String getCounter(final String counterName) throws ConnectionException, RequestException, AccessException {
 		return counterDelegator.getCounter(counterName);
 	}
 
 	@Override
-	public String getCounter(final String counterName, final CounterOptions opts)
-			throws P4JavaException {
+	public String getCounter(final String counterName, final CounterOptions opts) throws P4JavaException {
 		return counterDelegator.getCounter(counterName, opts);
 	}
 
 	@Override
-	public void setCounter(final String counterName, final String value,
-						   final boolean perforceCounter)
-			throws ConnectionException, RequestException, AccessException {
+	public void setCounter(final String counterName, final String value, final boolean perforceCounter) throws ConnectionException, RequestException, AccessException {
 		counterDelegator.setCounter(counterName, value, perforceCounter);
 	}
 
 	@Override
-	public String setCounter(final String counterName, final String value,
-							 final CounterOptions opts) throws P4JavaException {
+	public String setCounter(final String counterName, final String value, final CounterOptions opts) throws P4JavaException {
 		return counterDelegator.setCounter(counterName, value, opts);
 	}
 
 	@Override
-	public void deleteCounter(final String counterName, final boolean perforceCounter)
-			throws ConnectionException, RequestException, AccessException {
+	public void deleteCounter(final String counterName, final boolean perforceCounter) throws ConnectionException, RequestException, AccessException {
 		counterDelegator.deleteCounter(counterName, perforceCounter);
 	}
 
@@ -1874,7 +1805,9 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	/* (non-Javadoc)
 	 * @see com.perforce.p4java.server.delegator.ICountersDelegator#getCounters(com.perforce.p4java.option.server.CounterOptions)
+	 * @deprecated replaced by {@link #getCounters(com.perforce.p4java.option.server.GetCountersOptions)}
 	 */
+	@Deprecated
 	@Override
 	public Map<String, String> getCounters(CounterOptions opts) throws P4JavaException {
 		return countersDelegator.getCounters(opts);
@@ -1884,8 +1817,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * @see com.perforce.p4java.server.IServer#getCounters()
 	 */
 	@Override
-	public Map<String, String> getCounters()
-			throws ConnectionException, RequestException, AccessException {
+	public Map<String, String> getCounters() throws ConnectionException, RequestException, AccessException {
 		return countersDelegator.getCounters();
 	}
 
@@ -1893,8 +1825,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * @see com.perforce.p4java.impl.mapbased.server.IServerControl#init(java.lang.String, int, java.util.Properties, com.perforce.p4java.option.UsageOptions, boolean, java.lang.String)
 	 */
 	@Override
-	public ServerStatus init(String host, int port, Properties props, UsageOptions opts,
-							 boolean secure, String rsh) throws ConfigException, ConnectionException {
+	public ServerStatus init(String host, int port, Properties props, UsageOptions opts, boolean secure, String rsh) throws ConfigException, ConnectionException {
 		// TODO Auto-generated method stub
 		return null;
 	}
@@ -1964,63 +1895,27 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public List<IFileDiff> getFileDiffs(
-			final IFileSpec file1,
-			final IFileSpec file2,
-			final String branchSpecName,
-			final GetFileDiffsOptions opts) throws P4JavaException {
+	public List<IFileDiff> getFileDiffs(final IFileSpec file1, final IFileSpec file2, final String branchSpecName, final GetFileDiffsOptions opts) throws P4JavaException {
 
 		return diff2Delegator.getFileDiffs(file1, file2, branchSpecName, opts);
 	}
 
 	@Override
-	public InputStream getFileDiffsStream(
-			final IFileSpec file1,
-			final IFileSpec file2,
-			final String branchSpecName,
-			final GetFileDiffsOptions opts) throws P4JavaException {
+	public InputStream getFileDiffsStream(final IFileSpec file1, final IFileSpec file2, final String branchSpecName, final GetFileDiffsOptions opts) throws P4JavaException {
 
 		return diff2Delegator.getFileDiffsStream(file1, file2, branchSpecName, opts);
 	}
 
 	@Override
-	public List<IFileDiff> getFileDiffs(
-			final IFileSpec file1,
-			final IFileSpec file2,
-			final String branchSpecName,
-			final DiffType diffType,
-			final boolean quiet,
-			final boolean includeNonTextDiffs,
-			final boolean gnuDiffs) throws ConnectionException, RequestException, AccessException {
+	public List<IFileDiff> getFileDiffs(final IFileSpec file1, final IFileSpec file2, final String branchSpecName, final DiffType diffType, final boolean quiet, final boolean includeNonTextDiffs, final boolean gnuDiffs) throws ConnectionException, RequestException, AccessException {
 
-		return diff2Delegator.getFileDiffs(
-				file1,
-				file2,
-				branchSpecName,
-				diffType,
-				quiet,
-				includeNonTextDiffs,
-				gnuDiffs);
+		return diff2Delegator.getFileDiffs(file1, file2, branchSpecName, diffType, quiet, includeNonTextDiffs, gnuDiffs);
 	}
 
 	@Override
-	public InputStream getServerFileDiffs(
-			final IFileSpec file1,
-			final IFileSpec file2,
-			final String branchSpecName,
-			final DiffType diffType,
-			final boolean quiet,
-			final boolean includeNonTextDiffs,
-			final boolean gnuDiffs) throws ConnectionException, RequestException, AccessException {
+	public InputStream getServerFileDiffs(final IFileSpec file1, final IFileSpec file2, final String branchSpecName, final DiffType diffType, final boolean quiet, final boolean includeNonTextDiffs, final boolean gnuDiffs) throws ConnectionException, RequestException, AccessException {
 
-		return diff2Delegator.getServerFileDiffs(
-				file1,
-				file2,
-				branchSpecName,
-				diffType,
-				quiet,
-				includeNonTextDiffs,
-				gnuDiffs);
+		return diff2Delegator.getServerFileDiffs(file1, file2, branchSpecName, diffType, quiet, includeNonTextDiffs, gnuDiffs);
 	}
 
 	@Override
@@ -2029,179 +1924,111 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public List<IFileSpec> duplicateRevisions(
-			final IFileSpec fromFile,
-			final IFileSpec toFile,
-			final DuplicateRevisionsOptions opts) throws P4JavaException {
+	public List<IFileSpec> duplicateRevisions(final IFileSpec fromFile, final IFileSpec toFile, final DuplicateRevisionsOptions opts) throws P4JavaException {
 
 		return duplicateDelegator.duplicateRevisions(fromFile, toFile, opts);
 	}
 
 	@Override
-	public List<Map<String, Object>> getExportRecords(final ExportRecordsOptions opts)
-			throws P4JavaException {
+	public List<Map<String, Object>> getExportRecords(final ExportRecordsOptions opts) throws P4JavaException {
 		return exportDelegator.getExportRecords(opts);
 	}
 
 	@Override
-	public void getStreamingExportRecords(
-			final ExportRecordsOptions opts,
-			@Nonnull final IStreamingCallback callback,
-			final int key) throws P4JavaException {
+	public void getStreamingExportRecords(final ExportRecordsOptions opts, @Nonnull final IStreamingCallback callback, final int key) throws P4JavaException {
 
 		exportDelegator.getStreamingExportRecords(opts, callback, key);
 	}
 
 	@Override
-	public List<Map<String, Object>> getExportRecords(
-			final boolean useJournal,
-			final long maxRecs,
-			final int sourceNum,
-			final long offset,
-			final boolean format,
-			final String journalPrefix,
-			final String filter) throws ConnectionException, RequestException, AccessException {
+	public List<Map<String, Object>> getExportRecords(final boolean useJournal, final long maxRecs, final int sourceNum, final long offset, final boolean format, final String journalPrefix, final String filter) throws ConnectionException, RequestException, AccessException {
 
-		return exportDelegator.getExportRecords(
-				useJournal,
-				maxRecs,
-				sourceNum,
-				offset,
-				format,
-				journalPrefix,
-				filter);
+		return exportDelegator.getExportRecords(useJournal, maxRecs, sourceNum, offset, format, journalPrefix, filter);
 	}
 
 	@Override
-	public List<IFileAnnotation> getFileAnnotations(
-			final List<IFileSpec> fileSpecs,
-			@Nonnull final DiffType wsOpts,
-			final boolean allResults,
-			final boolean useChangeNumbers,
-			final boolean followBranches) throws ConnectionException, RequestException, AccessException {
+	public List<IFileAnnotation> getFileAnnotations(final List<IFileSpec> fileSpecs, @Nonnull final DiffType wsOpts, final boolean allResults, final boolean useChangeNumbers, final boolean followBranches) throws ConnectionException, RequestException, AccessException {
 
-		return fileAnnotateDelegator.getFileAnnotations(
-				fileSpecs,
-				wsOpts,
-				allResults,
-				useChangeNumbers,
-				followBranches);
+		return fileAnnotateDelegator.getFileAnnotations(fileSpecs, wsOpts, allResults, useChangeNumbers, followBranches);
 	}
 
 	@Override
-	public List<IFileAnnotation> getFileAnnotations(
-			final List<IFileSpec> fileSpecs,
-			final GetFileAnnotationsOptions opts) throws P4JavaException {
+	public List<IFileAnnotation> getFileAnnotations(final List<IFileSpec> fileSpecs, final GetFileAnnotationsOptions opts) throws P4JavaException {
 
 		return fileAnnotateDelegator.getFileAnnotations(fileSpecs, opts);
 	}
 
 	@Override
-	public Map<IFileSpec, List<IFileRevisionData>> getRevisionHistory(
-			final List<IFileSpec> fileSpecs,
-			final GetRevisionHistoryOptions opts) throws P4JavaException {
+	public Map<IFileSpec, List<IFileRevisionData>> getRevisionHistory(final List<IFileSpec> fileSpecs, final GetRevisionHistoryOptions opts) throws P4JavaException {
 
 		return fileLogDelegator.getRevisionHistory(fileSpecs, opts);
 	}
 
 	@Override
-	public Map<IFileSpec, List<IFileRevisionData>> getRevisionHistory(
-			final List<IFileSpec> fileSpecs,
-			final int maxRevs,
-			final boolean contentHistory,
-			final boolean includeInherited,
-			final boolean longOutput,
-			final boolean truncatedLongOutput) throws ConnectionException, AccessException {
+	public Map<IFileSpec, List<IFileRevisionData>> getRevisionHistory(final List<IFileSpec> fileSpecs, final int maxRevs, final boolean contentHistory, final boolean includeInherited, final boolean longOutput, final boolean truncatedLongOutput) throws ConnectionException, AccessException {
 
-		return fileLogDelegator.getRevisionHistory(
-				fileSpecs,
-				maxRevs,
-				contentHistory,
-				includeInherited,
-				longOutput,
-				truncatedLongOutput);
+		return fileLogDelegator.getRevisionHistory(fileSpecs, maxRevs, contentHistory, includeInherited, longOutput, truncatedLongOutput);
 	}
 
 	@Override
-	public List<IFileSpec> getDirectories(@Nonnull final List<IFileSpec> fileSpecs,
-										  final boolean clientOnly, final boolean deletedOnly, final boolean haveListOnly)
-			throws ConnectionException, AccessException {
+	public List<IFileSpec> getDirectories(@Nonnull final List<IFileSpec> fileSpecs, final boolean clientOnly, final boolean deletedOnly, final boolean haveListOnly) throws ConnectionException, AccessException {
 		return dirsDelegator.getDirectories(fileSpecs, clientOnly, deletedOnly, haveListOnly);
 	}
 
 	@Override
-	public List<IFileSpec> getDirectories(final List<IFileSpec> fileSpecs,
-										  final GetDirectoriesOptions opts) throws P4JavaException {
+	public List<IFileSpec> getDirectories(final List<IFileSpec> fileSpecs, final GetDirectoriesOptions opts) throws P4JavaException {
 		return dirsDelegator.getDirectories(fileSpecs, opts);
 	}
 
 	@Override
-	public List<IFileSpec> getDepotFiles(@Nonnull final List<IFileSpec> fileSpecs,
-										 final boolean allRevs) throws ConnectionException, AccessException {
+	public List<IFileSpec> getDepotFiles(@Nonnull final List<IFileSpec> fileSpecs, final boolean allRevs) throws ConnectionException, AccessException {
 
 		return filesDelegator.getDepotFiles(fileSpecs, allRevs);
 	}
 
 	@Override
-	public List<IFileSpec> getDepotFiles(@Nonnull final List<IFileSpec> fileSpecs,
-										 final GetDepotFilesOptions opts) throws P4JavaException {
+	public List<IFileSpec> getDepotFiles(@Nonnull final List<IFileSpec> fileSpecs, final GetDepotFilesOptions opts) throws P4JavaException {
 
 		return filesDelegator.getDepotFiles(fileSpecs, opts);
 	}
 
 	@Override
-	public List<IFix> fixJobs(final List<String> jobIds, final int changeListId,
-							  final String status, final boolean delete)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IFix> fixJobs(final List<String> jobIds, final int changeListId, final String status, final boolean delete) throws ConnectionException, RequestException, AccessException {
 		return fixDelegator.fixJobs(jobIds, changeListId, status, delete);
 	}
 
 	@Override
-	public List<IFix> fixJobs(@Nonnull final List<String> jobIds, final int changeListId,
-							  final FixJobsOptions opts) throws P4JavaException {
+	public List<IFix> fixJobs(@Nonnull final List<String> jobIds, final int changeListId, final FixJobsOptions opts) throws P4JavaException {
 		return fixDelegator.fixJobs(jobIds, changeListId, opts);
 	}
 
 	@Override
-	public List<IFix> getFixList(final List<IFileSpec> fileSpecs, final int changeListId,
-								 final String jobId, final boolean includeIntegrations, final int maxFixes)
-			throws ConnectionException, RequestException, AccessException {
-		return fixesDelegator.getFixList(fileSpecs, changeListId, jobId,
-				includeIntegrations, maxFixes);
+	public List<IFix> getFixList(final List<IFileSpec> fileSpecs, final int changeListId, final String jobId, final boolean includeIntegrations, final int maxFixes) throws ConnectionException, RequestException, AccessException {
+		return fixesDelegator.getFixList(fileSpecs, changeListId, jobId, includeIntegrations, maxFixes);
 	}
 
 	@Override
-	public List<IFix> getFixes(final List<IFileSpec> fileSpecs, final GetFixesOptions opts)
-			throws P4JavaException {
+	public List<IFix> getFixes(final List<IFileSpec> fileSpecs, final GetFixesOptions opts) throws P4JavaException {
 		return fixesDelegator.getFixes(fileSpecs, opts);
 	}
 
 	@Override
-	public List<IExtendedFileSpec> getExtendedFiles(final List<IFileSpec> fileSpecs,
-													final int maxFiles, final int sinceChangelist, final int affectedByChangelist,
-													final FileStatOutputOptions outputOptions,
-													final FileStatAncilliaryOptions ancilliaryOptions)
-			throws ConnectionException, AccessException {
-		return fstatDelegator.getExtendedFiles(fileSpecs, maxFiles, sinceChangelist,
-				affectedByChangelist, outputOptions, ancilliaryOptions);
+	public List<IExtendedFileSpec> getExtendedFiles(final List<IFileSpec> fileSpecs, final int maxFiles, final int sinceChangelist, final int affectedByChangelist, final FileStatOutputOptions outputOptions, final FileStatAncilliaryOptions ancilliaryOptions) throws ConnectionException, AccessException {
+		return fstatDelegator.getExtendedFiles(fileSpecs, maxFiles, sinceChangelist, affectedByChangelist, outputOptions, ancilliaryOptions);
 	}
 
 	@Override
-	public List<IExtendedFileSpec> getExtendedFiles(final List<IFileSpec> fileSpecs,
-													final GetExtendedFilesOptions opts) throws P4JavaException {
+	public List<IExtendedFileSpec> getExtendedFiles(final List<IFileSpec> fileSpecs, final GetExtendedFilesOptions opts) throws P4JavaException {
 		return fstatDelegator.getExtendedFiles(fileSpecs, opts);
 	}
 
 	@Override
-	public List<IFileLineMatch> getMatchingLines(List<IFileSpec> fileSpecs,
-												 String pattern, MatchingLinesOptions options) throws P4JavaException {
+	public List<IFileLineMatch> getMatchingLines(List<IFileSpec> fileSpecs, String pattern, MatchingLinesOptions options) throws P4JavaException {
 		return grepDelegator.getMatchingLines(fileSpecs, pattern, options);
 	}
 
 	@Override
-	public List<IFileLineMatch> getMatchingLines(@Nonnull List<IFileSpec> fileSpecs,
-												 @Nonnull String pattern, @Nullable List<String> infoLines,
-												 MatchingLinesOptions options) throws P4JavaException {
+	public List<IFileLineMatch> getMatchingLines(@Nonnull List<IFileSpec> fileSpecs, @Nonnull String pattern, @Nullable List<String> infoLines, MatchingLinesOptions options) throws P4JavaException {
 		return grepDelegator.getMatchingLines(fileSpecs, pattern, infoLines, options);
 	}
 
@@ -2211,81 +2038,67 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public String createUserGroup(IUserGroup group)
-			throws ConnectionException, RequestException, AccessException {
+	public String createUserGroup(IUserGroup group) throws ConnectionException, RequestException, AccessException {
 		return groupDelegator.createUserGroup(group);
 	}
 
 	@Override
-	public String createUserGroup(IUserGroup group, UpdateUserGroupOptions opts)
-			throws P4JavaException {
+	public String createUserGroup(IUserGroup group, UpdateUserGroupOptions opts) throws P4JavaException {
 		return groupDelegator.createUserGroup(group, opts);
 	}
 
 	@Override
-	public String deleteUserGroup(IUserGroup group)
-			throws ConnectionException, RequestException, AccessException {
+	public String deleteUserGroup(IUserGroup group) throws ConnectionException, RequestException, AccessException {
 		return groupDelegator.deleteUserGroup(group);
 	}
 
 	@Override
-	public String deleteUserGroup(IUserGroup group, UpdateUserGroupOptions opts)
-			throws P4JavaException {
+	public String deleteUserGroup(IUserGroup group, UpdateUserGroupOptions opts) throws P4JavaException {
 		return groupDelegator.deleteUserGroup(group, opts);
 	}
 
 	@Override
-	public IUserGroup getUserGroup(String name)
-			throws ConnectionException, RequestException, AccessException {
+	public IUserGroup getUserGroup(String name) throws ConnectionException, RequestException, AccessException {
 		return groupDelegator.getUserGroup(name);
 	}
 
 	@Override
-	public String updateUserGroup(IUserGroup group, boolean updateIfOwner)
-			throws ConnectionException, RequestException, AccessException {
+	public String updateUserGroup(IUserGroup group, boolean updateIfOwner) throws ConnectionException, RequestException, AccessException {
 		return groupDelegator.updateUserGroup(group, updateIfOwner);
 	}
 
 	@Override
-	public String updateUserGroup(IUserGroup group, UpdateUserGroupOptions opts)
-			throws P4JavaException {
+	public String updateUserGroup(IUserGroup group, UpdateUserGroupOptions opts) throws P4JavaException {
 		return groupDelegator.updateUserGroup(group, opts);
 	}
 
 	@Override
-	public List<IUserGroup> getUserGroups(String userOrGroupName, GetUserGroupsOptions opts)
-			throws P4JavaException {
+	public List<IUserGroup> getUserGroups(String userOrGroupName, GetUserGroupsOptions opts) throws P4JavaException {
 		return groupsDelegator.getUserGroups(userOrGroupName, opts);
 	}
 
 	@Override
-	public List<IUserGroup> getUserGroups(String userOrGroupName, boolean indirect,
-										  boolean displayValues, int maxGroups)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IUserGroup> getUserGroups(String userOrGroupName, boolean indirect, boolean displayValues, int maxGroups) throws ConnectionException, RequestException, AccessException {
 		return groupsDelegator.getUserGroups(userOrGroupName, indirect, displayValues, maxGroups);
 	}
 
 	@Override
-	public List<IFileSpec> getSubmittedIntegrations(List<IFileSpec> fileSpecs, String branchSpec,
-													boolean reverseMappings) throws ConnectionException, RequestException, AccessException {
+	public List<IFileSpec> getSubmittedIntegrations(List<IFileSpec> fileSpecs, String branchSpec, boolean reverseMappings) throws ConnectionException, RequestException, AccessException {
 		return integratedDelegator.getSubmittedIntegrations(fileSpecs, branchSpec, reverseMappings);
 	}
 
 	@Override
-	public List<IFileSpec> getSubmittedIntegrations(List<IFileSpec> fileSpecs,
-													GetSubmittedIntegrationsOptions opts) throws P4JavaException {
+	public List<IFileSpec> getSubmittedIntegrations(List<IFileSpec> fileSpecs, GetSubmittedIntegrationsOptions opts) throws P4JavaException {
 		return integratedDelegator.getSubmittedIntegrations(fileSpecs, opts);
 	}
 
 	@Override
-	public IStreamIntegrationStatus getStreamIntegrationStatus(final String stream,
-															   final StreamIntegrationStatusOptions opts) throws P4JavaException {
+	public IStreamIntegrationStatus getStreamIntegrationStatus(final String stream, final StreamIntegrationStatusOptions opts) throws P4JavaException {
 		return statDelegator.getStreamIntegrationStatus(stream, opts);
 	}
 
 	@Override
-	public IJob createJob(@Nonnull Map<String, Object> fieldMap)
-			throws ConnectionException, RequestException, AccessException {
+	public IJob createJob(@Nonnull Map<String, Object> fieldMap) throws ConnectionException, RequestException, AccessException {
 		return jobDelegator.createJob(fieldMap);
 	}
 
@@ -2300,22 +2113,17 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public String updateJob(@Nonnull IJob job)
-			throws ConnectionException, RequestException, AccessException {
+	public String updateJob(@Nonnull IJob job) throws ConnectionException, RequestException, AccessException {
 		return jobDelegator.updateJob(job);
 	}
 
 	@Override
-	public List<IJob> getJobs(final List<IFileSpec> fileSpecs, final int maxJobs,
-							  final boolean longDescriptions, final boolean reverseOrder,
-							  final boolean includeIntegrated, final String jobView)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IJob> getJobs(final List<IFileSpec> fileSpecs, final int maxJobs, final boolean longDescriptions, final boolean reverseOrder, final boolean includeIntegrated, final String jobView) throws ConnectionException, RequestException, AccessException {
 		return jobsDelegator.getJobs(fileSpecs, maxJobs, longDescriptions, reverseOrder, includeIntegrated, jobView);
 	}
 
 	@Override
-	public List<IJob> getJobs(final List<IFileSpec> fileSpecs, final GetJobsOptions opts)
-			throws P4JavaException {
+	public List<IJob> getJobs(final List<IFileSpec> fileSpecs, final GetJobsOptions opts) throws P4JavaException {
 		return jobsDelegator.getJobs(fileSpecs, opts);
 	}
 
@@ -2330,8 +2138,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public String setKey(final String keyName, final String value, final KeyOptions opts)
-			throws P4JavaException {
+	public String setKey(final String keyName, final String value, final KeyOptions opts) throws P4JavaException {
 
 		return keyDelegator.setKey(keyName, value, opts);
 	}
@@ -2347,55 +2154,43 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public String createLabel(@Nonnull final ILabel label)
-			throws ConnectionException, RequestException, AccessException {
+	public String createLabel(@Nonnull final ILabel label) throws ConnectionException, RequestException, AccessException {
 
 		return labelDelegator.createLabel(label);
 	}
 
 	@Override
-	public String deleteLabel(final String labelName, final boolean force)
-			throws ConnectionException, RequestException, AccessException {
+	public String deleteLabel(final String labelName, final boolean force) throws ConnectionException, RequestException, AccessException {
 
 		return labelDelegator.deleteLabel(labelName, force);
 	}
 
 	@Override
-	public String deleteLabel(final String labelName, final DeleteLabelOptions opts)
-			throws P4JavaException {
+	public String deleteLabel(final String labelName, final DeleteLabelOptions opts) throws P4JavaException {
 
 		return labelDelegator.deleteLabel(labelName, opts);
 	}
 
 	@Override
-	public ILabel getLabel(final String labelName)
-			throws ConnectionException, RequestException, AccessException {
+	public ILabel getLabel(final String labelName) throws ConnectionException, RequestException, AccessException {
 
 		return labelDelegator.getLabel(labelName);
 	}
 
 	@Override
-	public String updateLabel(@Nonnull final ILabel label)
-			throws ConnectionException, RequestException, AccessException {
+	public String updateLabel(@Nonnull final ILabel label) throws ConnectionException, RequestException, AccessException {
 
 		return labelDelegator.updateLabel(label);
 	}
 
 	@Override
-	public List<ILabelSummary> getLabels(
-			final String user,
-			final int maxLabels,
-			final String nameFilter,
-			final List<IFileSpec> fileList)
-			throws ConnectionException, RequestException, AccessException {
+	public List<ILabelSummary> getLabels(final String user, final int maxLabels, final String nameFilter, final List<IFileSpec> fileList) throws ConnectionException, RequestException, AccessException {
 
 		return labelsDelegator.getLabels(user, maxLabels, nameFilter, fileList);
 	}
 
 	@Override
-	public List<ILabelSummary> getLabels(
-			final List<IFileSpec> fileList,
-			final GetLabelsOptions opts) throws P4JavaException {
+	public List<ILabelSummary> getLabels(final List<IFileSpec> fileList, final GetLabelsOptions opts) throws P4JavaException {
 
 		return labelsDelegator.getLabels(fileList, opts);
 	}
@@ -2411,14 +2206,12 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public void login(final String password)
-			throws ConnectionException, RequestException, AccessException, ConfigException {
+	public void login(final String password) throws ConnectionException, RequestException, AccessException, ConfigException {
 		loginDelegator.login(password);
 	}
 
 	@Override
-	public void login(final String password, final boolean allHosts)
-			throws ConnectionException, RequestException, AccessException, ConfigException {
+	public void login(final String password, final boolean allHosts) throws ConnectionException, RequestException, AccessException, ConfigException {
 		loginDelegator.login(password, allHosts);
 	}
 
@@ -2428,14 +2221,12 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public void login(final String password, final StringBuffer ticket, final LoginOptions opts)
-			throws P4JavaException {
+	public void login(final String password, final StringBuffer ticket, final LoginOptions opts) throws P4JavaException {
 		loginDelegator.login(password, ticket, opts);
 	}
 
 	@Override
-	public void login(@Nonnull final IUser user, final StringBuffer ticket, final LoginOptions opts)
-			throws P4JavaException {
+	public void login(@Nonnull final IUser user, final StringBuffer ticket, final LoginOptions opts) throws P4JavaException {
 		loginDelegator.login(user, ticket, opts);
 	}
 
@@ -2480,8 +2271,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public void logout()
-			throws ConnectionException, RequestException, AccessException, ConfigException {
+	public void logout() throws ConnectionException, RequestException, AccessException, ConfigException {
 		logoutDelegator.logout();
 	}
 
@@ -2491,15 +2281,13 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public List<IServerProcess> getServerProcesses()
-			throws ConnectionException, RequestException, AccessException {
+	public List<IServerProcess> getServerProcesses() throws ConnectionException, RequestException, AccessException {
 
 		return monitorDelegator.getServerProcesses();
 	}
 
 	@Override
-	public List<IServerProcess> getServerProcesses(final GetServerProcessesOptions opts)
-			throws P4JavaException {
+	public List<IServerProcess> getServerProcesses(final GetServerProcessesOptions opts) throws P4JavaException {
 
 		return monitorDelegator.getServerProcesses(opts);
 	}
@@ -2510,114 +2298,76 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public List<IFileSpec> getOpenedFiles(final List<IFileSpec> fileSpecs, final boolean allClients,
-										  final String clientName, final int maxFiles, final int changeListId)
-			throws ConnectionException, AccessException {
+	public List<IFileSpec> getOpenedFiles(final List<IFileSpec> fileSpecs, final boolean allClients, final String clientName, final int maxFiles, final int changeListId) throws ConnectionException, AccessException {
 		return openedDelegator.getOpenedFiles(fileSpecs, allClients, clientName, maxFiles, changeListId);
 	}
 
 	@Override
-	public List<IFileSpec> getOpenedFiles(final List<IFileSpec> fileSpecs,
-										  final OpenedFilesOptions opts) throws P4JavaException {
+	public List<IFileSpec> getOpenedFiles(final List<IFileSpec> fileSpecs, final OpenedFilesOptions opts) throws P4JavaException {
 		return openedDelegator.getOpenedFiles(fileSpecs, opts);
 	}
 
 	@Override
-	public List<IFileSpec> moveFile(
-			final int changelistId,
-			final boolean listOnly,
-			final boolean noClientMove,
-			final String fileType,
-			@Nonnull final IFileSpec fromFile,
-			@Nonnull final IFileSpec toFile)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IFileSpec> moveFile(final int changelistId, final boolean listOnly, final boolean noClientMove, final String fileType, @Nonnull final IFileSpec fromFile, @Nonnull final IFileSpec toFile) throws ConnectionException, RequestException, AccessException {
 
-		return moveDelegator.moveFile(
-				changelistId,
-				listOnly,
-				noClientMove,
-				fileType,
-				fromFile,
-				toFile);
+		return moveDelegator.moveFile(changelistId, listOnly, noClientMove, fileType, fromFile, toFile);
 	}
 
 	@Override
-	public List<IFileSpec> moveFile(
-			@Nonnull IFileSpec fromFile,
-			@Nonnull IFileSpec toFile,
-			@Nullable MoveFileOptions opts) throws P4JavaException {
+	public List<IFileSpec> moveFile(@Nonnull IFileSpec fromFile, @Nonnull IFileSpec toFile, @Nullable MoveFileOptions opts) throws P4JavaException {
 
 		return moveDelegator.moveFile(fromFile, toFile, opts);
 	}
 
 	@Override
-	public List<IObliterateResult> obliterateFiles(
-			@Nonnull final List<IFileSpec> fileSpecs,
-			final ObliterateFilesOptions opts) throws P4JavaException {
+	public List<IObliterateResult> obliterateFiles(@Nonnull final List<IFileSpec> fileSpecs, final ObliterateFilesOptions opts) throws P4JavaException {
 
 		return obliterateDelegator.obliterateFiles(fileSpecs, opts);
 	}
 
 	@Override
-	public String changePassword(
-			final String oldPassword,
-			final String newPassword,
-			final String userName) throws P4JavaException {
+	public String changePassword(final String oldPassword, final String newPassword, final String userName) throws P4JavaException {
 		return passwdDelegator.changePassword(oldPassword, newPassword, userName);
 	}
 
 	@Override
-	public InputStream getFileContents(
-			final List<IFileSpec> fileSpecs,
-			final GetFileContentsOptions opts) throws P4JavaException {
+	public InputStream getFileContents(final List<IFileSpec> fileSpecs, final GetFileContentsOptions opts) throws P4JavaException {
 
 		return printDelegator.getFileContents(fileSpecs, opts);
 	}
 
 	@Override
-	public InputStream getFileContents(
-			final List<IFileSpec> fileSpecs,
-			final boolean allrevs,
-			final boolean noHeaderLine)
-			throws ConnectionException, RequestException, AccessException {
+	public InputStream getFileContents(final List<IFileSpec> fileSpecs, final boolean allrevs, final boolean noHeaderLine) throws ConnectionException, RequestException, AccessException {
 
 		return printDelegator.getFileContents(fileSpecs, allrevs, noHeaderLine);
 	}
 
 	@Override
-	public String setProperty(
-			final String name,
-			final String value,
-			final PropertyOptions opts) throws P4JavaException {
+	public String setProperty(final String name, final String value, final PropertyOptions opts) throws P4JavaException {
 
 		return propertyDelegator.setProperty(name, value, opts);
 	}
 
 	@Override
-	public List<IProperty> getProperty(final GetPropertyOptions opts)
-			throws P4JavaException {
+	public List<IProperty> getProperty(final GetPropertyOptions opts) throws P4JavaException {
 
 		return propertyDelegator.getProperty(opts);
 	}
 
 	@Override
-	public String deleteProperty(
-			final String name,
-			final PropertyOptions opts) throws P4JavaException {
+	public String deleteProperty(final String name, final PropertyOptions opts) throws P4JavaException {
 
 		return propertyDelegator.deleteProperty(name, opts);
 	}
 
 	@Override
-	public String createProtectionEntries(@Nonnull final List<IProtectionEntry> entryList)
-			throws P4JavaException {
+	public String createProtectionEntries(@Nonnull final List<IProtectionEntry> entryList) throws P4JavaException {
 
 		return protectDelegator.createProtectionEntries(entryList);
 	}
 
 	@Override
-	public String updateProtectionEntries(@Nonnull final List<IProtectionEntry> entryList)
-			throws P4JavaException {
+	public String updateProtectionEntries(@Nonnull final List<IProtectionEntry> entryList) throws P4JavaException {
 
 		return protectDelegator.updateProtectionEntries(entryList);
 	}
@@ -2628,28 +2378,15 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public List<IProtectionEntry> getProtectionEntries(
-			final List<IFileSpec> fileList,
-			final GetProtectionEntriesOptions opts) throws P4JavaException {
+	public List<IProtectionEntry> getProtectionEntries(final List<IFileSpec> fileList, final GetProtectionEntriesOptions opts) throws P4JavaException {
 
 		return protectsDelegator.getProtectionEntries(fileList, opts);
 	}
 
 	@Override
-	public List<IProtectionEntry> getProtectionEntries(
-			final boolean allUsers,
-			final String hostName,
-			final String userName,
-			final String groupName,
-			final List<IFileSpec> fileList)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IProtectionEntry> getProtectionEntries(final boolean allUsers, final String hostName, final String userName, final String groupName, final List<IFileSpec> fileList) throws ConnectionException, RequestException, AccessException {
 
-		return protectsDelegator.getProtectionEntries(
-				allUsers,
-				hostName,
-				userName,
-				groupName,
-				fileList);
+		return protectsDelegator.getProtectionEntries(allUsers, hostName, userName, groupName, fileList);
 	}
 
 	@Override
@@ -2658,49 +2395,37 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public String renameUser(
-			final String oldUserName,
-			final String newUserName) throws P4JavaException {
+	public String renameUser(final String oldUserName, final String newUserName) throws P4JavaException {
 
 		return renameUserDelegator.renameUser(oldUserName, newUserName);
 	}
 
 	@Override
-	public List<IReviewChangelist> getReviewChangelists(final GetReviewChangelistsOptions opts)
-			throws P4JavaException {
+	public List<IReviewChangelist> getReviewChangelists(final GetReviewChangelistsOptions opts) throws P4JavaException {
 
 		return reviewDelegator.getReviewChangelists(opts);
 	}
 
 	@Override
-	public List<IUserSummary> getReviews(
-			final int changelistId,
-			final List<IFileSpec> fileSpecs)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IUserSummary> getReviews(final int changelistId, final List<IFileSpec> fileSpecs) throws ConnectionException, RequestException, AccessException {
 
 		return reviewsDelegator.getReviews(changelistId, fileSpecs);
 	}
 
 	@Override
-	public List<IUserSummary> getReviews(
-			final List<IFileSpec> fileSpecs,
-			final GetReviewsOptions opts) throws P4JavaException {
+	public List<IUserSummary> getReviews(final List<IFileSpec> fileSpecs, final GetReviewsOptions opts) throws P4JavaException {
 
 		return reviewsDelegator.getReviews(fileSpecs, opts);
 	}
 
 	@Override
-	public List<String> searchJobs(
-			final String words,
-			final SearchJobsOptions opts) throws P4JavaException {
+	public List<String> searchJobs(final String words, final SearchJobsOptions opts) throws P4JavaException {
 
 		return searchDelegator.searchJobs(words, opts);
 	}
 
 	@Override
-	public List<IFileSize> getFileSizes(
-			final List<IFileSpec> fileSpecs,
-			final GetFileSizesOptions opts) throws P4JavaException {
+	public List<IFileSize> getFileSizes(final List<IFileSpec> fileSpecs, final GetFileSizesOptions opts) throws P4JavaException {
 
 		return sizesDelegator.getFileSizes(fileSpecs, opts);
 	}
@@ -2716,59 +2441,43 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public IStream getStream(
-			final String streamPath,
-			final GetStreamOptions opts) throws P4JavaException {
+	public IStream getStream(final String streamPath, final GetStreamOptions opts) throws P4JavaException {
 
 		return streamDelegator.getStream(streamPath, opts);
 	}
 
 	@Override
-	public String updateStream(
-			final IStream stream,
-			final StreamOptions opts) throws P4JavaException {
+	public String updateStream(final IStream stream, final StreamOptions opts) throws P4JavaException {
 
 		return streamDelegator.updateStream(stream, opts);
 	}
 
 	@Override
-	public String deleteStream(
-			final String streamPath,
-			final StreamOptions opts) throws P4JavaException {
+	public String deleteStream(final String streamPath, final StreamOptions opts) throws P4JavaException {
 
 		return streamDelegator.deleteStream(streamPath, opts);
 	}
 
 	@Override
-	public List<IStreamSummary> getStreams(
-			final List<String> streamPaths,
-			final GetStreamsOptions opts) throws P4JavaException {
+	public List<IStreamSummary> getStreams(final List<String> streamPaths, final GetStreamsOptions opts) throws P4JavaException {
 
 		return streamsDelegator.getStreams(streamPaths, opts);
 	}
 
 	@Override
-	public List<IFileSpec> tagFiles(
-			List<IFileSpec> fileSpecs,
-			String labelName,
-			boolean listOnly,
-			boolean delete) throws ConnectionException, RequestException, AccessException {
+	public List<IFileSpec> tagFiles(List<IFileSpec> fileSpecs, String labelName, boolean listOnly, boolean delete) throws ConnectionException, RequestException, AccessException {
 
 		return tagDelegator.tagFiles(fileSpecs, labelName, listOnly, delete);
 	}
 
 	@Override
-	public List<IFileSpec> tagFiles(
-			final List<IFileSpec> fileSpecs,
-			final String labelName,
-			final TagFilesOptions opts) throws P4JavaException {
+	public List<IFileSpec> tagFiles(final List<IFileSpec> fileSpecs, final String labelName, final TagFilesOptions opts) throws P4JavaException {
 
 		return tagDelegator.tagFiles(fileSpecs, labelName, opts);
 	}
 
 	@Override
-	public String createTriggerEntries(@Nonnull final List<ITriggerEntry> entryList)
-			throws P4JavaException {
+	public String createTriggerEntries(@Nonnull final List<ITriggerEntry> entryList) throws P4JavaException {
 
 		return triggersDelegator.createTriggerEntries(entryList);
 	}
@@ -2779,8 +2488,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public String updateTriggerEntries(@Nonnull final List<ITriggerEntry> entryList)
-			throws P4JavaException {
+	public String updateTriggerEntries(@Nonnull final List<ITriggerEntry> entryList) throws P4JavaException {
 
 		return triggersDelegator.updateTriggerEntries(entryList);
 	}
@@ -2791,74 +2499,55 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public String createUser(
-			@Nonnull final IUser user,
-			final boolean force) throws ConnectionException, RequestException, AccessException {
+	public String createUser(@Nonnull final IUser user, final boolean force) throws ConnectionException, RequestException, AccessException {
 
 		return userDelegator.createUser(user, force);
 	}
 
 	@Override
-	public String createUser(
-			@Nonnull final IUser user,
-			final UpdateUserOptions opts) throws P4JavaException {
+	public String createUser(@Nonnull final IUser user, final UpdateUserOptions opts) throws P4JavaException {
 
 		return userDelegator.createUser(user, opts);
 	}
 
 	@Override
-	public String updateUser(
-			@Nonnull final IUser user,
-			final UpdateUserOptions opts) throws P4JavaException {
+	public String updateUser(@Nonnull final IUser user, final UpdateUserOptions opts) throws P4JavaException {
 
 		return userDelegator.updateUser(user, opts);
 	}
 
 	@Override
-	public String updateUser(
-			@Nonnull final IUser user,
-			final boolean force)
-			throws ConnectionException, RequestException, AccessException {
+	public String updateUser(@Nonnull final IUser user, final boolean force) throws ConnectionException, RequestException, AccessException {
 
 		return userDelegator.updateUser(user, force);
 	}
 
 	@Override
-	public String deleteUser(
-			final String userName,
-			final boolean force) throws ConnectionException, RequestException, AccessException {
+	public String deleteUser(final String userName, final boolean force) throws ConnectionException, RequestException, AccessException {
 
 		return userDelegator.deleteUser(userName, force);
 	}
 
 	@Override
-	public String deleteUser(
-			String userName,
-			UpdateUserOptions opts) throws P4JavaException {
+	public String deleteUser(String userName, UpdateUserOptions opts) throws P4JavaException {
 
 		return userDelegator.deleteUser(userName, opts);
 	}
 
 	@Override
-	public IUser getUser(final String userName)
-			throws ConnectionException, RequestException, AccessException {
+	public IUser getUser(final String userName) throws ConnectionException, RequestException, AccessException {
 
 		return userDelegator.getUser(userName);
 	}
 
 	@Override
-	public List<IUserSummary> getUsers(
-			final List<String> userList,
-			final int maxUsers)
-			throws ConnectionException, RequestException, AccessException {
+	public List<IUserSummary> getUsers(final List<String> userList, final int maxUsers) throws ConnectionException, RequestException, AccessException {
 
 		return usersDelegator.getUsers(userList, maxUsers);
 	}
 
 	@Override
-	public List<IUserSummary> getUsers(
-			final List<String> userList,
-			final GetUsersOptions opts) throws P4JavaException {
+	public List<IUserSummary> getUsers(final List<String> userList, final GetUsersOptions opts) throws P4JavaException {
 
 		return usersDelegator.getUsers(userList, opts);
 	}
@@ -2869,9 +2558,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	@Override
-	public List<IExtendedFileSpec> verifyFiles(
-			final List<IFileSpec> fileSpecs,
-			final VerifyFilesOptions opts) throws P4JavaException {
+	public List<IExtendedFileSpec> verifyFiles(final List<IFileSpec> fileSpecs, final VerifyFilesOptions opts) throws P4JavaException {
 
 		return verifyDelegator.verifyFiles(fileSpecs, opts);
 	}
@@ -3061,20 +2748,27 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	}
 
 	/**
+	 * @param map map
+	 * @return IFileSpec
+	 * @throws AccessException     on error
+	 * @throws ConnectionException on error
 	 * @deprecated use {@link com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder}
 	 */
 	@Deprecated
-	public IFileSpec handleFileReturn(Map<String, Object> map)
-			throws AccessException, ConnectionException {
+	public IFileSpec handleFileReturn(Map<String, Object> map) throws AccessException, ConnectionException {
 		return ResultListBuilder.handleFileReturn(map, this);
 	}
 
 	/**
+	 * @param map    map
+	 * @param client client
+	 * @return IFileSpec
+	 * @throws AccessException     on error
+	 * @throws ConnectionException on error
 	 * @deprecated use {@link com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder}
 	 */
 	@Deprecated
-	public IFileSpec handleFileReturn(Map<String, Object> map, IClient client)
-			throws AccessException, ConnectionException {
+	public IFileSpec handleFileReturn(Map<String, Object> map, IClient client) throws AccessException, ConnectionException {
 		return ResultListBuilder.handleFileReturn(map, this);
 	}
 

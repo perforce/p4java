@@ -16,7 +16,6 @@ public interface ILabelDelegator {
     /**
      * Get a specific named Perforce label.
      * <p>
-     * <p>
      * Unlike the getLabelList method, the getViewMapping method on the returned
      * label will be valid. Note though that changes to the returned label or
      * its view will not be reflected on to the server unless the updateLabel

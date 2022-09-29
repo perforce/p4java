@@ -37,7 +37,7 @@ public interface IStream extends IStreamSummary {
 	/**
 	 * Return the view map associated with this stream. One or more mappings
 	 * that define file paths in the stream view. Each line is of the form:
-	 * <path_type> <view_path> [<depot_path>]
+	 * path_type view_path [depot_path]
 	 * 
 	 * @return non-null list of IStreamViewMapping mappings for this stream.
 	 */
@@ -57,7 +57,7 @@ public interface IStream extends IStreamSummary {
 	/**
 	 * Return the remapped view map associated with this stream. Optional; one
 	 * or more mappings that define how stream view paths are to be remapped in
-	 * client views. Each line is of the form: <view_path_1> <view_path_2>
+	 * client views. Each line is of the form: view_path_1 view_path_2
 	 * 
 	 * @return possibly-null (optional) list of IStreamRemappedMapping mappings
 	 *         for this stream.
@@ -89,6 +89,7 @@ public interface IStream extends IStreamSummary {
 	 * Set the ignored view map associated with this stream spec. This will
 	 * not change the associated stream spec on the Perforce server unless you
 	 * arrange for the update to server.
+	 * @param ignoredView ignore view mapping
 	 */
 	void setIgnoredView(ViewMap<IStreamIgnoredMapping> ignoredView);
 
@@ -105,6 +106,7 @@ public interface IStream extends IStreamSummary {
 	 * Set the automatically generated client view map associated with this
 	 * stream spec. This will not change the associated stream spec on the
 	 * Perforce server unless you arrange for the update to server.
+	 * @param clientView client view
 	 */
 	void setClientView(ViewMap<IClientViewMapping> clientView);
 
@@ -119,11 +121,13 @@ public interface IStream extends IStreamSummary {
 	 * Set the extra tags associated with this stream. This will not change
 	 * the associated stream spec on the Perforce server unless you arrange for
 	 * the update to server.
+	 * @param extraTags extra tags
 	 */
 	void setExtraTags(List<IExtraTag> extraTags);
 	
 	/**
 	 * Set the server to type of IOptionsServer, overriding the default IServer.
+	 * @param server server
 	 */
 	void setServer(IOptionsServer server);
 }

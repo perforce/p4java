@@ -26,6 +26,10 @@ public interface IDepotsDelegator {
 
 	/**
 	 * Gets depots with type and namefilter
+	 *
+	 * @param opts options
+	 * @return list of depots
+	 * @throws P4JavaException on error
 	 */
 	List<IDepot> getDepots(GetDepotsOptions opts) throws P4JavaException;
 }

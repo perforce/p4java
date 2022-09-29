@@ -26,20 +26,21 @@ public class ProtectionsTable implements IProtectionsTable {
 	
 	/**
 	 * Explicit-value constructor.
+	 * @param entries protections
 	 */
 	public ProtectionsTable(List<IProtectionEntry> entries) {
 		this.entries = entries;
 	}
 	
 	/**
-	 * @see com.perforce.p4java.admin.IProtectionTable#getEntries()
+	 * @see com.perforce.p4java.admin.IProtectionsTable#getEntries()
 	 */
 	public List<IProtectionEntry> getEntries() {
 		return this.entries;
 	}
 
 	/**
-	 * @see com.perforce.p4java.admin.IProtectionTable#setEntries(java.util.List)
+	 * @see com.perforce.p4java.admin.IProtectionsTable#setEntries(java.util.List)
 	 */
 	public void setEntries(List<IProtectionEntry> entries) {
 		this.entries = entries;

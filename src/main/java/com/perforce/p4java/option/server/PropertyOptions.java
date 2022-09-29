@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option.server;
 
@@ -13,24 +13,24 @@ import java.util.List;
  * Options class for IOptionsServer's setProperty and deleteProperty methods.
  */
 public class PropertyOptions extends Options {
-	
+
 	/**
 	 * Options: -n name -v value [-s sequence] [-u user | -g group]
 	 */
 	public static final String OPTIONS_SPECS = "s:n s:v s:s s:u s:g";
-	
+
 	/**
 	 * If not null, use this as the name of this property.
 	 * Corresponds to the -n flag.
 	 */
 	protected String name = null;
-	
+
 	/**
 	 * If not null, use this as the value of this property.
 	 * Corresponds to the -v flag.
 	 */
 	protected String value = null;
-	
+
 	/**
 	 * If greater than zero, use this as the sequence number of this property.
 	 * If the sequence is not specified, it defaults to 1.
@@ -60,30 +60,36 @@ public class PropertyOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public PropertyOptions(String... options) {
 		super(options);
 	}
-	
+
 	/**
 	 * Explicit value constructor.
+	 *
+	 * @param name     name
+	 * @param value    value
+	 * @param sequence sequence
+	 * @param user     user
+	 * @param group    group
 	 */
-	public PropertyOptions(String name, String value, String sequence,
-			String user, String group) {
+	public PropertyOptions(String name, String value, String sequence, String user, String group) {
 		super();
 		this.name = name;
 		this.value = value;
@@ -91,17 +97,12 @@ public class PropertyOptions extends Options {
 		this.user = user;
 		this.group = group;
 	}
-	
+
 	/**
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-								this.getName(),
-								this.getValue(),
-								this.getSequence(),
-								this.getUser(),
-								this.getGroup());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.getName(), this.getValue(), this.getSequence(), this.getUser(), this.getGroup());
 
 		return this.optionList;
 	}

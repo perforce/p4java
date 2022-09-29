@@ -1,24 +1,24 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option;
-
-import java.util.Properties;
 
 import com.perforce.p4java.PropertyDefs;
 import com.perforce.p4java.exception.NullPointerError;
 import com.perforce.p4java.exception.P4JavaError;
 
+import java.util.Properties;
+
 /**
  * Global server usage options class.<p>
- * 
+ *
  * Intended to implement some of the options described in
  * the main Perforce p4 usage and p4 undoc documentation on
  * a per-IOptionsServer object basis, and also implements some of
  * the broader environment settings (such as the client name used
  * by the P4Java server implementation when no client has been
  * associated with the server).<p>
- * 
+ *
  * The UsageOptions object associated with a server is read and used
  * for a small number of usage values (currently programName, programVersion,
  * unsetUserName, and unsetClientName) each time a command is issued to the
@@ -28,12 +28,12 @@ import com.perforce.p4java.exception.P4JavaError;
  * UsageOption objects shared between multiple servers are sensitive to such
  * changes, and that changes that occur when a server is processing command
  * requests may cause unexpected results.<p>
- * 
+ *
  * A UsageOption object is associated with a server instance when
  * the server is issued by the server factory; this can be the default
  * object or one passed-in to the server factory specifically for that
  * server.<p>
- * 
+ *
  * Note that the UsageOptions class should be used with some
  * care as the possible side effects of setting some of the
  * usage parameters to the wrong value can lead to unexpected or
@@ -41,13 +41,13 @@ import com.perforce.p4java.exception.P4JavaError;
  */
 
 public class UsageOptions {
-	
+
 	/**
 	 * The name of the system property used to determine the JVM's current
 	 * working directory.
 	 */
 	public static final String WORKING_DIRECTORY_PROPNAME = "user.dir";
-	
+
 	/**
 	 * Properties object used to get default field values from. Note that
 	 * these properties are potentially accessed for each command, so any
@@ -55,36 +55,36 @@ public class UsageOptions {
 	 * object is used.
 	 */
 	protected Properties props = null;
-	
+
 	/**
 	 * If not null, will be used to identify the P4Java application's
 	 * program name to the Perforce server.
 	 */
 	protected String programName = null;
-	
+
 	/**
 	 * If not null, will be used to identify the P4Java application's
 	 * program version to the Perforce server.
 	 */
 	protected String programVersion = null;
-	
+
 	/**
 	 * If not null, this specifies the Perforce server's idea of each command's
 	 * working directory for the associated server object. Corresponds to
 	 * the p4 -d usage option.<p>
-	 * 
+	 *
 	 * This affects all commands on the associated server from this point on,
 	 * and the passed-in path should be both absolute and valid, otherwise
 	 * strange errors may appear from the server. If workingDirectory is null,
 	 * the Java VM's actual current working directory <b>at the time this object
 	 * is constructed</b> is used instead (which is almost always a safe option unless
 	 * you're using Perforce alt roots).<p>
-	 * 
+	 *
 	 * Note: no checking is done at any time for correctness (or otherwise)
 	 * of the workingDirectory option.
 	 */
 	protected String workingDirectory = null;
-	
+
 	/**
 	 * If not null, specifies the host name used by the server's commands.
 	 * Set to null by the default constructor. Corresponds to the p4 -H
@@ -94,7 +94,7 @@ public class UsageOptions {
 	 * associated server.
 	 */
 	protected String hostName = null;
-	
+
 	/**
 	 * If not null, use this field to tell the server which language to
 	 * use in text messages it sends back to the client. Corresponds to
@@ -102,30 +102,31 @@ public class UsageOptions {
 	 * the default constructor.
 	 */
 	protected String textLanguage = null;
-	
+
 	/**
 	 * What will be sent to the Perforce server with each command as the user
 	 * name if no user name has been explicitly set for servers associated with
 	 * this UsageOption.
 	 */
 	protected String unsetUserName = null;
-	
+
 	/**
 	 * If set, this will be used as the name of the client when no
 	 * client has actually been explicitly set for the associated server(s).
 	 */
 	protected String unsetClientName = null;
-	
+
 	/**
 	 * Default working directory from the JVM to fall back to if not working
 	 * directory is set on the usage options
 	 */
 	protected String defaultWorkingDirectory = null;
-	
+
 
 	/**
 	 * Default constructor. Sets props field then calls setFieldDefaults
 	 * to set appropriate field default values; otherwise does nothing.
+	 * @param props properties
 	 */
 	public UsageOptions(Properties props) {
 		if (props == null) {
@@ -140,10 +141,18 @@ public class UsageOptions {
 	 * Explicit value constructor. After setting any values explicitly,
 	 * calls setFieldDefaults() to tidy up any still-null fields that shouldn't
 	 * be null.
+	 * @param props properties
+	 * @param programName program name
+	 * @param programVersion program version
+	 * @param workingDirectory working directory
+	 * @param hostName host name
+	 * @param textLanguage language
+	 * @param unsetUserName user name
+	 * @param noClientName client name
 	 */
 	public UsageOptions(Properties props, String programName, String programVersion,
-			String workingDirectory, String hostName, String textLanguage,
-			String unsetUserName, String noClientName) {
+						String workingDirectory, String hostName, String textLanguage,
+						String unsetUserName, String noClientName) {
 		if (props == null) {
 			this.props = new Properties();
 		} else {
@@ -158,26 +167,28 @@ public class UsageOptions {
 		this.unsetClientName = noClientName;
 		setFieldDefaults(getProps());
 	}
-	
+
 	/**
 	 * Set any non-null default values when the object
 	 * is constructed. Basically, this means running down the fields
 	 * and if a field is null and it's not a field that should have a null
 	 * default value, calling the corresponding getXXXXDefault method.<p>
-	 * 
+	 *
 	 * Fields set here: workingDirectory.
+	 * @param props properties
 	 */
 	protected void setFieldDefaults(Properties props) {
 		this.defaultWorkingDirectory = getWorkingDirectoryDefault(props);
 	}
-	
+
 	/**
 	 * Get a suitable default value for the programName field.
 	 * This version tries to find a suitable value in the passed-in
 	 * properties with the key PropertyDefs.PROG_NAME_KEY_SHORTFORM, then
 	 * with the key PropertyDefs.PROG_NAME_KEY; if that comes up null,
 	 * it uses the value of PropertyDefs.PROG_NAME_DEFAULT.
-	 * 
+	 *
+	 * @param props properties
 	 * @return non-null default programName value.
 	 */
 	protected String getProgramNameDefault(Properties props) {
@@ -188,14 +199,15 @@ public class UsageOptions {
 				props.getProperty(PropertyDefs.PROG_NAME_KEY,
 						PropertyDefs.PROG_NAME_DEFAULT));
 	}
-	
+
 	/**
 	 * Get a suitable default value for the programVersion field.
 	 * This version tries to find a suitable value in the passed-in
 	 * properties with the key PropertyDefs.PROG_VERSION_KEY_SHORTFORM, then
 	 * with the key PropertyDefs.PROG_VERSION_KEY; if that comes up null,
 	 * it uses the value of PropertyDefs.PROG_VERSION_DEFAULT.
-	 * 
+	 *
+	 * @param props properties
 	 * @return non-null default programVersion value.
 	 */
 	protected String getProgramVersionDefault(Properties props) {
@@ -206,12 +218,13 @@ public class UsageOptions {
 				props.getProperty(PropertyDefs.PROG_VERSION_KEY,
 						PropertyDefs.PROG_VERSION_DEFAULT));
 	}
-	
+
 	/**
 	 * Get a suitable default value for the workingDirectory field. This
 	 * is taken from the JVM's system properties using the WORKING_DIRECTORY_PROPNAME
 	 * system properties key (which is normally user.dir).
-	 * 
+	 *
+	 * @param props properties
 	 * @return non-null working directory.
 	 */
 	protected String getWorkingDirectoryDefault(Properties props) {
@@ -221,15 +234,16 @@ public class UsageOptions {
 			throw new P4JavaError(
 					"Unable to retrieve current working directory from JVM system properties");
 		}
-			
+
 		return cwd;
 	}
-	
+
 	/**
 	 * Get a suitable default value for the unsetUserName field. This version
 	 * returns the value of the property associated with the PropertyDefs.USER_UNSET_NAME_KEY
 	 * if it exists, or PropertyDefs.USER_UNSET_NAME_DEFAULT if not.
 	 *
+	 * @param props properties
 	 * @return non-null default unsetUserName value.
 	 */
 	protected String getUnsetUserNameDefault(Properties props) {
@@ -239,12 +253,13 @@ public class UsageOptions {
 		return this.props.getProperty(PropertyDefs.USER_UNSET_NAME_KEY,
 				PropertyDefs.USER_UNSET_NAME_DEFAULT);
 	}
-	
+
 	/**
 	 * Get a suitable default value for the unsetClientName field. This version
 	 * returns the value of the property associated with the PropertyDefs.CLIENT_UNSET_NAME_KEY
 	 * if it exists, or PropertyDefs.CLIENT_UNSET_NAME_DEFAULT if not.
 	 *
+	 * @param props properties
 	 * @return non-null default unsetClientName value.
 	 */
 	protected String getUnsetClientNameDefault(Properties props) {
@@ -262,6 +277,7 @@ public class UsageOptions {
 	 * for a value with the key PropertyDefs.PROG_NAME_KEY_SHORTFORM, then
 	 * with the key PropertyDefs.PROG_NAME_KEY; if that comes up null,
 	 * it returns the value of PropertyDefs.PROG_NAME_DEFAULT.
+	 * @return program name
 	 */
 	public String getProgramName() {
 		if (this.programName != null) {
@@ -287,6 +303,7 @@ public class UsageOptions {
 	 * for a value with the key PropertyDefs.PROG_VERSION_KEY_SHORTFORM, then
 	 * with the key PropertyDefs.PROG_VERSION_KEY; if that comes up null,
 	 * it returns the value of PropertyDefs.PROG_VERSION_DEFAULT.
+	 * @return program version
 	 */
 	public String getProgramVersion() {
 		if (this.programVersion != null) {
@@ -300,6 +317,10 @@ public class UsageOptions {
 						PropertyDefs.PROG_VERSION_DEFAULT));
 	}
 
+	/**
+	 * @param programVersion program version
+	 * @return usage options
+	 */
 	public UsageOptions setProgramVersion(String programVersion) {
 		this.programVersion = programVersion;
 		return this;
@@ -310,17 +331,25 @@ public class UsageOptions {
 	 * set explicitly using the setter method or implicitly when the object is
 	 * constructed using the JVM's working directory as reflected in the
 	 * System properties.
+	 * @return working directory
 	 */
 	public String getWorkingDirectory() {
 		return workingDirectory != null ? workingDirectory
 				: defaultWorkingDirectory;
 	}
 
+	/**
+	 * @param workingDirectory working directory
+	 * @return usage options
+	 */
 	public UsageOptions setWorkingDirectory(String workingDirectory) {
 		this.workingDirectory = workingDirectory;
 		return this;
 	}
 
+	/**
+	 * @return host name
+	 */
 	public String getHostName() {
 		return hostName;
 	}
@@ -328,25 +357,41 @@ public class UsageOptions {
 	/**
 	 * Set the host name. Calling this method has no effect at all after
 	 * any associated server object is created.
+	 * @param hostName host name
+	 * @return usage options
 	 */
 	public UsageOptions setHostName(String hostName) {
 		this.hostName = hostName;
 		return this;
 	}
 
+	/**
+	 * @return language
+	 */
 	public String getTextLanguage() {
 		return textLanguage;
 	}
 
+	/**
+	 * @param textLanguage language
+	 * @return usage options
+	 */
 	public UsageOptions setTextLanguage(String textLanguage) {
 		this.textLanguage = textLanguage;
 		return this;
 	}
 
+	/**
+	 * @return properties
+	 */
 	public Properties getProps() {
 		return props;
 	}
 
+	/**
+	 * @param props properties
+	 * @return usage options
+	 */
 	public UsageOptions setProps(Properties props) {
 		this.props = props;
 		return this;
@@ -358,6 +403,7 @@ public class UsageOptions {
 	 * if so, it's returned; otherwise the associated properties are searched
 	 * for a value with the key PropertyDefs.CLIENT_UNSET_NAME_KEY; if that comes
 	 * up null, it returns the value of PropertyDefs.CLIENT_UNSET_NAME_DEFAULT.
+	 * @return client name
 	 */
 	public String getUnsetClientName() {
 		if (this.unsetClientName != null) {
@@ -367,9 +413,13 @@ public class UsageOptions {
 			throw new NullPointerError("Null properties in UsageOptions");
 		}
 		return props.getProperty(PropertyDefs.CLIENT_UNSET_NAME_KEY,
-						PropertyDefs.CLIENT_UNSET_NAME_DEFAULT);
+				PropertyDefs.CLIENT_UNSET_NAME_DEFAULT);
 	}
 
+	/**
+	 * @param unsetClientName client name
+	 * @return usage options
+	 */
 	public UsageOptions setUnsetClientName(String unsetClientName) {
 		this.unsetClientName = unsetClientName;
 		return this;
@@ -381,6 +431,7 @@ public class UsageOptions {
 	 * if so, it's returned; otherwise the associated properties are searched
 	 * for a value with the key PropertyDefs.USER_UNSET_NAME_KEY; if that comes
 	 * up null, it returns the value of PropertyDefs.USER_UNSET_NAME_DEFAULT.
+	 * @return user name
 	 */
 	public String getUnsetUserName() {
 		if (this.unsetUserName != null) {
@@ -390,9 +441,13 @@ public class UsageOptions {
 			throw new NullPointerError("Null properties in UsageOptions");
 		}
 		return props.getProperty(PropertyDefs.USER_UNSET_NAME_KEY,
-						PropertyDefs.USER_UNSET_NAME_DEFAULT);
+				PropertyDefs.USER_UNSET_NAME_DEFAULT);
 	}
 
+	/**
+	 * @param unsetUserName user name
+	 * @return usage options
+	 */
 	public UsageOptions setUnsetUserName(String unsetUserName) {
 		this.unsetUserName = unsetUserName;
 		return this;

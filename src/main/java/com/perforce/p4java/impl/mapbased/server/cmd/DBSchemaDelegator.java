@@ -46,11 +46,6 @@ public class DBSchemaDelegator extends BaseDelegator implements IDBSchemaDelegat
         List<Map<String, Object>> resultMaps = execMapCmdList(DBSCHEMA, args, null);
         return ResultListBuilder.buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, IDbSchema>() {
-                    @Override
-                    public IDbSchema apply(Map map) {
-                        return new DbSchema(map);
-                    }
-                });
+				map -> new DbSchema(map));
     }
 }

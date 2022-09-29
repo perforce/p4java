@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.core;
 
@@ -8,7 +8,7 @@ package com.perforce.p4java.core;
  * "left" values to "right" values, where the semantics and
  * usage of "left" and "right" depends on the specific type of view
  * (e.g. left may be "depot", right "client").<p>
- * 
+ *
  * Note that the left and right strings are pure paths -- they do
  * not contain (or should not contain) any leading include / exclude
  * prefixes except where this is explicitly allowed (e.g. the special
@@ -16,9 +16,9 @@ package com.perforce.p4java.core;
  */
 
 public interface IMapEntry {
-	
+
 	int ORDER_UNKNOWN = -1;
-	
+
 	/**
 	 * Defines the specific type of a given view map entry.
 	 */
@@ -29,24 +29,24 @@ public interface IMapEntry {
 		 * the map includes this path and its children.
 		 */
 		INCLUDE(""),
-		
+
 		/**
 		 * Specifies this is an "exclude" mapping; this means that
 		 * the map excludes this path and its children.
 		 */
 		EXCLUDE("-"),
 
-        /**
-         * Specifies this is an "overlay" mapping; this means that
-         * the map overlays this path and its children.
-         */
-        OVERLAY("+"),
-		
-        /**
-         * Specifies this is an "ditto" mapping; this means that
-         * the map duplicates this path and its children.
-         */
-        DITTO("&");
+		/**
+		 * Specifies this is an "overlay" mapping; this means that
+		 * the map overlays this path and its children.
+		 */
+		OVERLAY("+"),
+
+		/**
+		 * Specifies this is an "ditto" mapping; this means that
+		 * the map duplicates this path and its children.
+		 */
+		DITTO("&");
 
 
 		private final String symbol;
@@ -64,18 +64,20 @@ public interface IMapEntry {
 		 * string, which is assumed to be a Perforce view map path string.
 		 * If str is null, or no such EntryType can be inferred,
 		 * returns null.
+		 * @param str str
+		 * @return EntryType
 		 */
 		public static EntryType fromString(String str) {
 			if (str == null) {
 				return null;
 			}
 
-			for(IMapEntry.EntryType type : IMapEntry.EntryType.values()) {
+			for (IMapEntry.EntryType type : IMapEntry.EntryType.values()) {
 				// skip over the INCLUDE type as there is no symbol to match
-				if(type.equals(INCLUDE)) {
+				if (type.equals(INCLUDE)) {
 					continue;
 				}
-				if(str.startsWith(type.getSymbol())) {
+				if (str.startsWith(type.getSymbol())) {
 					return type;
 				}
 			}
@@ -84,7 +86,7 @@ public interface IMapEntry {
 			return INCLUDE;
 		}
 
-		
+
 		/**
 		 * Return a more useful string than "EXCLUDE" or "OVERLAY", i.e.
 		 * return "-" or "+" respectively. Returns the empty string
@@ -93,13 +95,15 @@ public interface IMapEntry {
 		public String toString() {
 			return getSymbol();
 		}
-	};
-	
+	}
+
+	;
+
 	/**
 	 * Get the order of this entry in the entry list, if known. Returns
 	 * ORDER_UNKNOWN if the order is unknown or this entry is not currently
 	 * associated with a map.
-	 * 
+	 *
 	 * @return ORDER_UNKNOWN or current order.
 	 */
 	int getOrder();
@@ -108,131 +112,134 @@ public interface IMapEntry {
 	 * Set the order of this entry in the entry list. Note that this method
 	 * has no effect on the actual order within an entry whatsoever, and is
 	 * provided for symmetry and for implementation initialization reasons only.
-	 * 
+	 *
 	 * @param position new order
 	 */
 	void setOrder(int position);
-	
+
 	/**
 	 * Return the view map type of this entry.
-	 * 
+	 *
 	 * @return possibly-null EntryType
 	 */
-    EntryType getType();
-    
-    /**
-     * Set this entry's type.
-     * 
-     * @param type new entry type. May be null.
-     */
-    void setType(EntryType type);
-    
-    /**
-     * Get the "left" entry for this mapping; equivalent to
-     * getLeft(false).
-     * 
-     * @return possibly-null left mapping entry.
-     */
-    String getLeft();
-    
-    /**
-     * Get the "left" entry for this mapping. Will not include
-     * any prefixes. If quoteBlanks is true and the left string
-     * contains spaces or tabs the entire string is returned
-     * surrounded by quote characters.
-     * 
-     * @param quoteBlanks if true, and the left string
-     * 			contains spaces or tabs the entire string is returned
-     * 			surrounded by quote characters.
-     * @return possibly-null left mapping entry.
-     */
-    String getLeft(boolean quoteBlanks);
-    
-    /**
-     * Set the "left" entry for this mapping. Will strip off
-     * any exclude (etc.) prefix before assigning it.
-     * 
-     * @param left possibly-null new left mapping entry
-     */
-    void setLeft(String left);
-    
-    /**
-     * Get the "right" entry for this mapping; equivalent to
-     * getRight(false).
-     * 
-     * @return possibly-null right mapping entry.
-     */
-    String getRight();
-    
-    /**
-     * Get the "right" entry for this mapping. Will not include
-     * any prefixes. If quoteBlanks is true and the right string
-     * contains spaces or tabs the entire string is returned
-     * surrounded by quote characters.
-     * 
-     * @param quoteBlanks if true, and the right string
-     * 			contains spaces or tabs the entire string is returned
-     * 			surrounded by quote characters.
-     * @return possibly-null right mapping entry.
-     */
-    String getRight(boolean quoteBlanks);
-    
-    /**
-     * Set the "right" entry for this mapping. Will strip off
-     * any exclude (etc.) prefix before assigning it.
-     * 
-     * @param right possibly-null new right mapping entry
-     */
-    void setRight(String right);
+	EntryType getType();
+
+	/**
+	 * Set this entry's type.
+	 *
+	 * @param type new entry type. May be null.
+	 */
+	void setType(EntryType type);
+
+	/**
+	 * Get the "left" entry for this mapping; equivalent to
+	 * getLeft(false).
+	 *
+	 * @return possibly-null left mapping entry.
+	 */
+	String getLeft();
+
+	/**
+	 * Get the "left" entry for this mapping. Will not include
+	 * any prefixes. If quoteBlanks is true and the left string
+	 * contains spaces or tabs the entire string is returned
+	 * surrounded by quote characters.
+	 *
+	 * @param quoteBlanks if true, and the left string
+	 * 			contains spaces or tabs the entire string is returned
+	 * 			surrounded by quote characters.
+	 * @return possibly-null left mapping entry.
+	 */
+	String getLeft(boolean quoteBlanks);
+
+	/**
+	 * Set the "left" entry for this mapping. Will strip off
+	 * any exclude (etc.) prefix before assigning it.
+	 *
+	 * @param left possibly-null new left mapping entry
+	 */
+	void setLeft(String left);
+
+	/**
+	 * Get the "right" entry for this mapping; equivalent to
+	 * getRight(false).
+	 *
+	 * @return possibly-null right mapping entry.
+	 */
+	String getRight();
+
+	/**
+	 * Get the "right" entry for this mapping. Will not include
+	 * any prefixes. If quoteBlanks is true and the right string
+	 * contains spaces or tabs the entire string is returned
+	 * surrounded by quote characters.
+	 *
+	 * @param quoteBlanks if true, and the right string
+	 * 			contains spaces or tabs the entire string is returned
+	 * 			surrounded by quote characters.
+	 * @return possibly-null right mapping entry.
+	 */
+	String getRight(boolean quoteBlanks);
+
+	/**
+	 * Set the "right" entry for this mapping. Will strip off
+	 * any exclude (etc.) prefix before assigning it.
+	 *
+	 * @param right possibly-null new right mapping entry
+	 */
+	void setRight(String right);
 
 
-    /**
-     * Get the "comment" entry for this mapping; equivalent to
-     * getComment(false).
-     *
-     * @return possibly-null comment mapping entry.
-     */
-    String getComment();
+	/**
+	 * Get the "comment" entry for this mapping; equivalent to
+	 * getComment(false).
+	 *
+	 * @return possibly-null comment mapping entry.
+	 */
+	String getComment();
 
-    /**
-     * Get the "comment" entry for this mapping. Will not include
-     * any prefixes. If quoteBlanks is true and the comment string
-     * contains spaces or tabs the entire string is returned
-     * surrounded by quote characters.
-     *
-     * @param quoteBlanks if true, and the comment string
-     * 			contains spaces or tabs the entire string is returned
-     * 			surrounded by quote characters.
-     * @return possibly-null comment mapping entry.
-     */
-    String getComment(boolean quoteBlanks);
+	/**
+	 * Get the "comment" entry for this mapping. Will not include
+	 * any prefixes. If quoteBlanks is true and the comment string
+	 * contains spaces or tabs the entire string is returned
+	 * surrounded by quote characters.
+	 *
+	 * @param quoteBlanks if true, and the comment string
+	 * 			contains spaces or tabs the entire string is returned
+	 * 			surrounded by quote characters.
+	 * @return possibly-null comment mapping entry.
+	 */
+	String getComment(boolean quoteBlanks);
 
-    /**
-     * Set the "comment" entry for this mapping. Will strip off
-     * any exclude (etc.) prefix before assigning it.
-     *
-     * @param comment possibly-null new comment mapping entry
-     */
-    void setComment(String comment);
+	/**
+	 * Set the "comment" entry for this mapping. Will strip off
+	 * any exclude (etc.) prefix before assigning it.
+	 *
+	 * @param comment possibly-null new comment mapping entry
+	 */
+	void setComment(String comment);
 
-    /**
-     * Alias for toString(" ", false).
-     */
-    String toString();
-    
-    /**
-     * Return a canonical String representation of this entry. This
-     * is in the form [type prefix]leftpath[specstring]rightpath, e.g.
-     * "-//depot/dev/test/... //clientname/newpath/..."<p>
-     * 
-     * If the passed-in string is null, the left and right strings
-     * (if they exist) will be concatenated into one long separator-less
-     * string.<p>
-     * 
-     * If the quoteBlanks parameter is true, if either or both the left
-     * or right entries contain spaces, the entries are quoted in full, i.e.
-     * the mapping //depot/test/space test 01/... //depot/test/space test 02/...
-     * becomes "//depot/test/space test 01/..." "//depot/test/space test 02/...".
-     */
-    String toString(String sepString, boolean quoteBlanks);
+	/**
+	 * Alias for toString(" ", false).
+	 */
+	String toString();
+
+	/**
+	 * Return a canonical String representation of this entry. This
+	 * is in the form [type prefix]leftpath[specstring]rightpath, e.g.
+	 * "-//depot/dev/test/... //clientname/newpath/..."<p>
+	 *
+	 * If the passed-in string is null, the left and right strings
+	 * (if they exist) will be concatenated into one long separator-less
+	 * string.<p>
+	 *
+	 * If the quoteBlanks parameter is true, if either or both the left
+	 * or right entries contain spaces, the entries are quoted in full, i.e.
+	 * the mapping //depot/test/space test 01/... //depot/test/space test 02/...
+	 * becomes "//depot/test/space test 01/..." "//depot/test/space test 02/...".
+	 * @param sepString   separator string
+	 * @param quoteBlanks quotes if spaces are used
+	 * @return formatted string
+	 */
+	String toString(String sepString, boolean quoteBlanks);
 }

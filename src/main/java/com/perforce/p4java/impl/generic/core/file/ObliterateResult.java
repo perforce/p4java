@@ -3,12 +3,12 @@
  */
 package com.perforce.p4java.impl.generic.core.file;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.perforce.p4java.core.file.IFileSpec;
 import com.perforce.p4java.core.file.IObliterateResult;
 import com.perforce.p4java.exception.NullPointerError;
+
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The various record stats returned by the obliterateFiles method. Obliterate
@@ -29,11 +29,17 @@ public class ObliterateResult implements IObliterateResult {
 
 	/**
 	 * Explicit parameterized constructor
+	 *
+	 * @param fileSpecs             fileSpecs
+	 * @param integrationRecAdded   integrationRecAdded
+	 * @param labelRecDeleted       labelRecDeleted
+	 * @param clientRecDeleted      clientRecDeleted
+	 * @param integrationRecDeleted integrationRecDeleted
+	 * @param workingRecDeleted     workingRecDeleted
+	 * @param revisionRecDeleted    revisionRecDeleted
+	 * @param reportOnly            reportOnly
 	 */
-	public ObliterateResult(List<IFileSpec> fileSpecs, int integrationRecAdded,
-			int labelRecDeleted, int clientRecDeleted,
-			int integrationRecDeleted, int workingRecDeleted,
-			int revisionRecDeleted, boolean reportOnly) {
+	public ObliterateResult(List<IFileSpec> fileSpecs, int integrationRecAdded, int labelRecDeleted, int clientRecDeleted, int integrationRecDeleted, int workingRecDeleted, int revisionRecDeleted, boolean reportOnly) {
 
 		if (fileSpecs == null) {
 			throw new NullPointerError("null fileSpecs passed to ObliterateResult constructor");

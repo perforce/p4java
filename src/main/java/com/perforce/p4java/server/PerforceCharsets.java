@@ -14,20 +14,16 @@ import java.util.Set;
 /**
  * Encapsulates Perforce-wide charset information for servers.
  * <p>
- * <p>
  * Unfortunately, support for Unicode and associated charsets is somewhat
  * server- and installation-dependent, and not easy to divine unless you're
  * already talking to a Perforce server -- by which time it's too late. This
  * class is an attempt to make it easier to cut that Gordian knot...
  * <p>
- * <p>
  * Note that the names below are not actually the standard name for the charset
  * in some cases: e.g. UTF-8 should be "utf-8" not "utf8", but we follow the
  * Perforce server's rules here.
  * <p>
- * <p>
  * The following are special cases.
- * <p>
  * <pre>
  * "auto" (Guess a P4CHARSET based on client OS params)
  * "none" (same as unsetting P4CHARSET)
@@ -82,8 +78,8 @@ public class PerforceCharsets {
 	 */
 	/*
 	 * Conversions from p4 charsets to Java charsets take from from
-     * http://java.sun.com/j2se/1.5.0/docs/guide/intl/encoding.doc.html
-     */
+	 * http://java.sun.com/j2se/1.5.0/docs/guide/intl/encoding.doc.html
+	 */
 	private static final Map<String, String> p4ToJavaCharsets;
 
 	static {
@@ -171,6 +167,7 @@ public class PerforceCharsets {
 	 * charset name. Multiple Perforce charsets can be mapped to a Java charset
 	 * (i.e. Perforce "utf8-bom" and "utf8unchecked" are mapped to Java "UTF-8")
 	 *
+	 * @param javaCharsetName charset
 	 * @return - Perforce charset name
 	 */
 	public static String getP4CharsetName(String javaCharsetName) {
@@ -191,6 +188,7 @@ public class PerforceCharsets {
 	/**
 	 * Get the matching Java charset for a given P4 charset name.
 	 *
+	 * @param p4CharsetName charset
 	 * @return - Java charset
 	 */
 	public static Charset getP4Charset(String p4CharsetName) {
@@ -208,6 +206,7 @@ public class PerforceCharsets {
 	/**
 	 * Get Java equivalent charset name for a p4 charset name
 	 *
+	 * @param p4CharsetName charset
 	 * @return - Java charset name
 	 */
 	public static String getJavaCharsetName(String p4CharsetName) {
@@ -218,6 +217,10 @@ public class PerforceCharsets {
 		return javaCharsetName;
 	}
 
+	/**
+	 * @param p4CharsetName charset
+	 * @return true, if client charset has BOM
+	 */
 	public static boolean hasClientBOM(String p4CharsetName) {
 		if (p4CharsetName != null && !p4CharsetName.isEmpty()) {
 			return p4ToClientBOM.containsKey(p4CharsetName);
@@ -228,6 +231,7 @@ public class PerforceCharsets {
 	/**
 	 * Is the P4 charset name specified supported?
 	 *
+	 * @param p4CharsetName charset
 	 * @return - true if supported, false otherwise
 	 */
 	public static boolean isSupported(String p4CharsetName) {

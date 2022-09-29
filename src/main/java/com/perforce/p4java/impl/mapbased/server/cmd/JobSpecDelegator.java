@@ -31,18 +31,12 @@ public class JobSpecDelegator extends BaseDelegator implements IJobSpecDelegator
     /* (non-Javadoc)
      * @see com.perforce.p4java.server.delegator.IJobSpecDelegator#getJobSpec()
      */
-    @SuppressWarnings("unchecked")
     @Override
     public IJobSpec getJobSpec() throws ConnectionException, RequestException, AccessException {
         List<Map<String, Object>> resultMaps = execMapCmdList(JOBSPEC, new String[] { "-o" }, null);
         return ResultListBuilder.buildNullableObjectFromNonInfoMessageCommandResultMaps(
                 resultMaps,
-                new Function<Map, IJobSpec>() {
-                    @Override
-                    public IJobSpec apply(Map map) {
-                        return new JobSpec(map, server);
-                    }
-                }
-        );
+				(Function<Map<String, Object>, IJobSpec>) map -> new JobSpec(map, server)
+		);
     }
 }

@@ -136,7 +136,6 @@ public class ExtendedFileSpec extends FileSpec implements IExtendedFileSpec {
 	 * annotations, at least), try to construct a corresponding extended file
 	 * spec.
 	 * <p>
-	 * <p>
 	 * See the corresponding FileSpec constructor for details -- this
 	 * constructor does not add any ExtendedFileSpec-specific semantics.
 	 *

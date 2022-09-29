@@ -74,13 +74,8 @@ public class BranchDelegator extends BaseDelegator implements IBranchDelegator {
 
         return ResultListBuilder.buildNullableObjectFromNonInfoMessageCommandResultMaps(
                 resultMaps,
-                new Function<Map, IBranchSpec>() {
-                    @Override
-                    public IBranchSpec apply(Map map) {
-                        return new BranchSpec(map, server);
-                    }
-                }
-        );
+				(Function<Map<String, Object>, IBranchSpec>) map -> new BranchSpec(map, server)
+		);
     }
 
     @Override
@@ -100,6 +95,7 @@ public class BranchDelegator extends BaseDelegator implements IBranchDelegator {
         }
     }
 
+	@Deprecated
     @Override
     public String deleteBranchSpec(final String branchSpecName, final boolean force)
             throws ConnectionException, RequestException, AccessException {

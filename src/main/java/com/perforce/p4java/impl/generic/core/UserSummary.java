@@ -1,15 +1,15 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.impl.generic.core;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
 
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.IUserSummary;
 import com.perforce.p4java.impl.mapbased.MapKeys;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * Default implementation class for IUserSummary interface.
@@ -25,34 +25,43 @@ public class UserSummary extends ServerResource implements IUserSummary {
 	protected UserType type = null;
 	protected Date ticketExpiration = null;
 	protected Date passwordChange = null;
-	
+
 	static final String DATE_FORMAT = "yyyy/MM/dd HH:mm:ss";
-	
+
 	/**
 	 * Default constructor; sets all fields to null or zero.
 	 */
 	public UserSummary() {
 	}
-	
+
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param loginName loginName
+	 * @param email     email
+	 * @param fullName  fullName
+	 * @param access    access
+	 * @param update    update
 	 */
-	
-	public UserSummary(String loginName, String email, String fullName,
-			Date access, Date update) {
+	public UserSummary(String loginName, String email, String fullName, Date access, Date update) {
 		this.loginName = loginName;
 		this.email = email;
 		this.fullName = fullName;
 		this.access = access;
 		this.update = update;
 	}
-	
+
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param loginName loginName
+	 * @param email     email
+	 * @param fullName  fullName
+	 * @param access    access
+	 * @param update    update
+	 * @param type      type
 	 */
-	
-	public UserSummary(String loginName, String email, String fullName,
-			Date access, Date update, UserType type) {
+	public UserSummary(String loginName, String email, String fullName, Date access, Date update, UserType type) {
 		this.loginName = loginName;
 		this.email = email;
 		this.fullName = fullName;
@@ -65,15 +74,18 @@ public class UserSummary extends ServerResource implements IUserSummary {
 	 * Construct a UserSummary from the passed-in map and summaryOnly values.
 	 * The map must have been returned from the Perforce server in response
 	 * to a getUsers() or getUser (etc.) call; is summaryOnly is true, this
-	 * is treated as a map that came from the getUseres method.<p>
-	 * 
+	 * is treated as a map that came from the getUseres method.
+	 * <p>
 	 * If map is null, this is equivalent to calling the default constructor.
+	 *
+	 * @param map         spec map
+	 * @param summaryOnly if true
 	 */
 	public UserSummary(Map<String, Object> map, boolean summaryOnly) {
 		super(!summaryOnly, !summaryOnly);
-		
+
 		if (map != null) {
-			try{
+			try {
 				this.loginName = (String) map.get("User");
 				this.email = (String) map.get("Email");
 				this.fullName = (String) map.get("FullName");
@@ -81,36 +93,28 @@ public class UserSummary extends ServerResource implements IUserSummary {
 					this.type = UserType.fromString(((String) map.get(MapKeys.TYPE_KEY)).toUpperCase());
 				}
 				if (summaryOnly) {
-					this.update = new Date(Long.parseLong((String) map
-							.get(MapKeys.UPDATE_KEY)) * 1000);
-					this.access = new Date(Long.parseLong((String) map
-							.get(MapKeys.ACCESS_KEY)) * 1000);
+					this.update = new Date(Long.parseLong((String) map.get(MapKeys.UPDATE_KEY)) * 1000);
+					this.access = new Date(Long.parseLong((String) map.get(MapKeys.ACCESS_KEY)) * 1000);
 					if (map.get(MapKeys.TICKET_EXPIRATION) != null) {
-						this.ticketExpiration = new Date(Long.parseLong((String) map
-							.get(MapKeys.TICKET_EXPIRATION)) * 1000);
+						this.ticketExpiration = new Date(Long.parseLong((String) map.get(MapKeys.TICKET_EXPIRATION)) * 1000);
 					}
 					if (map.get(MapKeys.PASSWORD_CHANGE_KEY) != null) {
-						this.passwordChange = new Date(Long.parseLong((String) map
-							.get(MapKeys.PASSWORD_CHANGE_KEY)) * 1000);
+						this.passwordChange = new Date(Long.parseLong((String) map.get(MapKeys.PASSWORD_CHANGE_KEY)) * 1000);
 					}
 				} else {
 					SimpleDateFormat simpleDateFormat = new SimpleDateFormat(DATE_FORMAT);
 					if (map.containsKey(MapKeys.UPDATE_KEY)) {
-						this.update = simpleDateFormat
-								.parse((String) map.get(MapKeys.UPDATE_KEY));
+						this.update = simpleDateFormat.parse((String) map.get(MapKeys.UPDATE_KEY));
 					}
 					if (map.containsKey(MapKeys.ACCESS_KEY)) {
-						this.access = simpleDateFormat
-								.parse((String) map.get(MapKeys.ACCESS_KEY));
+						this.access = simpleDateFormat.parse((String) map.get(MapKeys.ACCESS_KEY));
 					}
 					if (map.get(MapKeys.PASSWORD_CHANGE_LC_KEY) != null) {
-						this.passwordChange = simpleDateFormat
-								.parse((String) map.get(MapKeys.PASSWORD_CHANGE_LC_KEY));
+						this.passwordChange = simpleDateFormat.parse((String) map.get(MapKeys.PASSWORD_CHANGE_LC_KEY));
 					}
 				}
 			} catch (Throwable thr) {
-				Log.error("Unexpected exception in UserSummary constructor: "
-						+ thr.getLocalizedMessage());
+				Log.error("Unexpected exception in UserSummary constructor: " + thr.getLocalizedMessage());
 				Log.exception(thr);
 			}
 		}

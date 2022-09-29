@@ -3,7 +3,6 @@ package com.perforce.p4java.server;
 /**
  * Object representing the three parts of a Perforce ticket, the server address,
  * the user name, and the ticket token value.
- * 
  */
 public class AuthTicket {
 
@@ -21,10 +20,10 @@ public class AuthTicket {
 	/**
 	 * Create a ticket with the specified server address, user name, and ticket
 	 * value.
-	 * 
-	 * @param serverAddress
-	 * @param userName
-	 * @param ticketValue
+	 *
+	 * @param serverAddress serverAddress
+	 * @param userName      userName
+	 * @param ticketValue   ticketValue
 	 */
 	public AuthTicket(String serverAddress, String userName, String ticketValue) {
 		this.serverAddress = serverAddress;
@@ -40,8 +39,7 @@ public class AuthTicket {
 	}
 
 	/**
-	 * @param serverAddress
-	 *            the serverAddress to set
+	 * @param serverAddress the serverAddress to set
 	 */
 	public void setServerAddress(String serverAddress) {
 		this.serverAddress = serverAddress;
@@ -55,8 +53,7 @@ public class AuthTicket {
 	}
 
 	/**
-	 * @param userName
-	 *            the userName to set
+	 * @param userName the userName to set
 	 */
 	public void setUserName(String userName) {
 		this.userName = userName;
@@ -70,8 +67,7 @@ public class AuthTicket {
 	}
 
 	/**
-	 * @param ticketValue
-	 *            the ticketValue to set
+	 * @param ticketValue the ticketValue to set
 	 */
 	public void setTicketValue(String ticketValue) {
 		this.ticketValue = ticketValue;
@@ -101,8 +97,7 @@ public class AuthTicket {
 	 * @see java.lang.Object#toString()
 	 */
 	public String toString() {
-		return this.serverAddress + "=" + this.userName + ":"
-				+ this.getTicketValue();
+		return this.serverAddress + "=" + this.userName + ":" + this.getTicketValue();
 	}
 
 }

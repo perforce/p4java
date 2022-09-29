@@ -13,11 +13,11 @@ import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 
 /**
- * Defines the various Perforce RPC function names.<p>
+ * Defines the various Perforce RPC function names.
  * <p>
  * If you add or change something here, make sure you also
  * change the corresponding definitions elsewhere in places
- * like the RpcFunction class.<p>
+ * like the RpcFunction class.
  */
 
 public enum RpcFunctionSpec {
@@ -85,7 +85,7 @@ public enum RpcFunctionSpec {
 	USER_TRANSMIT,
 	USER_LIST,
 	USER_RETYPE,
-    USER_LICENSE,
+	USER_LICENSE,
 	USER_STREAMLOG,
 	USER_TOPOLOGY,
 
@@ -121,7 +121,7 @@ public enum RpcFunctionSpec {
 	USER_GROUP,
 	USER_GROUPS,
 	USER_HAVE,
-    USER_HEARTBEAT,
+	USER_HEARTBEAT,
 	USER_HELP,
 	USER_INFO,
 	USER_INTEGRATE,
@@ -154,7 +154,7 @@ public enum RpcFunctionSpec {
 	USER_SET,
 	USER_STREAM,
 	USER_STREAMS,
-    USER_STREAMSPEC,
+	USER_STREAMSPEC,
 	USER_STORAGE,
 	USER_SUBMIT,
 	USER_SWITCH,
@@ -251,11 +251,15 @@ public enum RpcFunctionSpec {
 	SERVER_DM_RESOLVEDFILE,
 	SERVER_DM_RESOLVEDFAILED,
 	SERVER_RECONCILEFILE,
-	SERVER_RECONCILEADDS,;
+	SERVER_RECONCILEADDS,
+	;
 
 	/**
 	 * Decode a RpcFunctionSpec from the passed-in string, assumed to be
 	 * in RPC wire form.
+	 *
+	 * @param str string
+	 * @return RpcFunctionSpec
 	 */
 	public static RpcFunctionSpec decode(String str) {
 		if (str == null) {
@@ -268,6 +272,10 @@ public enum RpcFunctionSpec {
 	/**
 	 * A version of decode that handles the specialised case of
 	 * relaxed checking for USER commands (and user commands *only*).
+	 *
+	 * @param str          string
+	 * @param relaxedCheck relaxed check option
+	 * @return RpcFunctionSpec
 	 */
 	public static RpcFunctionSpec decode(String str, boolean relaxedCheck) {
 		if (str == null) {
@@ -291,6 +299,10 @@ public enum RpcFunctionSpec {
 	 * levels of P4Java as an end-user command, e.g. decode "depots" to
 	 * USER_DEPOTS. This is subtly different to decoding it from the wire;
 	 * also, it's only applicable for user commands.
+	 *
+	 * @param str          string
+	 * @param relaxedCheck relaxed check option
+	 * @return RpcFunctionSpec
 	 */
 	public static RpcFunctionSpec decodeFromEndUserCmd(String str, boolean relaxedCheck) {
 		if (str == null) {

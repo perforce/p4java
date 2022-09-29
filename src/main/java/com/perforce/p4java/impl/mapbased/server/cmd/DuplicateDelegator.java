@@ -48,14 +48,9 @@ public class DuplicateDelegator extends BaseDelegator implements IDuplicateDeleg
         return buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
                 rethrowFunction(
-                        new FunctionWithException<Map, IFileSpec>() {
-                            @Override
-                            public IFileSpec apply(Map map) throws P4JavaException {
-                                return ResultListBuilder.handleIntegrationFileReturn(
-                                        map,
-                                        server);
-                            }
-                        }
-                ));
+						map -> ResultListBuilder.handleIntegrationFileReturn(
+								map,
+								server)
+				));
     }
 }

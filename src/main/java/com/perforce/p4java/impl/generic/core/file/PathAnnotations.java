@@ -1,17 +1,17 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.impl.generic.core.file;
+
+import com.perforce.p4java.Log;
+import com.perforce.p4java.core.IChangelist;
+import com.perforce.p4java.core.file.IFileSpec;
 
 import java.text.FieldPosition;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import com.perforce.p4java.Log;
-import com.perforce.p4java.core.IChangelist;
-import com.perforce.p4java.core.file.IFileSpec;
 
 /**
  * Conveniently bundles up possible Perforce path-based metadata
@@ -22,72 +22,57 @@ import com.perforce.p4java.core.file.IFileSpec;
  */
 
 public class PathAnnotations {
-	
+
 	/**
 	 * The string used to start Perforce file revision metadata annotations.
 	 */
 	public static final String REV_PFX = "#";
-	
+
 	/**
 	 * The string used to separate Perforce file revision metadata annotations.
 	 */
 	public static final String REV_SEP = ",#";
-	
+
 	/**
 	 * The string used to start Perforce file label / changelist / date metadata
 	 * annotations.
 	 */
 	public static final String NONREV_PFX = "@"; // non-revision prefix, i.e.
-												 // label, date and changelist prefix...
+	// label, date and changelist prefix...
 
 	protected int startRevision = IFileSpec.NO_FILE_REVISION;
 	protected int endRevision = IFileSpec.NO_FILE_REVISION;
 	protected Date date = null;
 	protected int changelistId = IChangelist.UNKNOWN;
 	protected String label = null;
-	
+
 	/**
 	 * Describes what to search for to see if any Perforce revision annotation metadata
 	 * is in the path string.
 	 */
-	private static Pattern revMetadata = Pattern.compile(
-										 "((#)(\\d+)$)"
-										+ "|(#none$)"
-										+ "|(#head$)"
-										+ "|(#have$)"
-										+ "|(#have,#head$)"
-										+ "|((#)(\\d+),#(\\d+)$)"
-										+ "|((#)(\\d+),#head$)"
-										+ "|((#)(\\d+),#have$)"
-										+ "|(#)have,(\\d+)$"
-									);
-	
+	private static Pattern revMetadata = Pattern.compile("((#)(\\d+)$)" + "|(#none$)" + "|(#head$)" + "|(#have$)" + "|(#have,#head$)" + "|((#)(\\d+),#(\\d+)$)" + "|((#)(\\d+),#head$)" + "|((#)(\\d+),#have$)" + "|(#)have,(\\d+)$");
+
 	/**
 	 * Describes what to search for to see if any Perforce non-revision annotation metadata
 	 * is in the path string.
 	 */
-	private static Pattern nonRevMetadata = Pattern.compile(
-										"((@)(\\d+)$)"
-										+ "|((@)(\\d+\\/\\d+\\/\\d+)$)"
-										+ "|((@)(\\d+\\/\\d+\\/\\d+:\\d+:\\d+:\\d+)$)"
-										+ "|((@)([^@,%#]+)$)"
-									);
-	
-	private static Pattern revNumNum = Pattern.compile("(#)(\\d+),#(\\d+)$");		// #2,#3
-	private static Pattern revNumHead = Pattern.compile("(#)(\\d+),#head$");	// #3,#head
-	private static Pattern revNumHave = Pattern.compile("(#)(\\d+),#have$");	// #3,#have
-	private static Pattern revHaveNum = Pattern.compile("#have,#(\\d+)$");	// #have,#3
-	private static Pattern revNum = Pattern.compile("(#)(\\d+)$");				// #3
-	private static Pattern revNone = Pattern.compile("#none$");	// #none
-	private static Pattern revHead = Pattern.compile("#head$");	// #head
-	private static Pattern revHave = Pattern.compile("#have$");	// #have
-	private static Pattern revHaveHead = Pattern.compile("#have,#head$");	// #have,#head
-	
-	private static Pattern nonrevChange = Pattern.compile("(@)(\\d+)$");	// @12345
-	private static Pattern nonrevDateShort = Pattern.compile("(@)(\\d+\\/\\d+\\/\\d+)$");	// @yyyy/MM/dd
+	private static Pattern nonRevMetadata = Pattern.compile("((@)(\\d+)$)" + "|((@)(\\d+\\/\\d+\\/\\d+)$)" + "|((@)(\\d+\\/\\d+\\/\\d+:\\d+:\\d+:\\d+)$)" + "|((@)([^@,%#]+)$)");
+
+	private static Pattern revNumNum = Pattern.compile("(#)(\\d+),#(\\d+)$");        // #2,#3
+	private static Pattern revNumHead = Pattern.compile("(#)(\\d+),#head$");    // #3,#head
+	private static Pattern revNumHave = Pattern.compile("(#)(\\d+),#have$");    // #3,#have
+	private static Pattern revHaveNum = Pattern.compile("#have,#(\\d+)$");    // #have,#3
+	private static Pattern revNum = Pattern.compile("(#)(\\d+)$");                // #3
+	private static Pattern revNone = Pattern.compile("#none$");    // #none
+	private static Pattern revHead = Pattern.compile("#head$");    // #head
+	private static Pattern revHave = Pattern.compile("#have$");    // #have
+	private static Pattern revHaveHead = Pattern.compile("#have,#head$");    // #have,#head
+
+	private static Pattern nonrevChange = Pattern.compile("(@)(\\d+)$");    // @12345
+	private static Pattern nonrevDateShort = Pattern.compile("(@)(\\d+\\/\\d+\\/\\d+)$");    // @yyyy/MM/dd
 	private static Pattern nonrevDateFull = Pattern.compile("(@)(\\d+\\/\\d+\\/\\d+:\\d+:\\d+:\\d+)$"); // @yyyy/MM/dd:HH:mm:ss
-	private static Pattern nonrevLabel = Pattern.compile("(@)([^@,%#]+)$");	// @labelname
-	
+	private static Pattern nonrevLabel = Pattern.compile("(@)([^@,%#]+)$");    // @labelname
+
 	/**
 	 * Construct a PathAnnotations object with default field values:<br>
 	 * startRev, endRev = IFileSpec.NO_FILE_REVISION;<br>
@@ -99,22 +84,27 @@ public class PathAnnotations {
 
 	/**
 	 * Construct a PathAnnotations object from explicit candidate field values.
+	 *
+	 * @param startRevision startRevision
+	 * @param endRevision   endRevision
+	 * @param date          date
+	 * @param changelistId  changelistId
+	 * @param label         label
 	 */
-	
-	public PathAnnotations(int startRevision, int endRevision, Date date,
-			int changelistId, String label) {
+	public PathAnnotations(int startRevision, int endRevision, Date date, int changelistId, String label) {
 		this.startRevision = startRevision;
 		this.endRevision = endRevision;
 		this.date = date;
 		this.changelistId = changelistId;
 		this.label = label;
 	}
-	
+
 	/**
 	 * Construct a PathAnnotations object for a specific file spec. If fileSpec
 	 * is null, this is equivalent to calling the default constructor.
+	 *
+	 * @param fileSpec fileSpec
 	 */
-	
 	public PathAnnotations(IFileSpec fileSpec) {
 		if (fileSpec != null) {
 			this.startRevision = fileSpec.getStartRevision();
@@ -124,13 +114,15 @@ public class PathAnnotations {
 			this.label = fileSpec.getLabel();
 		}
 	}
-	
+
 	/**
 	 * Construct a PathAnnotations object from the passed-in string,
 	 * which is assumed to contain a path string with optional
 	 * Perforce annotations. If pathStr is null, or contains no
 	 * parseable annotations, this is equivalent to calling the
 	 * default constructor.
+	 *
+	 * @param pathStr pathStr
 	 */
 	public PathAnnotations(String pathStr) {
 		if (pathStr != null) {
@@ -141,12 +133,15 @@ public class PathAnnotations {
 			}
 		}
 	}
-	
+
 	/**
 	 * Strip any Perforce file metadata annotations from the passed-in string.
 	 * Returns the string as-is if there were no annotations or if the string
 	 * was null. Will return the empty (not null) string if there was no actual
 	 * path part of the string and pathStr wasn't null.
+	 *
+	 * @param pathStr pathStr
+	 * @return stripped path
 	 */
 	public static String stripAnnotations(String pathStr) {
 		if (pathStr != null) {
@@ -157,27 +152,33 @@ public class PathAnnotations {
 				return pathStr.substring(0, i);
 			}
 		}
-		
+
 		return pathStr;
 	}
-	
+
 	/**
 	 * Get all Perforce metadata annotations from the passed-in string. If
 	 * there are no annotations, or the passed-in pathStr argument is null,
 	 * returns null.
+	 *
+	 * @param pathStr pathStr
+	 * @return path annotations
 	 */
 	public static PathAnnotations getAnnotations(String pathStr) {
 		if ((pathStr != null) && (PathAnnotations.hasPerforceAnnotations(pathStr))) {
 			return new PathAnnotations(pathStr);
 		}
-		
+
 		return null;
 	}
-	
+
 	/**
 	 * Return non-negative index of first non-revision Perforce annotations match in the
 	 * string if the passed-in string is not null has Perforce
 	 * revision annotations appended to it. Otherwise returns -1.
+	 *
+	 * @param pathStr pathStr
+	 * @return index
 	 */
 	public static int hasRevisionAnnotations(String pathStr) {
 		if (pathStr != null) {
@@ -188,14 +189,17 @@ public class PathAnnotations {
 				}
 			}
 		}
-		
+
 		return -1;
 	}
-	
+
 	/**
 	 * Return non-negative index of first non-revision Perforce annotations match in the
 	 * string if the passed-in string is not null and has label, changelist, date,
 	 * etc., specs appended. Otherwise returns -1.
+	 *
+	 * @param pathStr pathStr
+	 * @return index
 	 */
 	public static int hasNonRevisionAnnotations(String pathStr) {
 		if (pathStr != null) {
@@ -206,25 +210,31 @@ public class PathAnnotations {
 				}
 			}
 		}
-		
+
 		return -1;
 	}
-	
+
 	/**
 	 * Return true if the passed-in path is not null and has Perforce file
 	 * metadata appended to it.
+	 *
+	 * @param pathStr pathStr
+	 * @return has matadata
 	 */
 	public static boolean hasPerforceAnnotations(String pathStr) {
-		return (hasRevisionAnnotations(pathStr) >= 0)
-							|| (hasNonRevisionAnnotations(pathStr) >= 0);
+		return (hasRevisionAnnotations(pathStr) >= 0) || (hasNonRevisionAnnotations(pathStr) >= 0);
 	}
-	
+
 	/**
 	 * Extract any start / end revision info from the passed-in pathStr and put it into
 	 * the passed-in pathAnnotations object. Returns true if it found any parseable
-	 * revision information, false otherwise.<p>
-	 * 
+	 * revision information, false otherwise.
+	 * <p>
 	 * If either or both pathStr and pathAnnotations is null, returns false.
+	 *
+	 * @param pathStr         pathStr
+	 * @param pathAnnotations pathAnnotations
+	 * @return true if parseable revision data
 	 */
 	public static boolean extractRevisionData(String pathStr, PathAnnotations pathAnnotations) {
 		/*
@@ -236,79 +246,79 @@ public class PathAnnotations {
 		 * #have
 		 * #have,#head (is this legal?)
 		 */
-		
+
 		try {
 			// Note: match order is significant below; don't change it unless
 			// you're sure you know what you're doing...
-	
+
 			if ((pathStr != null) && (pathAnnotations != null)) {
-	
+
 				Matcher mat = revNumNum.matcher(pathStr);
-				
+
 				if (mat.find()) {
 					pathAnnotations.startRevision = new Integer(mat.group(2));
 					pathAnnotations.endRevision = new Integer(mat.group(3));
 					return true;
 				}
-				
+
 				mat = revNumHead.matcher(pathStr);
-					
+
 				if (mat.find()) {
 					pathAnnotations.startRevision = new Integer(mat.group(2));
 					pathAnnotations.endRevision = IFileSpec.HEAD_REVISION;
 					return true;
 				}
-				
+
 				mat = revNumHave.matcher(pathStr);
-				
+
 				if (mat.find()) {
 					pathAnnotations.startRevision = new Integer(mat.group(2));
 					pathAnnotations.endRevision = IFileSpec.HAVE_REVISION;
 					return true;
 				}
-				
+
 				mat = revHaveNum.matcher(pathStr);
-				
+
 				if (mat.find()) {
 					pathAnnotations.startRevision = IFileSpec.HAVE_REVISION;
 					pathAnnotations.endRevision = new Integer(mat.group(1));
 					return true;
 				}
-				
+
 				mat = revHaveHead.matcher(pathStr);
-				
+
 				if (mat.find()) {
 					pathAnnotations.startRevision = IFileSpec.HAVE_REVISION;
 					pathAnnotations.endRevision = IFileSpec.HEAD_REVISION;
 					return true;
 				}
-				
+
 				mat = revNum.matcher(pathStr);
-	
+
 				if (mat.find()) {
 					pathAnnotations.startRevision = IFileSpec.NO_FILE_REVISION;
 					pathAnnotations.endRevision = new Integer(mat.group(2));
 					return true;
 				}
-				
+
 				mat = revHead.matcher(pathStr);
-	
+
 				if (mat.find()) {
 					pathAnnotations.startRevision = IFileSpec.NO_FILE_REVISION;
 					pathAnnotations.endRevision = IFileSpec.HEAD_REVISION;
 					return true;
 				}
-				
+
 				mat = revHave.matcher(pathStr);
-	
+
 				if (mat.find()) {
 					pathAnnotations.startRevision = IFileSpec.NO_FILE_REVISION;
 					pathAnnotations.endRevision = IFileSpec.HAVE_REVISION;
 					return true;
 				}
-				
+
 				mat = revNone.matcher(pathStr);
-	
+
 				if (mat.find()) {
 					pathAnnotations.startRevision = IFileSpec.NO_FILE_REVISION;
 					pathAnnotations.endRevision = IFileSpec.NONE_REVISION;
@@ -316,84 +326,83 @@ public class PathAnnotations {
 				}
 			}
 		} catch (Throwable thr) {
-			Log.error("Unexpected exception in PathAnnotations.extractRevisionData; "
-									+ "pathStr: " + pathStr + "; message: "
-									+ thr.getLocalizedMessage());
+			Log.error("Unexpected exception in PathAnnotations.extractRevisionData; " + "pathStr: " + pathStr + "; message: " + thr.getLocalizedMessage());
 			Log.exception(thr);
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Extract any non-revision info from the passed-in pathStr and put it into
 	 * the passed-in pathAnnotations object. Returns true if it found any parseable
-	 * label / changelist / date (etc.) information, false otherwise.<p>
-	 * 
+	 * label / changelist / date (etc.) information, false otherwise.
+	 * <p>
 	 * Note that the candidate string "@2009/09/12" is ambiguous -- it could be
 	 * either a date or a label by a generous reading of the Perforce specs -- but
 	 * we take the "if it looks like a duck..." approach here and parse it as a date
 	 * if at all possible. Similarly for the string "@12345" which could be a changelist
-	 * ID or a label ID -- we parse it as a changelist ID if at all possible.<p>
-	 * 
+	 * ID or a label ID -- we parse it as a changelist ID if at all possible.
+	 * <p>
 	 * If either or both pathStr and pathAnnotations is null, returns false.
+	 *
+	 * @param pathStr         pathStr
+	 * @param pathAnnotations pathAnnotations
+	 * @return false if null
 	 */
 	public static boolean extractNonRevisionData(String pathStr, PathAnnotations pathAnnotations) {
 		//				@date:			@2009/08/15
 		//				@changelistid:	@34567
 		//				@label:			@Label10A
-		
+
 		// NOTE: the order of matching below is critical; don't change it unless
 		// you know what you're doing and why you're doing it...
-		
+
 		if ((pathStr != null) && (pathAnnotations != null)) {
 			try {
 				Matcher mat = nonrevChange.matcher(pathStr);
-				
+
 				if (mat.find()) {
 					pathAnnotations.changelistId = new Integer(mat.group(2));
 					return true;
 				}
-				
+
 				mat = nonrevDateShort.matcher(pathStr);
-				
+
 				if (mat.find()) {
 					pathAnnotations.date = new SimpleDateFormat("yyyy/MM/dd").parse(mat.group(2));// HH:mm:ss					
 					return true;
 				}
-				
+
 				mat = nonrevDateFull.matcher(pathStr);
-				
+
 				if (mat.find()) {
 					pathAnnotations.date = new SimpleDateFormat("yyyy/MM/dd:HH:mm:ss").parse(mat.group(2));// HH:mm:ss					
 					return true;
 				}
-				
+
 				mat = nonrevLabel.matcher(pathStr);
-				
+
 				if (mat.find()) {
 					pathAnnotations.label = mat.group(2);
 					return true;
 				}
 			} catch (Exception exc) {
-				Log.error("Unexpected parse exception in PathAnnotations.extractNonRevData: "
-						+ exc.getLocalizedMessage());
+				Log.error("Unexpected parse exception in PathAnnotations.extractNonRevData: " + exc.getLocalizedMessage());
 				Log.exception(exc);
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Return a Perforce-standard string representation of this
 	 * annotation. Will return an empty (not null) string if there's
 	 * nothing to represent.
 	 */
-	
 	public String toString() {
-		if ((startRevision != IFileSpec.NO_FILE_REVISION)
-					&& (endRevision != IFileSpec.NO_FILE_REVISION)) {
+		if ((startRevision != IFileSpec.NO_FILE_REVISION) && (endRevision != IFileSpec.NO_FILE_REVISION)) {
 			return REV_PFX + revString(startRevision) + REV_SEP + revString(endRevision);
 		} else if (endRevision != IFileSpec.NO_FILE_REVISION) {
 			return REV_PFX + revString(endRevision);
@@ -404,12 +413,12 @@ public class PathAnnotations {
 		} else if (getDate() != null) {
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd:HH:mm:ss");
 			StringBuffer sBuf = new StringBuffer();
-				
+
 			sdf.format(getDate(), sBuf, new FieldPosition(0));
-			
+
 			return NONREV_PFX + sBuf.toString();
 		}
-		
+
 		return "";
 	}
 
@@ -452,22 +461,23 @@ public class PathAnnotations {
 	public void setLabel(String label) {
 		this.label = label;
 	}
-	
+
 	private static String revString(int revision) {
 		switch (revision) {
 			case IFileSpec.NO_FILE_REVISION:
 				return IFileSpec.NO_REVISION_STRING;
-				
+
 			case IFileSpec.NONE_REVISION:
 				return IFileSpec.NONE_REVISION_STRING;
-				
+
 			case IFileSpec.HAVE_REVISION:
 				return IFileSpec.HAVE_REVISION_STRING;
-				
+
 			case IFileSpec.HEAD_REVISION:
 				return IFileSpec.HEAD_REVISION_STRING;
-				
-			default: return "" + revision;
+
+			default:
+				return "" + revision;
 		}
 	}
 }

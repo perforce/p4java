@@ -1,25 +1,25 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.impl.generic.core;
-
-import java.util.Date;
-import java.util.Map;
 
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.ILabelSummary;
 import com.perforce.p4java.impl.mapbased.MapKeys;
 
+import java.util.Date;
+import java.util.Map;
+
 /**
  * Default implementation of the ILabelSumamry interface.
  */
 public class LabelSummary extends ServerResource implements ILabelSummary {
-	
+
 	protected static final String LOCKED_VALUE = "locked";
 	protected static final String UNLOCKED_VALUE = "unlocked";
 	protected static final String AUTORELOAD_VALUE = "autoreload";
 	protected static final String NOAUTORELOAD_VALUE = "noautoreload";
-	
+
 	protected String name = null;
 	protected String ownerName = null;
 	protected Date lastAccess = null;
@@ -29,33 +29,35 @@ public class LabelSummary extends ServerResource implements ILabelSummary {
 	protected boolean locked = false;
 	protected boolean unloaded = false;
 	protected boolean autoreload = false;
-	
+
 	/**
 	 * Default constructor -- set all fields to null or false.
 	 */
 	public LabelSummary() {
 		super(false, false);
 	}
-	
-	
+
+
 	/**
 	 * Construct an empty LabelSummary and appropriately initialize
 	 * the ServerResource superclass fields according to whether this
 	 * summary a summary only or part of the full Label class.
+	 * @param summaryOnly summary only
 	 */
 	public LabelSummary(boolean summaryOnly) {
 		super(!summaryOnly, !summaryOnly);
 	}
-	
+
 	/**
 	 * Construct a LabelSummary from a map returned from the Perforce server's
 	 * getLabelSummaryList.<p>
-	 * 
+	 *
 	 * If the map is null, this is equivalent to calling the default constructor.
+	 * @param map spec map
 	 */
 	public LabelSummary(Map<String, Object> map) {
 		super(false, false);
-		
+
 		if (map != null) {
 			try {
 				this.name = (String) map.get(MapKeys.LABEL_LC_KEY);
@@ -93,7 +95,7 @@ public class LabelSummary extends ServerResource implements ILabelSummary {
 				}
 			} catch (Throwable thr) {
 				Log.error("Unexpected exception in LabelSummary constructor: "
-								+ thr.getLocalizedMessage());
+						+ thr.getLocalizedMessage());
 				Log.exception(thr);
 			}
 		}

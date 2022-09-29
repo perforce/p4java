@@ -26,6 +26,7 @@ public class TriggersTable implements ITriggersTable {
 
 	/**
 	 * Explicit-value constructor.
+	 * @param entries triggers
 	 */
 	public TriggersTable(List<ITriggerEntry> entries) {
 		this.entries = entries;

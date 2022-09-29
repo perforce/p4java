@@ -3,11 +3,6 @@
  */
 package com.perforce.p4java.impl.mapbased.rpc;
 
-import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.perforce.p4java.Log;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.impl.mapbased.rpc.connection.RpcConnection;
@@ -19,25 +14,28 @@ import com.perforce.p4java.server.callback.IParallelCallback;
 import com.perforce.p4java.server.callback.IProgressCallback;
 import com.perforce.p4java.server.callback.IStreamingCallback;
 
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 /**
  * Used to package up the Perforce function environment for a single
- * Perforce command across multiple RPC function calls.<p>
- * 
+ * Perforce command across multiple RPC function calls.
+ * <p>
  * In particular, we need to keep things like file handles,
  * arbitrary RPC function arguments, etc., around for use during
  * complex long-running commands that span many dispatch calls
  * in loop or duplex mode, etc., in response to single
- * user commands like 'sync'.<p>
- * 
+ * user commands like 'sync'.
+ * <p>
  * Note that this is in distinction to a) the command's external
  * environment (in the ExternalEnv class), and b) the command's
  * individual function environments,
- * 
- *
  */
 
 public class CommandEnv {
-	
+
 	/**
 	 * Max number of live handlers per command cycle.
 	 * Value copied straight from the C++ API.
@@ -48,9 +46,8 @@ public class CommandEnv {
 	 * Sequence used by operating system to separate lines in text files.
 	 * Default to "\n" if it is not available.
 	 */
-	public static final String LINE_SEPARATOR = System.getProperty(
-			"line.separator", "\n");
-	
+	public static final String LINE_SEPARATOR = System.getProperty("line.separator", "\n");
+
 	/**
 	 * P4Java's version of the notorious handler class
 	 * in the C++ API. Basically used (and abused) in
@@ -58,11 +55,11 @@ public class CommandEnv {
 	 * work out a better way to do things, at which
 	 * point it's likely to be factored out elsewhere.
 	 */
-	
+
 	public class RpcHandler {
 
-        private String name = null;
-        private String type = null;
+		private String name = null;
+		private String type = null;
 		private boolean error = false;
 		private File file = null;
 		private Map<String, Object> map = null;
@@ -74,21 +71,26 @@ public class CommandEnv {
 			this.map = new HashMap<String, Object>();
 		}
 
-        public String getName() {
-            return this.name;
-        }
-        public void setName(String name) {
-            this.name = name;
-        }
-        public String getType() {
-            return this.type;
-        }
-        public void setType(String type) {
-            this.type = type;
-        }
+		public String getName() {
+			return this.name;
+		}
+
+		public void setName(String name) {
+			this.name = name;
+		}
+
+		public String getType() {
+			return this.type;
+		}
+
+		public void setType(String type) {
+			this.type = type;
+		}
+
 		public boolean isError() {
 			return this.error;
 		}
+
 		public void setError(boolean error) {
 			this.error = error;
 		}
@@ -114,61 +116,62 @@ public class CommandEnv {
 	 * The parent server object
 	 */
 	private RpcServer server = null;
-	
+
 	/**
 	 * The current user function that started this all...
 	 */
 	private RpcCmdSpec cmdSpec = null;
 
-    /**
-     * The result maps that will ultimately be passed back to the user levels.
-     */
-    private List<Map<String, Object>> resultMaps = null;
+	/**
+	 * The result maps that will ultimately be passed back to the user levels.
+	 */
+	private List<Map<String, Object>> resultMaps = null;
 
-    /**
-     * The last result map that's being populated by fstatPartial.
-     */
-    private Map<String, Object> lastResultMap = null;
-    
+	/**
+	 * The last result map that's being populated by fstatPartial.
+	 */
+	private Map<String, Object> lastResultMap = null;
+
 	/**
 	 * State map for storing arbitrary state across RPC function
 	 * calls.
 	 */
 	private Map<String, Object> stateMap = null;
-	
-	/** C++ API-like handlers. Will probably be refactored
+
+	/**
+	 * C++ API-like handlers. Will probably be refactored
 	 * out later when I can work out what to do with them.
 	 * NOTE: code below relies on the handlers array elements
 	 * being initialized to null.
 	 */
 	private RpcHandler[] handlers = new RpcHandler[MAX_HANDLERS];
-	
+
 	/**
 	 * Protocol specs (in command form). We carry this around
 	 * for possible reference only; it may disappear in future
 	 * refactorings if it's never used.
 	 */
 	private ProtocolCommand protocolSpecs = null;
-	
+
 	private Map<String, Object> serverProtocolSpecsMap = null;
-	
+
 	private IProgressCallback progressCallback = null;
-	
+
 	private int cmdCallBackKey = 0;
-	
+
 	private boolean syncInPlace = false;
 	private boolean nonCheckedSyncs = false;
 	private boolean dontWriteTicket = false;
 
 	private boolean streamCmd = false;
-	
+
 	private RpcPacketFieldRule fieldRule = null;
-	
+
 	private IStreamingCallback streamingCallback = null;
 	private int streamingCallbackKey = 0;
-	
+
 	private IFilterCallback filterCallback = null;
-	
+
 	private IParallelCallback parallelCallback = null;
 
 	private long syncTime = 0;
@@ -178,16 +181,10 @@ public class CommandEnv {
 	 * The Perforce RPC connection in use for this command.
 	 */
 	private RpcConnection rpcConnection = null;
-	
+
 	private boolean userCanceled = false; // true if the user tried to cancel the command
-	
-	public CommandEnv(RpcServer server, RpcCmdSpec cmdSpec, RpcConnection rpcConnection,
-									ProtocolCommand protocolSpecs,
-									Map<String, Object> serverProtocolSpecsMap,
-									IProgressCallback progressCallback,
-									int cmdCallBackKey,
-									boolean syncInPlace,
-									boolean nonCheckedSyncs) {
+
+	public CommandEnv(RpcServer server, RpcCmdSpec cmdSpec, RpcConnection rpcConnection, ProtocolCommand protocolSpecs, Map<String, Object> serverProtocolSpecsMap, IProgressCallback progressCallback, int cmdCallBackKey, boolean syncInPlace, boolean nonCheckedSyncs) {
 		this.server = server;
 		this.cmdSpec = cmdSpec;
 		this.rpcConnection = rpcConnection;
@@ -199,70 +196,67 @@ public class CommandEnv {
 		this.syncInPlace = syncInPlace;
 		this.nonCheckedSyncs = nonCheckedSyncs;
 	}
-	
+
 	public boolean addHandler(RpcHandler handler) {
 		for (int i = 0; i < handlers.length; i++) {
-			if ((handlers[i] != null) && (handlers[i].name != null)
-					&& handlers[i].name.equalsIgnoreCase(handler.name)) {
-				
+			if ((handlers[i] != null) && (handlers[i].name != null) && handlers[i].name.equalsIgnoreCase(handler.name)) {
+
 			}
 			if (handlers[i] == null) {
 				handlers[i] = handler;
 				return true;
 			}
 		}
-		
+
 		return false;
 	}
-	
+
 	/**
 	 * Handle a result by either adding it to the resultsMapVec
 	 * for later processing or passing it up to the streaming results
 	 * callback handler.
-	 * 
-	 * @param resultMap
+	 *
+	 * @param resultMap resultMap
 	 */
 	public void handleResult(Map<String, Object> resultMap) {
-	    if (lastResultMap != null) {
-	        lastResultMap.putAll(resultMap);
-        } else {
-            lastResultMap = resultMap;
-        }
-	    
+		if (lastResultMap != null) {
+			lastResultMap.putAll(resultMap);
+		} else {
+			lastResultMap = resultMap;
+		}
+
 		if (streamingCallback != null) {
 			if (!userCanceled) {
 				try {
 					userCanceled = !streamingCallback.handleResult(lastResultMap, streamingCallbackKey);
 				} catch (P4JavaException exc) {
-					Log.error("caught exception from streaming callback handler (key: "
-							+ streamingCallbackKey
-							+ "): " + exc.getLocalizedMessage());
+					Log.error("caught exception from streaming callback handler (key: " + streamingCallbackKey + "): " + exc.getLocalizedMessage());
 					Log.exception(exc);
 				}
 			}
 		} else {
 			resultMaps.add(lastResultMap);
 		}
-		
+
 		lastResultMap = null;
 	}
-	
+
 	/**
-     * Handle a partial result by either adding it to the resultsMapVec
-     * for later processing or passing it up to the streaming results
-     * callback handler.
-     * 
-     * @param resultMap
-     */
-    public void handlePartialResult(Map<String, Object> resultMap) {
-        if (lastResultMap == null) {
-            lastResultMap = new HashMap<String, Object>();
-        }
-        
-        if (streamingCallback != null) {
-          //  try {
-               // if( !streamingCallback.handlePartialResult(lastResultMap, streamingCallbackKey) ) {
-                    lastResultMap.putAll(resultMap);
+	 * Handle a partial result by either adding it to the resultsMapVec
+	 * for later processing or passing it up to the streaming results
+	 * callback handler.
+	 *
+	 * @param resultMap resultMap
+	 */
+	public void handlePartialResult(Map<String, Object> resultMap) {
+		if (lastResultMap == null) {
+			lastResultMap = new HashMap<String, Object>();
+		}
+
+		if (streamingCallback != null) {
+			//  try {
+			// if( !streamingCallback.handlePartialResult(lastResultMap, streamingCallbackKey) ) {
+			lastResultMap.putAll(resultMap);
                /* }
             } catch (P4JavaException exc) {
                 Log.error("caught exception from streaming callback handler (key: "
@@ -271,27 +265,26 @@ public class CommandEnv {
                 Log.exception(exc);
                 lastResultMap.putAll(resultMap);
             }*/
-        } else {
-            lastResultMap.putAll(resultMap);
-        }
-    }
+		} else {
+			lastResultMap.putAll(resultMap);
+		}
+	}
 
-    public void resetPartialResult() {
+	public void resetPartialResult() {
 		lastResultMap = null;
 	}
 
 	public RpcHandler getHandler(String handlerName) {
 		for (RpcHandler handler : handlers) {
-			if ((handler != null) && (handlerName != null)
-								&& (handler.getName() != null)
-								&& handler.getName().equalsIgnoreCase(handlerName)) {
+			if ((handler != null) && (handlerName != null) && (handler.getName() != null) && handler.getName().equalsIgnoreCase(handlerName)) {
 				return handler;
 			}
 		}
-		
+
 		return null;
-		
+
 	}
+
 	public RpcCmdSpec getCmdSpec() {
 		return this.cmdSpec;
 	}
@@ -300,17 +293,17 @@ public class CommandEnv {
 		this.cmdSpec = cmdSpec;
 	}
 
-    public List<Map<String, Object>> getResultMaps() {
-        return this.resultMaps;
-    }
+	public List<Map<String, Object>> getResultMaps() {
+		return this.resultMaps;
+	}
 
 	public void setResultMaps(List<Map<String, Object>> resultMaps) {
 		this.resultMaps = resultMaps;
 	}
-	
-    public void clearLastResultMap() {
-        lastResultMap = null;
-    }
+
+	public void clearLastResultMap() {
+		lastResultMap = null;
+	}
 
 	public Map<String, Object> getStateMap() {
 		return this.stateMap;
@@ -324,7 +317,7 @@ public class CommandEnv {
 		return this.protocolSpecs;
 	}
 
-    public int getServerProtocolLevel() {
+	public int getServerProtocolLevel() {
 		if (serverProtocolSpecsMap == null) {
 			return -1;
 		}
@@ -335,7 +328,7 @@ public class CommandEnv {
 			return Integer.parseInt((String) serverProtocolSpecsMap.get(RpcFunctionMapKey.SERVER));
 		}
 		return -1;
-    }
+	}
 
 	public void setProtocolSpecs(ProtocolCommand protocolSpecs) {
 		this.protocolSpecs = protocolSpecs;
@@ -356,7 +349,7 @@ public class CommandEnv {
 	public void setHandlers(RpcHandler[] handlers) {
 		this.handlers = handlers;
 	}
-	
+
 	public void newHandler() {
 		// Does nothing at the moment, as a standin for the C++ API version
 		// FIXME -- HR.
@@ -461,7 +454,7 @@ public class CommandEnv {
 	public IParallelCallback getParallelCallback() {
 		return parallelCallback;
 	}
-	
+
 	public void setParallelCallback(IParallelCallback parallelCallback) {
 		this.parallelCallback = parallelCallback;
 	}
@@ -470,13 +463,13 @@ public class CommandEnv {
 		return server;
 	}
 
-    public long getSyncTime() {
-        return syncTime;
-    }
+	public long getSyncTime() {
+		return syncTime;
+	}
 
-    public void setSyncTime(long syncTime) {
-        this.syncTime = syncTime;
-    }
+	public void setSyncTime(long syncTime) {
+		this.syncTime = syncTime;
+	}
 
 	public boolean isNullSync() {
 		return nullSync;

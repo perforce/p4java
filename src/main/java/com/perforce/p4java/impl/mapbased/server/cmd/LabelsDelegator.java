@@ -69,12 +69,7 @@ public class LabelsDelegator extends BaseDelegator implements ILabelsDelegator {
 
         return buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, ILabelSummary>() {
-                    @Override
-                    public ILabelSummary apply(Map map) {
-                        return new LabelSummary(map);
-                    }
-                }
-        );
+				map -> new LabelSummary(map)
+		);
     }
 }

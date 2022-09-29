@@ -214,6 +214,7 @@ public interface IChangelist extends IServerResource, IChangelistSummary {
 	 * the stream, in order to release the underlying io resources. Failure to do this
 	 * may leave temporary files lying around or cause inefficient memory usage.
 	 * 
+	 * @param diffType diff type
 	 * @return InputStream onto the diff stream. Note that
 	 *			while this stream will not be null, it may be empty.
 	 * @throws ConnectionException if the Perforce server is unreachable or is not

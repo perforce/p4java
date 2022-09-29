@@ -1,12 +1,7 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.impl.generic.core;
-
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Map;
 
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.ChangelistStatus;
@@ -15,6 +10,11 @@ import com.perforce.p4java.core.IChangelistSummary;
 import com.perforce.p4java.impl.mapbased.MapKeys;
 import com.perforce.p4java.server.IServer;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Map;
+
 /**
  * Default implementation of the IChangelistSummary interface.
  */
@@ -22,7 +22,7 @@ import com.perforce.p4java.server.IServer;
 public class ChangelistSummary extends ServerResource implements IChangelistSummary {
 
 	protected static final String DATE_FORMAT = "yyyy/MM/dd HH:mm:ss";
-	
+
 	protected int id = IChangelist.UNKNOWN;
 	protected String clientId = null;
 	protected String username = null;
@@ -39,22 +39,35 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 	 */
 	public ChangelistSummary() {
 	}
-	
+
 	/**
 	 * Explicit-value pass-through constructor for the ServerResource fields. Usually
 	 * used by IChangelistSummary extensions.
+	 *
+	 * @param complete    complete
+	 * @param completable completable
+	 * @param refreshable refreshable
+	 * @param updateable updateable
+	 * @param server server
 	 */
 	public ChangelistSummary(boolean complete, boolean completable,
-			boolean refreshable, boolean updateable, IServer server) {
+							 boolean refreshable, boolean updateable, IServer server) {
 		super(refreshable, updateable, server);
 	}
-	
+
 	/**
 	 * Explicit-value constructor; calls the default ServerResource constructor.
+	 * @param id          id
+	 * @param clientId    client
+	 * @param username    user name
+	 * @param status      status
+	 * @param date        date
+	 * @param description description
+	 * @param shelved     shelved
 	 */
 	public ChangelistSummary(int id, String clientId, String username,
-			ChangelistStatus status, Date date, String description,
-			boolean shelved) {
+							 ChangelistStatus status, Date date, String description,
+							 boolean shelved) {
 		this.id = id;
 		this.clientId = clientId;
 		this.username = username;
@@ -63,12 +76,13 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 		this.description = description;
 		this.shelved = shelved;
 	}
-	
+
 	/**
 	 * Construct a new ChangelistSummary from the passed-in summary. If summary
 	 * is null, this is equivalent to calling the default constructor.
+	 *
+	 * @param summary summary object
 	 */
-	
 	public ChangelistSummary(IChangelistSummary summary) {
 		if (summary != null) {
 			this.id = summary.getId();
@@ -80,14 +94,17 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 			this.shelved = summary.isShelved();
 		}
 	}
-	
+
 	/**
 	 * Convenience constructor, equivalent to this(map, summaryOnly, null).
+	 *
+	 * @param map         spec map
+	 * @param summaryOnly summary only
 	 */
 	public ChangelistSummary(Map<String, Object> map, boolean summaryOnly) {
 		this(map, summaryOnly, null);
 	}
-	
+
 	/**
 	 * Construct a ChangelistSummary from a suitable map returned from
 	 * the Perforce server. If map is null, this is equivalent to calling
@@ -97,10 +114,14 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 	 * the map is assumed to come from a full changelist command and the
 	 * superclass fields are also set appropriately for the full changelist.
 	 * The server parameter is ignored for summaryOnly objects.<p>
-	 * 
+	 *
 	 * Note that map keys returned from the Perforce server are sometimes different
 	 * for summary fields and full fields, so you have to be clear about where the
 	 * map came from to get accurate results.
+	 *
+	 * @param map         spec map
+	 * @param summaryOnly summary only
+	 * @param server      server
 	 */
 	public ChangelistSummary(Map<String, Object> map, boolean summaryOnly, IServer server) {
 		super();
@@ -109,7 +130,7 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 				try {
 					// Note use of lower-case keys here; this is the only
 					// place lower-case fields are used for this...
-					
+
 					this.id = new Integer((String) map.get("change"));
 					this.clientId = (String) map.get("client");
 					this.username = (String) map.get("user");
@@ -130,7 +151,7 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 				this.server = server;
 				this.refreshable = true;
 				this.updateable = true;
-				
+
 				try {
 					String idString = (String) map.get(MapKeys.CHANGE_KEY);
 
@@ -147,11 +168,11 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 					this.clientId = (String) map.get(MapKeys.CLIENT_KEY);
 					this.username = (String) map.get(MapKeys.USER_KEY);
 					this.status = ChangelistStatus.fromString((String) map.get(MapKeys.STATUS_KEY));
-					
+
 					// Note that this is about the only place that Perforce sends
 					// an actual formatted date string back; everywhere else it's
 					// a long; here it's in the yyyy/mm/dd hh:mm:ss format -- HR.
-					
+
 					String dateStr = (String) map.get(MapKeys.DATE_KEY);
 					if (dateStr == null) {
 						this.date = new Date();
@@ -163,7 +184,7 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 									+ pe.getLocalizedMessage());
 						}
 					}
-					
+
 					this.description = (String) map.get(MapKeys.DESCRIPTION_KEY);
 					if (map.containsKey("Type")) {
 						this.visibility = Visibility.fromString(((String) map.get("Type")).toUpperCase());
@@ -281,7 +302,9 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 	/**
 	 * @see com.perforce.p4java.core.IChangelistSummary#getVisibility()
 	 */
-	public Visibility getVisibility() {	return visibility; }
+	public Visibility getVisibility() {
+		return visibility;
+	}
 
 	/**
 	 * @see com.perforce.p4java.core.IChangelistSummary#setVisibility(com.perforce.p4java.core.IChangelistSummary.Visibility)
@@ -291,9 +314,11 @@ public class ChangelistSummary extends ServerResource implements IChangelistSumm
 	}
 
 	/**
-	// * @see com.perforce.p4java.core.IChangelistSummary#getChangelistStream()
+	 // * @see com.perforce.p4java.core.IChangelistSummary#getChangelistStream()
 	 */
-	public String getChangelistStream() { return changelistStream; }
+	public String getChangelistStream() {
+		return changelistStream;
+	}
 }
 
 

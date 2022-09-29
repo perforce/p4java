@@ -45,9 +45,9 @@ public class FileSpecBuilder {
 	/**
 	 * Given an array of file paths (which might include revision or label specs, etc.),
 	 * return a corresponding list of file specs. Returns null if filePaths is null; skips
-	 * any null element of the array.<p>
+	 * any null element of the array.
 	 * <p>
-	 * NOTE: use the 'FileSpecBuilder.makeFileSpecList(List<String> pathList)' method if
+	 * NOTE: use the {@code 'FileSpecBuilder.makeFileSpecList(List<String> pathList)'} method if
 	 * you have a very large amount of file paths. The method with the 'List' parameter
 	 * is more memory efficient, since an array keeps data in a contiguous chunk of memory.
 	 *
@@ -59,6 +59,30 @@ public class FileSpecBuilder {
 		if (filePaths != null) {
 			for (String path : filePaths) {
 				if (isNotBlank(path)) {
+					fileSpecs.add(new FileSpec(path));
+				}
+			}
+		}
+		return fileSpecs;
+	}
+
+	/**
+	 * Given a list of file paths which include special characters like #, @, % or * in the file path,
+	 * replaces the special characters (%, @, # or *) with their numeric values and returns a corresponding
+	 * list of file specs.
+	 *
+	 * @param filePaths multiple file path strings
+	 * @return non-null list of filespecs
+	 */
+	public static List<IFileSpec> makeFileSpecListSpecialChars(String... filePaths) {
+		List<IFileSpec> fileSpecs = new ArrayList<>();
+		if (filePaths != null) {
+			for (String path : filePaths) {
+				if (isNotBlank(path)) {
+					path = path.replaceAll("%", "%25");
+					path = path.replaceAll("@", "%40");
+					path = path.replaceAll("#", "%23");
+					path = path.replaceAll("\\*", "%2A");
 					fileSpecs.add(new FileSpec(path));
 				}
 			}

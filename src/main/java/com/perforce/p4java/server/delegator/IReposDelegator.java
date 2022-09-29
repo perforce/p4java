@@ -15,12 +15,9 @@ public interface IReposDelegator {
 	 * Gets the repos.
 	 *
 	 * @return a list of repos
-	 * @throws ConnectionException
-	 *             the connection exception
-	 * @throws RequestException
-	 *             the request exception
-	 * @throws AccessException
-	 *             the access exception
+	 * @throws ConnectionException the connection exception
+	 * @throws RequestException    the request exception
+	 * @throws AccessException     the access exception
 	 */
 	List<IRepo> getRepos() throws ConnectionException, RequestException, AccessException;
 
@@ -38,9 +35,9 @@ public interface IReposDelegator {
 	 *
 	 * @param clientName the name of the client workspace
 	 * @return a list of repos
-	 * @throws ConnectionException
-	 * @throws RequestException
-	 * @throws AccessException
+	 * @throws ConnectionException on error
+	 * @throws RequestException    on error
+	 * @throws AccessException     on error
 	 */
 	List<IRepo> getRepos(String clientName) throws ConnectionException, RequestException, AccessException;
 }

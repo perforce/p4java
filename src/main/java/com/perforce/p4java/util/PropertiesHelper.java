@@ -13,7 +13,9 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class PropertiesHelper {
 
 	/**
-	 * Return the first property string value found from the passed-in
+	 * @param props props
+	 * @param keys  keys
+	 * @return the first property string value found from the passed-in
 	 * properties with the specified keys.
 	 */
 	public static String getProperty(Properties props, String[] keys) {
@@ -21,7 +23,10 @@ public class PropertiesHelper {
 	}
 
 	/**
-	 * Return the first property string value found from the passed-in
+	 * @param props        props
+	 * @param keys         keys
+	 * @param defaultValue defaultValue
+	 * @return the first property string value found from the passed-in
 	 * properties with the specified keys. If it can't find a value,
 	 * then return the passed-in defaultValue.
 	 */
@@ -45,7 +50,10 @@ public class PropertiesHelper {
 	}
 
 	/**
-	 * Return the first property value found as an int, if possible.
+	 * @param props        props
+	 * @param keys         keys
+	 * @param defaultValue defaultValue
+	 * @return the first property value found as an int, if possible.
 	 * If it can't find a value, then return the passed-in defaultValue.
 	 */
 	public static int getPropertyAsInt(Properties props, String[] keys, int defaultValue) {
@@ -56,9 +64,7 @@ public class PropertiesHelper {
 			try {
 				retVal = new Integer(propStr);
 			} catch (Exception exc) {
-				Log.warn("Integer property conversion error; prop name: '"
-						+ Arrays.toString(keys) + "'; prop value: "
-						+ propStr);
+				Log.warn("Integer property conversion error; prop name: '" + Arrays.toString(keys) + "'; prop value: " + propStr);
 				Log.exception(exc);
 			}
 		}
@@ -67,7 +73,10 @@ public class PropertiesHelper {
 	}
 
 	/**
-	 * Return the property value as a long, if possible. If it can't find
+	 * @param props        props
+	 * @param keys         keys
+	 * @param defaultValue defaultValue
+	 * @return the property value as a long, if possible. If it can't find
 	 * a value by the specified key, then return the passed-in defaultValue.
 	 */
 	public static long getPropertyAsLong(Properties props, String[] keys, long defaultValue) {
@@ -78,9 +87,7 @@ public class PropertiesHelper {
 			try {
 				retVal = new Long(propStr);
 			} catch (Exception exc) {
-				Log.warn("Long property conversion error; prop name: '"
-						+ Arrays.toString(keys) + "'; prop value: "
-						+ propStr);
+				Log.warn("Long property conversion error; prop name: '" + Arrays.toString(keys) + "'; prop value: " + propStr);
 				Log.exception(exc);
 			}
 		}

@@ -55,11 +55,12 @@ public abstract class AbstractAuthHelper {
 	 * user name and server address. The user name be non-null and the server
 	 * address must be non-null and be of the form server:port.
 	 *
+	 * @param userName      userName
+	 * @param serverAddress serverAddress
+	 * @param authMap       authMap
 	 * @return - list of auth entries found in the specified auth map
 	 */
-	protected static Map<String, String> getMemoryEntry(final String userName, final String serverAddress,
-	                                                    final Map<String, String> authMap) {
-
+	protected static Map<String, String> getMemoryEntry(final String userName, final String serverAddress, final Map<String, String> authMap) {
 		String p4Port = serverAddress;
 		Map<String, String> entryMap = new ConcurrentHashMap<>();
 		if (isNotBlank(userName) && isNotBlank(serverAddress) && nonNull(authMap)) {
@@ -80,6 +81,7 @@ public abstract class AbstractAuthHelper {
 	/**
 	 * Get all the auth entries found in the specified auth store in memory.
 	 *
+	 * @param authMap authMap
 	 * @return - list of auth entries found in the specified auth map
 	 */
 	protected static List<Map<String, String>> getMemoryEntries(final Map<String, String> authMap) {
@@ -96,9 +98,7 @@ public abstract class AbstractAuthHelper {
 		return authList;
 	}
 
-	private static void popularAuthEntry(final int equals, final String line,
-	                                     final List<Map<String, String>> authList) {
-
+	private static void popularAuthEntry(final int equals, final String line, final List<Map<String, String>> authList) {
 		if (equals != -1) {
 			int colon = indexOf(line, ':', equals);
 			if (colon != -1 && colon + 1 < line.length()) {
@@ -125,8 +125,7 @@ public abstract class AbstractAuthHelper {
 	 * @param authValue     - possibly null auth value
 	 * @param authMap       - non-null auth map
 	 */
-	protected static void saveMemoryEntry(final String userName, final String serverAddress, final String authValue,
-	                                      final Map<String, String> authMap) {
+	protected static void saveMemoryEntry(final String userName, final String serverAddress, final String authValue, final Map<String, String> authMap) {
 
 		if (isNotBlank(userName) && isNotBlank(serverAddress) && nonNull(authMap)) {
 			String p4Port = serverAddress;
@@ -147,6 +146,7 @@ public abstract class AbstractAuthHelper {
 	/**
 	 * Get all the auth entries found in the specified auth file.
 	 *
+	 * @param authFile authFile
 	 * @return - list of auth entries found in the specified auth file
 	 * @throws IOException - io exception from reading auth file
 	 */
@@ -181,13 +181,15 @@ public abstract class AbstractAuthHelper {
 	 * @param serverAddress - non-null server address
 	 * @param authValue     - possibly null auth value
 	 * @param authFile      - non-null file
+	 * @param lockTry       lockTry
+	 * @param lockDelay     lockDelay
+	 * @param lockWait      lockWait
+	 * @throws IOException on error
 	 */
-	protected static void saveFileEntry(final String userName, final String serverAddress, final String authValue,
-	                                    final File authFile, final int lockTry, final long lockDelay, final long lockWait) throws IOException {
+	protected static void saveFileEntry(final String userName, final String serverAddress, final String authValue, final File authFile, final int lockTry, final long lockDelay, final long lockWait) throws IOException {
 
 		if (isNotBlank(userName) && isNotBlank(serverAddress) && nonNull(authFile)) {
-			String p4Port = firstMatch(lastIndexOf(serverAddress, ':') == -1, "localhost:" + serverAddress,
-					serverAddress);
+			String p4Port = firstMatch(lastIndexOf(serverAddress, ':') == -1, "localhost:" + serverAddress, serverAddress);
 
 			Path authFilePath = authFile.toPath();
 
@@ -198,9 +200,7 @@ public abstract class AbstractAuthHelper {
 				}
 				File lockFile = createLockFileIfNotExist(authFile);
 				boolean locked = false;
-				try (RandomAccessFile lockFileRandomAccessor = new RandomAccessFile(lockFile, "rw");
-				     FileChannel fileChannel = lockFileRandomAccessor.getChannel();
-				     FileLock lock = tryLockFile(fileChannel, lockFile, lockTry, lockWait)) {
+				try (RandomAccessFile lockFileRandomAccessor = new RandomAccessFile(lockFile, "rw"); FileChannel fileChannel = lockFileRandomAccessor.getChannel(); FileLock lock = tryLockFile(fileChannel, lockFile, lockTry, lockWait)) {
 
 					if (nonNull(lock) && lock.isValid()) {
 						locked = true;
@@ -208,13 +208,11 @@ public abstract class AbstractAuthHelper {
 						String newAuthValue = firstMatch(isNotBlank(authValue), authValuePrefix + authValue, EMPTY);
 
 						try {
-							readAuthFileContentPlusNewAuthValueAndWriteToTempAuthFile(authFile, authValuePrefix,
-									newAuthValue);
+							readAuthFileContentPlusNewAuthValueAndWriteToTempAuthFile(authFile, authValuePrefix, newAuthValue);
 							updateReadBit(authFile);
 						} catch (IOException e) {
 							e.printStackTrace();
-							throwIOException(e, "P4TICKETS file: %s could not be overwritten.",
-									authFile.getAbsolutePath());
+							throwIOException(e, "P4TICKETS file: %s could not be overwritten.", authFile.getAbsolutePath());
 						}
 
 						// Update read bit of actual auth file
@@ -243,12 +241,10 @@ public abstract class AbstractAuthHelper {
 		return lockFile;
 	}
 
-	private static void readAuthFileContentPlusNewAuthValueAndWriteToTempAuthFile(final File authFile,
-	                                                                              final String authValuePrefix, final String newAuthValue) throws IOException {
+	private static void readAuthFileContentPlusNewAuthValueAndWriteToTempAuthFile(final File authFile, final String authValuePrefix, final String newAuthValue) throws IOException {
 
 		File tempAuth = File.createTempFile("p4auth_" + System.currentTimeMillis(), ".txt");
-		try (BufferedReader reader = new BufferedReader(new FileReader(authFile));
-		     PrintWriter writer = new PrintWriter(tempAuth, "utf-8")) {
+		try (BufferedReader reader = new BufferedReader(new FileReader(authFile)); PrintWriter writer = new PrintWriter(tempAuth, "utf-8")) {
 			boolean processed = false;
 			// Only add current auth file content if a reader was
 			// successfully created
@@ -289,8 +285,7 @@ public abstract class AbstractAuthHelper {
 		}
 	}
 
-	private static FileLock tryLockFile(@Nullable final FileChannel lockFileChannel, @Nonnull final File lockFile,
-	                                    final int lockTry, final long lockWait) throws IOException {
+	private static FileLock tryLockFile(@Nullable final FileChannel lockFileChannel, @Nonnull final File lockFile, final int lockTry, final long lockWait) throws IOException {
 
 		int lockTries = firstMatch(lockTry < 1, DEFAULT_LOCK_TRY, lockTry);
 		long lockWaits = firstMatch(lockWait < 1, DEFAULT_LOCK_WAIT, lockWait);
@@ -314,8 +309,7 @@ public abstract class AbstractAuthHelper {
 				} else {
 					if (lockFile.lastModified() > 0) {
 						try {
-							Log.info("-----%s thread put to sleep, and it will retry lock %s times", currentThreadName,
-									lockTries - 1);
+							Log.info("-----%s thread put to sleep, and it will retry lock %s times", currentThreadName, lockTries - 1);
 							TimeUnit.SECONDS.sleep(lockWaits);
 						} catch (InterruptedException e) {
 							Log.error("Error waiting for auth lock file: %s", e.getLocalizedMessage());
@@ -325,8 +319,7 @@ public abstract class AbstractAuthHelper {
 			} while (lockTries-- > 0);
 
 			if (isNull(fileLock) || !fileLock.isValid()) {
-				throwIOException("Error creating new auth lock file \"%s\" after retries: %s",
-						lockFile.getAbsolutePath(), lockTry);
+				throwIOException("Error creating new auth lock file \"%s\" after retries: %s", lockFile.getAbsolutePath(), lockTry);
 			}
 		}
 

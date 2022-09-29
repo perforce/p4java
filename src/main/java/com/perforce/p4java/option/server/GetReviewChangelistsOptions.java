@@ -3,25 +3,25 @@
  */
 package com.perforce.p4java.option.server;
 
-import java.util.List;
-
 import com.perforce.p4java.core.IChangelist;
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
  * Options class for the IOptionsServer.getReviewChangelists method.
- * 
+ *
  * @see com.perforce.p4java.server.IOptionsServer#getReviewChangelists(com.perforce.p4java.option.server.GetReviewChangelistsOptions)
  */
 public class GetReviewChangelistsOptions extends Options {
-	
+
 	/**
 	 * Options: -c[changelist], -t[counter]
 	 */
 	public static final String OPTIONS_SPECS = "i:c:clz s:t";
-	
+
 	/**
 	 * If greater than zero, lists changelists that have not been reviewed
 	 * before, equal or above the specified changelist#.
@@ -31,15 +31,15 @@ public class GetReviewChangelistsOptions extends Options {
 
 	/**
 	 * If not null, lists changelists that have not been reviewed before, above
-	 * the specified counter's changelist#.<p>
-	 * 
+	 * the specified counter's changelist#.
+	 * <p>
 	 * Note, if both the 'changelistId' and 'counter' options are specified, the
 	 * 'p4 review' sets the counter to that changelist# and produces no output.
 	 * This functionality has been superceded by the 'p4 counter' command.
 	 * Corresponds to -t counter.
 	 */
 	protected String counter = null;
-	
+
 	/**
 	 * Default constructor.
 	 */
@@ -50,19 +50,20 @@ public class GetReviewChangelistsOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public GetReviewChangelistsOptions(String... options) {
@@ -71,6 +72,9 @@ public class GetReviewChangelistsOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param changelistId changelistId
+	 * @param counter      counter
 	 */
 	public GetReviewChangelistsOptions(int changelistId, String counter) {
 		super();

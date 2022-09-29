@@ -8,23 +8,28 @@ import java.util.Locale;
 import java.util.ResourceBundle;
 
 /**
- * Handles formatting Perforce messages. It provides locale (language & country)
+ * Handles formatting Perforce messages. It provides locale (language and country)
  * specific messages. The default locale is set during startup of the JVM based
- * on the host environment. </p>
- * 
+ * on the host environment.
+ * <p>
  * Additionally, this class provides a convenient way to format messages with
  * parameters.
  */
 public class PerforceMessages {
 
-	/** Default name of the Perforce message bundle properties file. */
-	public static final String MESSAGE_BUNDLE = PerforceMessages.class
-			.getName();
+	/**
+	 * Default name of the Perforce message bundle properties file.
+	 */
+	public static final String MESSAGE_BUNDLE = PerforceMessages.class.getName();
 
-	/** The locale. */
+	/**
+	 * The locale.
+	 */
 	private Locale locale;
 
-	/** The messages. */
+	/**
+	 * The messages.
+	 */
 	private ResourceBundle messages;
 
 	/**
@@ -38,11 +43,10 @@ public class PerforceMessages {
 	/**
 	 * Instantiates a new perforce messages base on the passed-in message bundle
 	 * properties file package path name.
-	 * 
-	 * @param propertiesFile
-	 *            the name (without the extension) of the properties file
-	 *            including the full package path name (i.e.
-	 *            com.perforce.p4java.messages.PerforceMessages)
+	 *
+	 * @param propertiesFile the name (without the extension) of the properties file
+	 *                       including the full package path name (i.e.
+	 *                       com.perforce.p4java.messages.PerforceMessages)
 	 */
 	public PerforceMessages(String propertiesFile) {
 		this.messages = ResourceBundle.getBundle(propertiesFile);
@@ -50,9 +54,8 @@ public class PerforceMessages {
 
 	/**
 	 * Instantiates a new perforce messages.
-	 * 
-	 * @param locale
-	 *            the locale
+	 *
+	 * @param locale the locale
 	 */
 	public PerforceMessages(Locale locale) {
 		this.locale = locale;
@@ -61,7 +64,7 @@ public class PerforceMessages {
 
 	/**
 	 * Gets the locale.
-	 * 
+	 *
 	 * @return the locale
 	 */
 	public Locale getLocale() {
@@ -70,9 +73,8 @@ public class PerforceMessages {
 
 	/**
 	 * Sets the locale.
-	 * 
-	 * @param locale
-	 *            the new locale
+	 *
+	 * @param locale the new locale
 	 */
 	public void setLocale(Locale locale) {
 		this.locale = locale;
@@ -80,7 +82,7 @@ public class PerforceMessages {
 
 	/**
 	 * Gets the messages.
-	 * 
+	 *
 	 * @return the messages
 	 */
 	public ResourceBundle getMessages() {
@@ -89,9 +91,8 @@ public class PerforceMessages {
 
 	/**
 	 * Sets the messages.
-	 * 
-	 * @param messages
-	 *            the new messages
+	 *
+	 * @param messages the new messages
 	 */
 	public void setMessages(ResourceBundle messages) {
 		this.messages = messages;
@@ -99,9 +100,8 @@ public class PerforceMessages {
 
 	/**
 	 * Gets the message.
-	 * 
-	 * @param key
-	 *            the key
+	 *
+	 * @param key the key
 	 * @return the message
 	 */
 	public String getMessage(String key) {
@@ -110,11 +110,9 @@ public class PerforceMessages {
 
 	/**
 	 * Gets the message.
-	 * 
-	 * @param key
-	 *            the key
-	 * @param params
-	 *            the params
+	 *
+	 * @param key    the key
+	 * @param params the params
 	 * @return the message
 	 */
 	public String getMessage(String key, Object[] params) {
@@ -123,11 +121,9 @@ public class PerforceMessages {
 
 	/**
 	 * Format a message with parameters.
-	 * 
-	 * @param message
-	 *            the message
-	 * @param params
-	 *            the params
+	 *
+	 * @param message the message
+	 * @param params  the params
 	 * @return the string
 	 * @see MessageFormat
 	 */

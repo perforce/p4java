@@ -15,47 +15,47 @@ import java.util.List;
 public interface IFileRevisionData {
 	
 	/**
-	 * Get the revision ID associated with this revision.
+	 * @return the revision ID associated with this revision.
 	 */
 	int getRevision();
 	
 	/**
-	 * Get the changelist ID associated with this revision.
+	 * @return the changelist ID associated with this revision.
 	 */
 	int getChangelistId();
 	
 	/**
-	 * Get the file action associated with this revision.
+	 * @return the file action associated with this revision.
 	 */
 	FileAction getAction();
 	
 	/**
-	 * Get the date associated with this revision.
+	 * @return the date associated with this revision.
 	 */
 	Date getDate();
 	
 	/**
-	 * Get the Perforce user name associated with this revision.
+	 * @return the Perforce user name associated with this revision.
 	 */
 	String getUserName();
 	
 	/**
-	 * Get the Perforce file type string associated with this revision.
+	 * @return the Perforce file type string associated with this revision.
 	 */
 	String getFileType();
 	
 	/**
-	 * Get the description string associated with this revision.
+	 * @return the description string associated with this revision.
 	 */
 	String getDescription();
 	
 	/**
-	 * Get the depot file name associated with this revision.
+	 * @return the depot file name associated with this revision.
 	 */
 	String getDepotFileName();
 	
 	/**
-	 * Get the client file name associated with this revision.
+	 * @return the client file name associated with this revision.
 	 */
 	String getClientName();
 	

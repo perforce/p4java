@@ -37,6 +37,9 @@ public class Streamlog extends ServerResource implements IStreamlog {
 	/**
 	 * Construct a Streamlog implementation, by parsing a map returned by the server.
 	 * Streamlog is a single change per Stream, sorted by order, to create array.
+	 *
+	 * @param map   spec map
+	 * @param order order
 	 */
 	public Streamlog(Map<String, Object> map, int order) {
 		if (map == null) {

@@ -37,12 +37,7 @@ public class StatDelegator extends BaseDelegator implements IStatDelegator {
 
         return ResultListBuilder.buildNullableObjectFromNonInfoMessageCommandResultMaps(
                 resultMaps,
-                new Function<Map, IStreamIntegrationStatus>() {
-                    @Override
-                    public IStreamIntegrationStatus apply(Map map) {
-                        return new StreamIntegrationStatus(map);
-                    }
-                }
-        );
+				(Function<Map<String, Object>, IStreamIntegrationStatus>) map -> new StreamIntegrationStatus(map)
+		);
     }
 }

@@ -24,10 +24,7 @@ import com.perforce.p4java.core.ILicense;
 import com.perforce.p4java.core.IMapEntry;
 import com.perforce.p4java.core.IReviewSubscription;
 import com.perforce.p4java.core.IStream;
-import com.perforce.p4java.core.IStreamIgnoredMapping;
-import com.perforce.p4java.core.IStreamRemappedMapping;
 import com.perforce.p4java.core.IStreamSummary;
-import com.perforce.p4java.core.IStreamViewMapping;
 import com.perforce.p4java.core.IUser;
 import com.perforce.p4java.core.IUserGroup;
 import com.perforce.p4java.core.ViewMap;
@@ -76,7 +73,7 @@ public class InputMapper {
 	 * Map a P4Java changelist to an IServer input map.
 	 *
 	 * @param change            candidate changelist
-	 * @param allowUnknownFiles
+	 * @param allowUnknownFiles unknown files?
 	 * @return non-null map suitable for use with execMapCmd
 	 */
 
@@ -346,7 +343,7 @@ public class InputMapper {
 			groupMap.put(MapKeys.TIMEOUT_KEY, getUGValue(group.getTimeout()));
 			groupMap.put(MapKeys.MAXSCANROWS_KEY, getUGValue(group.getMaxScanRows()));
 			groupMap.put(MapKeys.MAXLOCKTIME_KEY, getUGValue(group.getMaxLockTime()));
-			if (group.getMaxOpenFiles() != -Integer.MAX_VALUE){
+			if (group.getMaxOpenFiles() != -Integer.MAX_VALUE) {
 				groupMap.put(MapKeys.MAXOPENFILES_KEY, getUGValue(group.getMaxOpenFiles()));
 			}
 			groupMap.put(MapKeys.PASSWORD_TIMEOUT_KEY, getUGValue(group.getPasswordTimeout()));
@@ -490,9 +487,10 @@ public class InputMapper {
 	 * Map a P4Java stream object to an IServer input map.
 	 *
 	 * @param stream candidate stream
+	 * @param server server
 	 * @return non-null map suitable for use with execMapCmd
+	 * @throws P4JavaException on error
 	 */
-
 	public static Map<String, Object> map(IStream stream, IServer server) throws P4JavaException {
 		Map<String, Object> streamMap = new HashMap<String, Object>();
 		if (stream == null) {
@@ -539,7 +537,6 @@ public class InputMapper {
 	 * @param triggersTable table - list of trigger entries
 	 * @return non-null map suitable for use with execMapCmd
 	 */
-
 	public static Map<String, Object> map(ITriggersTable triggersTable) {
 		Map<String, Object> triggersMap = new HashMap<String, Object>();
 

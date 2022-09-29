@@ -1,30 +1,30 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option.server;
-
-import java.util.List;
 
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
  * Options class for the IOptionsServer fixJobs method.
  */
 public class FixJobsOptions extends Options {
-	
+
 	/**
 	 * Options: -s[status], -d
 	 */
 	public static final String OPTIONS_SPECS = "s:s b:d";
-	
+
 	/**
 	 * If not null, use this as the new status rather than "closed".
 	 * Corresponds to the -s flag.
 	 */
 	protected String status = null;
-	
+
 	/**
 	 * If true, delete the specified fixes. Corresponds
 	 * to the -d flag.
@@ -41,19 +41,20 @@ public class FixJobsOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public FixJobsOptions(String... options) {
@@ -62,6 +63,8 @@ public class FixJobsOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 * @param status status
+	 * @param delete delete option
 	 */
 	public FixJobsOptions(String status, boolean delete) {
 		super();
@@ -73,9 +76,7 @@ public class FixJobsOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-								this.getStatus(),
-								this.isDelete());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.getStatus(), this.isDelete());
 		return this.optionList;
 	}
 

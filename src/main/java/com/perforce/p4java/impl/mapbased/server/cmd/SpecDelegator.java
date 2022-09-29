@@ -30,18 +30,12 @@ public class SpecDelegator extends BaseDelegator implements ISpecDelegator {
 	/* (non-Javadoc)
 	 * @see com.perforce.p4java.server.delegator.ISpecDelegator#getSpec(CustomSpec)
 	 */
-	@SuppressWarnings("unchecked")
 	@Override
 	public Map<String, Object> getSpec(CustomSpec type) throws AccessException, RequestException, ConnectionException {
 		List<Map<String, Object>> resultMaps = execMapCmdList(SPEC, new String[]{"-o", type.toString()}, null);
 		return ResultListBuilder.buildNullableObjectFromNonInfoMessageCommandResultMaps(
 				resultMaps,
-				new Function<Map, Map>() {
-					@Override
-					public Map apply(Map map) {
-						return map;
-					}
-				}
+				map -> map
 		);
 	}
 

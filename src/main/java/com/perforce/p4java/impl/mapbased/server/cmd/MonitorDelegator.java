@@ -64,12 +64,7 @@ public class MonitorDelegator extends BaseDelegator implements IMonitorDelegator
 
         return buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, IServerProcess>() {
-                    @Override
-                    public IServerProcess apply(Map map) {
-                        return new ServerProcess(map);
-                    }
-                }
-        );
+				map -> new ServerProcess(map)
+		);
     }
 }

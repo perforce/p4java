@@ -30,11 +30,11 @@ public class DefaultParallelSync implements IParallelCallback {
 	 * <p>
 	 * Invocation of this method spawns the threads required to support parallelism
 	 *
-	 * @param cmdEnv
-	 * @param threads
-	 * @param flags
-	 * @param args
-	 * @return
+	 * @param cmdEnv  command env
+	 * @param threads threads
+	 * @param flags   flags
+	 * @param args    arguments
+	 * @return true if no error
 	 */
 	@Override
 	public boolean transmit(CommandEnv cmdEnv, int threads, HashMap<String, String> flags, ArrayList<String> args) {
@@ -56,14 +56,14 @@ public class DefaultParallelSync implements IParallelCallback {
 	/**
 	 * Helper method which creates a Runnable that performs the sync
 	 *
-	 * @param cmdEnv
-	 * @param thread
-	 * @param flags
-	 * @param args
-	 * @return
+	 * @param cmdEnv command env
+	 * @param thread (not used)
+	 * @param flags  (not used)
+	 * @param args   list arguments
+	 * @return runnable thread
 	 */
 	private Runnable createRunnable(final CommandEnv cmdEnv, int thread,
-	                                HashMap<String, String> flags, final List<String> args) {
+									HashMap<String, String> flags, final List<String> args) {
 
 		class RunnableSync implements Runnable {
 			@Override
@@ -104,10 +104,10 @@ public class DefaultParallelSync implements IParallelCallback {
 	}
 
 	/**
-	 * Handles results on a per thread basis
+	 * Handles results on a per-thread basis
 	 *
-	 * @param results
-	 * @param cmdEnv
+	 * @param results results map
+	 * @param cmdEnv  command environment
 	 */
 	private synchronized void handleResults(Map<String, Object>[] results, CommandEnv cmdEnv) {
 		if (results != null) {

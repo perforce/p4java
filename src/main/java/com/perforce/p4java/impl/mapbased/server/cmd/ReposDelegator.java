@@ -50,7 +50,7 @@ public class ReposDelegator extends BaseDelegator implements IReposDelegator {
 	 *
 	 * @param options Repos filter options
 	 * @return a list of repos
-	 * @throws P4JavaException
+	 * @throws P4JavaException on error
 	 */
 	@Override
 	public List<IRepo> getRepos(ReposOptions options) throws P4JavaException {
@@ -64,9 +64,9 @@ public class ReposDelegator extends BaseDelegator implements IReposDelegator {
 	 *
 	 * @param client the name of the client workspace
 	 * @return a list of repos
-	 * @throws ConnectionException
-	 * @throws RequestException
-	 * @throws AccessException
+	 * @throws ConnectionException on error
+	 * @throws RequestException    on error
+	 * @throws AccessException     on error
 	 */
 	@Override
 	public List<IRepo> getRepos(@Nonnull String client) throws ConnectionException, RequestException, AccessException {

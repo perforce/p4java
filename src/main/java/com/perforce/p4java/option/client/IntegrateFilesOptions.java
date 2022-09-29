@@ -12,12 +12,12 @@ import java.util.Iterator;
 import java.util.List;
 
 /**
- * Options for the IClient.integrateFiles method.<p>
+ * Options for the IClient.integrateFiles method.
  * <p>
  * Note that this implementation extends the normal default
  * options processing with its own method(s) due to the complexity
  * of the various -D and -R flag options; note also the somewhat odd
- * relationship with the previous IntegrationOptions class.<p>
+ * relationship with the previous IntegrationOptions class.
  * <p>
  * Note also that the current implementation makes no attempt
  * to validate the sanity or otherwise of the various options and
@@ -206,12 +206,10 @@ public class IntegrateFilesOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * <p>
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
-	 * <p>
+	 * option value (if any).</b>
 	 * <p>
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
@@ -219,6 +217,7 @@ public class IntegrateFilesOptions extends Options {
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
 	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public IntegrateFilesOptions(String... options) {
@@ -227,16 +226,24 @@ public class IntegrateFilesOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param changelistId               changelistId
+	 * @param bidirectionalInteg         bidirectionalInteg
+	 * @param integrateAroundDeletedRevs integrateAroundDeletedRevs
+	 * @param rebranchSourceAfterDelete  rebranchSourceAfterDelete
+	 * @param deleteTargetAfterDelete    deleteTargetAfterDelete
+	 * @param integrateAllAfterReAdd     integrateAllAfterReAdd
+	 * @param forceIntegration           forceIntegration
+	 * @param useHaveRev                 useHaveRev
+	 * @param doBaselessMerge            doBaselessMerge
+	 * @param displayBaseDetails         displayBaseDetails
+	 * @param showActionsOnly            showActionsOnly
+	 * @param reverseMapping             reverseMapping
+	 * @param propagateType              propagateType
+	 * @param dontCopyToClient           dontCopyToClient
+	 * @param maxFiles                   maxFiles
 	 */
-	public IntegrateFilesOptions(int changelistId,
-	                             boolean bidirectionalInteg,
-	                             boolean integrateAroundDeletedRevs,
-	                             boolean rebranchSourceAfterDelete, boolean deleteTargetAfterDelete,
-	                             boolean integrateAllAfterReAdd, boolean forceIntegration,
-	                             boolean useHaveRev, boolean doBaselessMerge,
-	                             boolean displayBaseDetails, boolean showActionsOnly,
-	                             boolean reverseMapping, boolean propagateType,
-	                             boolean dontCopyToClient, int maxFiles) {
+	public IntegrateFilesOptions(int changelistId, boolean bidirectionalInteg, boolean integrateAroundDeletedRevs, boolean rebranchSourceAfterDelete, boolean deleteTargetAfterDelete, boolean integrateAllAfterReAdd, boolean forceIntegration, boolean useHaveRev, boolean doBaselessMerge, boolean displayBaseDetails, boolean showActionsOnly, boolean reverseMapping, boolean propagateType, boolean dontCopyToClient, int maxFiles) {
 		super();
 		this.changelistId = changelistId;
 		this.bidirectionalInteg = bidirectionalInteg;
@@ -257,18 +264,27 @@ public class IntegrateFilesOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param changelistId               changelistId
+	 * @param bidirectionalInteg         bidirectionalInteg
+	 * @param integrateAroundDeletedRevs integrateAroundDeletedRevs
+	 * @param rebranchSourceAfterDelete  rebranchSourceAfterDelete
+	 * @param deleteTargetAfterDelete    deleteTargetAfterDelete
+	 * @param integrateAllAfterReAdd     integrateAllAfterReAdd
+	 * @param branchResolves             branchResolves
+	 * @param deleteResolves             deleteResolves
+	 * @param skipIntegratedRevs         skipIntegratedRevs
+	 * @param forceIntegration           forceIntegration
+	 * @param useHaveRev                 useHaveRev
+	 * @param doBaselessMerge            doBaselessMerge
+	 * @param displayBaseDetails         displayBaseDetails
+	 * @param showActionsOnly            showActionsOnly
+	 * @param reverseMapping             reverseMapping
+	 * @param propagateType              propagateType
+	 * @param dontCopyToClient           dontCopyToClient
+	 * @param maxFiles                   maxFiles
 	 */
-	public IntegrateFilesOptions(int changelistId,
-	                             boolean bidirectionalInteg,
-	                             boolean integrateAroundDeletedRevs,
-	                             boolean rebranchSourceAfterDelete, boolean deleteTargetAfterDelete,
-	                             boolean integrateAllAfterReAdd,
-	                             boolean branchResolves, boolean deleteResolves,
-	                             boolean skipIntegratedRevs, boolean forceIntegration,
-	                             boolean useHaveRev, boolean doBaselessMerge,
-	                             boolean displayBaseDetails, boolean showActionsOnly,
-	                             boolean reverseMapping, boolean propagateType,
-	                             boolean dontCopyToClient, int maxFiles) {
+	public IntegrateFilesOptions(int changelistId, boolean bidirectionalInteg, boolean integrateAroundDeletedRevs, boolean rebranchSourceAfterDelete, boolean deleteTargetAfterDelete, boolean integrateAllAfterReAdd, boolean branchResolves, boolean deleteResolves, boolean skipIntegratedRevs, boolean forceIntegration, boolean useHaveRev, boolean doBaselessMerge, boolean displayBaseDetails, boolean showActionsOnly, boolean reverseMapping, boolean propagateType, boolean dontCopyToClient, int maxFiles) {
 		super();
 		this.changelistId = changelistId;
 		this.bidirectionalInteg = bidirectionalInteg;
@@ -292,18 +308,28 @@ public class IntegrateFilesOptions extends Options {
 
 	/**
 	 * Explicit-value constructor for use with a branch.
+	 *
+	 * @param changelistId               changelistId
+	 * @param integrateAroundDeletedRevs integrateAroundDeletedRevs
+	 * @param rebranchSourceAfterDelete  rebranchSourceAfterDelete
+	 * @param deleteTargetAfterDelete    deleteTargetAfterDelete
+	 * @param integrateAllAfterReAdd     integrateAllAfterReAdd
+	 * @param branchResolves             branchResolves
+	 * @param deleteResolves             deleteResolves
+	 * @param skipIntegratedRevs         skipIntegratedRevs
+	 * @param forceIntegration           forceIntegration
+	 * @param useHaveRev                 useHaveRev
+	 * @param doBaselessMerge            doBaselessMerge
+	 * @param displayBaseDetails         displayBaseDetails
+	 * @param showActionsOnly            showActionsOnly
+	 * @param propagateType              propagateType
+	 * @param dontCopyToClient           dontCopyToClient
+	 * @param maxFiles                   maxFiles
+	 * @param branch                     branch
+	 * @param reverseMapping             reverseMapping
+	 * @param bidirectionalInteg         bidirectionalInteg
 	 */
-	public IntegrateFilesOptions(int changelistId,
-	                             boolean integrateAroundDeletedRevs,
-	                             boolean rebranchSourceAfterDelete, boolean deleteTargetAfterDelete,
-	                             boolean integrateAllAfterReAdd,
-	                             boolean branchResolves, boolean deleteResolves,
-	                             boolean skipIntegratedRevs, boolean forceIntegration,
-	                             boolean useHaveRev, boolean doBaselessMerge,
-	                             boolean displayBaseDetails, boolean showActionsOnly,
-	                             boolean propagateType, boolean dontCopyToClient,
-	                             int maxFiles, String branch,
-	                             boolean reverseMapping, boolean bidirectionalInteg) {
+	public IntegrateFilesOptions(int changelistId, boolean integrateAroundDeletedRevs, boolean rebranchSourceAfterDelete, boolean deleteTargetAfterDelete, boolean integrateAllAfterReAdd, boolean branchResolves, boolean deleteResolves, boolean skipIntegratedRevs, boolean forceIntegration, boolean useHaveRev, boolean doBaselessMerge, boolean displayBaseDetails, boolean showActionsOnly, boolean propagateType, boolean dontCopyToClient, int maxFiles, String branch, boolean reverseMapping, boolean bidirectionalInteg) {
 		super();
 		this.changelistId = changelistId;
 		this.integrateAroundDeletedRevs = integrateAroundDeletedRevs;
@@ -328,18 +354,28 @@ public class IntegrateFilesOptions extends Options {
 
 	/**
 	 * Explicit-value constructor for use with a stream.
+	 *
+	 * @param changelistId               changelistId
+	 * @param integrateAroundDeletedRevs integrateAroundDeletedRevs
+	 * @param rebranchSourceAfterDelete  rebranchSourceAfterDelete
+	 * @param deleteTargetAfterDelete    deleteTargetAfterDelete
+	 * @param integrateAllAfterReAdd     integrateAllAfterReAdd
+	 * @param branchResolves             branchResolves
+	 * @param deleteResolves             deleteResolves
+	 * @param skipIntegratedRevs         skipIntegratedRevs
+	 * @param forceIntegration           forceIntegration
+	 * @param useHaveRev                 useHaveRev
+	 * @param doBaselessMerge            doBaselessMerge
+	 * @param displayBaseDetails         displayBaseDetails
+	 * @param showActionsOnly            showActionsOnly
+	 * @param propagateType              propagateType
+	 * @param dontCopyToClient           dontCopyToClient
+	 * @param maxFiles                   maxFiles
+	 * @param stream                     stream
+	 * @param parentStream               parentStream
+	 * @param reverseMapping             reverseMapping
 	 */
-	public IntegrateFilesOptions(int changelistId,
-	                             boolean integrateAroundDeletedRevs,
-	                             boolean rebranchSourceAfterDelete, boolean deleteTargetAfterDelete,
-	                             boolean integrateAllAfterReAdd,
-	                             boolean branchResolves, boolean deleteResolves,
-	                             boolean skipIntegratedRevs, boolean forceIntegration,
-	                             boolean useHaveRev, boolean doBaselessMerge,
-	                             boolean displayBaseDetails, boolean showActionsOnly,
-	                             boolean propagateType, boolean dontCopyToClient,
-	                             int maxFiles, String stream,
-	                             String parentStream, boolean reverseMapping) {
+	public IntegrateFilesOptions(int changelistId, boolean integrateAroundDeletedRevs, boolean rebranchSourceAfterDelete, boolean deleteTargetAfterDelete, boolean integrateAllAfterReAdd, boolean branchResolves, boolean deleteResolves, boolean skipIntegratedRevs, boolean forceIntegration, boolean useHaveRev, boolean doBaselessMerge, boolean displayBaseDetails, boolean showActionsOnly, boolean propagateType, boolean dontCopyToClient, int maxFiles, String stream, String parentStream, boolean reverseMapping) {
 		super();
 		this.changelistId = changelistId;
 		this.integrateAroundDeletedRevs = integrateAroundDeletedRevs;
@@ -366,32 +402,7 @@ public class IntegrateFilesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-				this.getChangelistId(),
-				this.isIntegrateAroundDeletedRevs(),
-				this.isIntegrateAllAfterReAdd(),
-				this.isDeleteTargetAfterDelete(),
-				this.isRebranchSourceAfterDelete(),
-				this.isBranchResolves(),
-				this.isDeleteResolves(),
-				this.isSkipIntegratedRevs(),
-				this.isForceIntegration(),
-				this.isUseHaveRev(),
-				this.isDoBaselessMerge(),
-				this.isDisplayBaseDetails(),
-				this.isShowActionsOnly(),
-				this.isPropagateType(),
-				this.isQuiet(),
-				this.isDontCopyToClient(),
-				this.getMaxFiles(),
-				this.getBranch(),
-				this.getStream(),
-				this.getParentStream(),
-				this.isReverseMapping(),
-				this.isBidirectionalInteg(),
-				this.isShowBaseRevision(),
-				this.isShowScheduledResolve(),
-				this.isInteg2());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.getChangelistId(), this.isIntegrateAroundDeletedRevs(), this.isIntegrateAllAfterReAdd(), this.isDeleteTargetAfterDelete(), this.isRebranchSourceAfterDelete(), this.isBranchResolves(), this.isDeleteResolves(), this.isSkipIntegratedRevs(), this.isForceIntegration(), this.isUseHaveRev(), this.isDoBaselessMerge(), this.isDisplayBaseDetails(), this.isShowActionsOnly(), this.isPropagateType(), this.isQuiet(), this.isDontCopyToClient(), this.getMaxFiles(), this.getBranch(), this.getStream(), this.getParentStream(), this.isReverseMapping(), this.isBidirectionalInteg(), this.isShowBaseRevision(), this.isShowScheduledResolve(), this.isInteg2());
 
 		combineGroupOptions("-R");
 		combineGroupOptions("-O");

@@ -15,12 +15,14 @@ public interface IReviewSubscription extends IMapEntry {
 	
 	/**
 	 * Get the review subscription.
+	 * @return subscription
 	 */
 	
 	String getSubscription();
 	
 	/**
 	 * Set the review subscription.
+	 * @param subscription subscription
 	 */
 	void setSubscription(String subscription);
 }

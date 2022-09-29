@@ -128,7 +128,7 @@ public class PopulateFilesOptions extends Options {
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
 	 * 
 	 * <b>NOTE: setting options this way always bypasses the internal options

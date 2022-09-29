@@ -21,7 +21,7 @@ public class ClientError extends P4JavaError {
 	/**
 	 * Create a P4Java client error
 	 * 
-	 * @param message
+	 * @param message message
 	 */
 	public ClientError(String message) {
 		super(message);
@@ -30,7 +30,7 @@ public class ClientError extends P4JavaError {
 	/**
 	 * Create a P4Java client error
 	 * 
-	 * @param cause
+	 * @param cause cause
 	 */
 	public ClientError(Throwable cause) {
 		super(cause);
@@ -39,8 +39,8 @@ public class ClientError extends P4JavaError {
 	/**
 	 * Create a P4Java client error
 	 * 
-	 * @param message
-	 * @param cause
+	 * @param message message
+	 * @param cause cause
 	 */
 	public ClientError(String message, Throwable cause) {
 		super(message, cause);

@@ -74,13 +74,8 @@ public class PropertyDelegator extends BaseDelegator implements IPropertyDelegat
 
         return buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, IProperty>() {
-                    @Override
-                    public IProperty apply(Map map) {
-                        return new Property(map);
-                    }
-                }
-        );
+				map -> new Property(map)
+		);
     }
 
     @Override

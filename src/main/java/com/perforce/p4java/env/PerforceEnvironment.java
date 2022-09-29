@@ -13,7 +13,7 @@ public class PerforceEnvironment {
 	public static final String P4USER = "P4USER";
 	public static final String P4PASSWD = "P4PASSWD";
 	public static final String P4CLIENT = "P4CLIENT";
-	
+
 	public static final String P4HOST = "P4HOST";
 	public static final String P4CHARSET = "P4CHARSET";
 	public static final String P4TICKETS = "P4TICKETS";
@@ -25,7 +25,7 @@ public class PerforceEnvironment {
 
 	// Default P4ENVIRO file path
 	public static final String DEFAULT_P4ENVIRO_FILE = System.getProperty("user.home") + "/.p4enviro";
-	
+
 	public static String getP4Port() {
 		return System.getenv(P4PORT);
 	}
@@ -68,6 +68,8 @@ public class PerforceEnvironment {
 
 	/**
 	 * If not set and return the default P4ENVIRO file path.
+	 *
+	 * @return P4ENVIRO
 	 */
 	public static String getP4Enviro() {
 		if (System.getenv(P4ENVIRO) != null) {

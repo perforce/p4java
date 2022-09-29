@@ -3,15 +3,15 @@
  */
 package com.perforce.p4java.option.server;
 
-import java.util.List;
-
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
  * Options-based method options for IOptionsServer obliterateFiles method(s).
- * 
+ *
  * @see com.perforce.p4java.server.IOptionsServer#obliterateFiles(java.util.List, com.perforce.p4java.option.server.ObliterateFilesOptions)
  */
 public class ObliterateFilesOptions extends Options {
@@ -34,7 +34,7 @@ public class ObliterateFilesOptions extends Options {
 	 * a branch, then it's most likely that the archival search is not
 	 * necessary. This option is safe to use with the '-b' option.
 	 * <p>
-	 * 
+	 *
 	 * Note: this is an 'undoc' flag; use 'p4 help undoc' for more details
 	 */
 	protected boolean skipArchiveSearchRemoval = false;
@@ -45,7 +45,7 @@ public class ObliterateFilesOptions extends Options {
 	 * This flag is useful for removing old branches while keeping files of
 	 * interest (files that were modified).
 	 * <p>
-	 * 
+	 *
 	 * Note: this is an 'undoc' flag; use 'p4 help undoc' for more details
 	 */
 	protected boolean branchedFirstHeadRevOnly = false;
@@ -58,7 +58,7 @@ public class ObliterateFilesOptions extends Options {
 	 * reuse, because the old content on any client will not match the
 	 * newly-added repository files.
 	 * <p>
-	 * 
+	 *
 	 * Note: this is an 'undoc' flag; use 'p4 help undoc' for more details
 	 */
 	protected boolean skipHaveSearch = false;
@@ -73,19 +73,20 @@ public class ObliterateFilesOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public ObliterateFilesOptions(String... options) {
@@ -94,10 +95,13 @@ public class ObliterateFilesOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param executeObliterate        executeObliterate
+	 * @param skipArchiveSearchRemoval skipArchiveSearchRemoval
+	 * @param branchedFirstHeadRevOnly branchedFirstHeadRevOnly
+	 * @param skipHaveSearch           skipHaveSearch
 	 */
-	public ObliterateFilesOptions(boolean executeObliterate,
-			boolean skipArchiveSearchRemoval, boolean branchedFirstHeadRevOnly,
-			boolean skipHaveSearch) {
+	public ObliterateFilesOptions(boolean executeObliterate, boolean skipArchiveSearchRemoval, boolean branchedFirstHeadRevOnly, boolean skipHaveSearch) {
 		super();
 		this.executeObliterate = executeObliterate;
 		this.skipArchiveSearchRemoval = skipArchiveSearchRemoval;
@@ -109,9 +113,7 @@ public class ObliterateFilesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-				this.executeObliterate, this.skipArchiveSearchRemoval,
-				this.branchedFirstHeadRevOnly, this.skipHaveSearch);
+		this.optionList = this.processFields(OPTIONS_SPECS, this.executeObliterate, this.skipArchiveSearchRemoval, this.branchedFirstHeadRevOnly, this.skipHaveSearch);
 
 		return this.optionList;
 	}
@@ -129,8 +131,7 @@ public class ObliterateFilesOptions extends Options {
 		return skipArchiveSearchRemoval;
 	}
 
-	public ObliterateFilesOptions setSkipArchiveSearchRemoval(
-			boolean skipArchiveSearchRemoval) {
+	public ObliterateFilesOptions setSkipArchiveSearchRemoval(boolean skipArchiveSearchRemoval) {
 		this.skipArchiveSearchRemoval = skipArchiveSearchRemoval;
 		return this;
 	}
@@ -139,8 +140,7 @@ public class ObliterateFilesOptions extends Options {
 		return branchedFirstHeadRevOnly;
 	}
 
-	public ObliterateFilesOptions setBranchedFirstHeadRevOnly(
-			boolean branchedFirstHeadRevOnly) {
+	public ObliterateFilesOptions setBranchedFirstHeadRevOnly(boolean branchedFirstHeadRevOnly) {
 		this.branchedFirstHeadRevOnly = branchedFirstHeadRevOnly;
 		return this;
 	}

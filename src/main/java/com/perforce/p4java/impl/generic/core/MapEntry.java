@@ -35,6 +35,10 @@ public class MapEntry implements IMapEntry {
 	 * Construct a suitable MapEntry from the passed-in arguments, inferring
 	 * the entry type from any suitable prefixes on the passed-in left string.
 	 * Left and right strings have any type prefixes stripped from them.
+	 *
+	 * @param order order
+	 * @param left  left mapping
+	 * @param right right mapping
 	 */
 	public MapEntry(int order, String left, String right) {
 		this.order = order;
@@ -52,6 +56,11 @@ public class MapEntry implements IMapEntry {
 	/**
 	 * Explicit-value constructor. Left and right strings have any type
 	 * prefixes stripped from them before being assigned to the new entry.
+	 *
+	 * @param order order
+	 * @param type  type
+	 * @param left  left mapping
+	 * @param right right mapping
 	 */
 	public MapEntry(int order, EntryType type, String left, String right) {
 		this.order = order;
@@ -72,6 +81,9 @@ public class MapEntry implements IMapEntry {
 	 * is in the format specified by parseViewString (below). If the passed-in string
 	 * is null, only the order field is set; the other fields are set to null or
 	 * ORDER_UNKNOWN.
+	 *
+	 * @param order      order
+	 * @param mappingStr mapping
 	 */
 	public MapEntry(int order, String mappingStr) {
 		this.order = order;
@@ -87,6 +99,8 @@ public class MapEntry implements IMapEntry {
 	/**
 	 * Copy constructor. Constructs a new MapEntry from the passed-in version.
 	 * If entry is null, this is equivalent to calling the default constructor.
+	 *
+	 * @param entry map entry
 	 */
 	public MapEntry(IMapEntry entry) {
 		if (entry != null) {
@@ -254,6 +268,9 @@ public class MapEntry implements IMapEntry {
 	 * Strip any Perforce entry type prefix from the passed-in string. If the
 	 * string is null, this returns null; if there's no such prefix, the original
 	 * string is returned.
+	 *
+	 * @param str prefix
+	 * @return formatted string
 	 */
 	public static String stripTypePrefix(final String str) {
 		if (str == null) {

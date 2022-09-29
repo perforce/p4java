@@ -121,7 +121,15 @@ public class GroupsDelegator extends BaseDelegator implements IGroupsDelegator {
     /**
      * Implemented on behalf of legacy clients.
      * 
-     * @see com.perforce.p4java.server.IServer#getUserGroups(String, boolean, boolean, int)
+     * @param userOrGroupName userOrGroupName
+	 * @param indirect indirect
+	 * @param displayValues displayValues
+	 * @param maxGroups maxGroups
+	 * @see com.perforce.p4java.server.IServer#getUserGroups(String, boolean, boolean, int)
+	 * @return list of groups
+	 * @throws ConnectionException on error
+	 * @throws RequestException on error
+	 * @throws AccessException on error
      */
     public List<IUserGroup> getUserGroups(final String userOrGroupName, final boolean indirect,
             final boolean displayValues, final int maxGroups)

@@ -1,51 +1,51 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option.server;
-
-import java.util.List;
 
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
  * Options class for IOptionsServer getDirectories method.
- * 
+ *
  * @see com.perforce.p4java.server.IOptionsServer#getDirectories(java.util.List, com.perforce.p4java.option.server.GetDirectoriesOptions)
  */
 public class GetDirectoriesOptions extends Options {
-	
+
 	/**
 	 * Options: -C, -D, -H, -S[stream]
 	 */
 	public static final String OPTIONS_SPECS = "b:C b:D b:H s:S";
-	
+
 	/**
 	 * If true, limit the returns to directories that are mapped in
 	 * the current Perforce client workspace. Corresponds to -C.
 	 */
 	protected boolean clientOnly = false;
-	
+
 	/**
 	 * If true, includes directories with only deleted files.
 	 * Corresponds to -D.
 	 */
 	protected boolean deletedOnly = false;
-	
+
 	/**
 	 *  If true, lists directories of files on the 'have' list.
 	 *  Corresponds to -H.
 	 */
 	protected boolean haveListOnly = false;
 
-    /**
-     * If non-null, limits output to depot directories mapped in a stream's
-     * client view. Corresponds to the "-S stream" flag.
-     */
-    protected String stream = null;
+	/**
+	 * If non-null, limits output to depot directories mapped in a stream's
+	 * client view. Corresponds to the "-S stream" flag.
+	 */
+	protected String stream = null;
 
-    /**
+	/**
 	 * Default constructor -- sets all fields to false.
 	 */
 	public GetDirectoriesOptions() {
@@ -55,19 +55,20 @@ public class GetDirectoriesOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public GetDirectoriesOptions(String... options) {
@@ -76,9 +77,12 @@ public class GetDirectoriesOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param clientOnly   clientOnly
+	 * @param deletedOnly  deletedOnly
+	 * @param haveListOnly haveListOnly
 	 */
-	public GetDirectoriesOptions(boolean clientOnly, boolean deletedOnly,
-			boolean haveListOnly) {
+	public GetDirectoriesOptions(boolean clientOnly, boolean deletedOnly, boolean haveListOnly) {
 		super();
 		this.clientOnly = clientOnly;
 		this.deletedOnly = deletedOnly;
@@ -87,9 +91,13 @@ public class GetDirectoriesOptions extends Options {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param clientOnly   clientOnly
+	 * @param deletedOnly  deletedOnly
+	 * @param haveListOnly haveListOnly
+	 * @param stream       stream
 	 */
-	public GetDirectoriesOptions(boolean clientOnly, boolean deletedOnly,
-			boolean haveListOnly, String stream) {
+	public GetDirectoriesOptions(boolean clientOnly, boolean deletedOnly, boolean haveListOnly, String stream) {
 		super();
 		this.clientOnly = clientOnly;
 		this.deletedOnly = deletedOnly;
@@ -101,11 +109,7 @@ public class GetDirectoriesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-										this.isClientOnly(),
-										this.isDeletedOnly(),
-										this.isHaveListOnly(),
-										this.getStream());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isClientOnly(), this.isDeletedOnly(), this.isHaveListOnly(), this.getStream());
 		return this.optionList;
 	}
 
@@ -137,11 +141,11 @@ public class GetDirectoriesOptions extends Options {
 	}
 
 	public String getStream() {
-    	return stream;
+		return stream;
 	}
 
 	public GetDirectoriesOptions setStream(String stream) {
-    	this.stream = stream;
-    	return this;
+		this.stream = stream;
+		return this;
 	}
 }

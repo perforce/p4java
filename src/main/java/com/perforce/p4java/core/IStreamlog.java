@@ -5,13 +5,12 @@ import java.util.List;
 
 /**
  * Defines the methods and operations available on Perforce
- * streamlogs returned from the server.<p>
+ * streamlogs returned from the server.
  * <p>
  * Streamlogs are typically returned from the server's streamlog
  * methods (e.g. getStreamlog) and normally contain only
  * the fields returned by the Perforce "p4 streamlog" command.
  */
-
 public interface IStreamlog {
 
 	/**
@@ -74,6 +73,7 @@ public interface IStreamlog {
 
 	/**
 	 * Return Integration history associated with changelist.
+	 *
 	 * @return List of hash maps describing integrations.
 	 */
 	List<IStreamIntegrationLog> getStreamIntegList();

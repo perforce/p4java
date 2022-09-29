@@ -21,31 +21,37 @@ public interface IBranchSpecSummary extends IServerResource {
 	
 	/**
 	 * Get the name of this branch.
+	 * @return name
 	 */
 	String getName();
 	
 	/**
 	 * Get the name of the user who created this branch.
+	 * @return owner
 	 */
 	String getOwnerName();
 	
 	/**
 	 * Get the date specification was last modified.
+	 * @return date
 	 */
 	Date getUpdated();
 	
 	/**
 	 * Get the date of the last 'integrate' using this branch.
+	 * @return date
 	 */
 	Date getAccessed();
 	
 	/**
 	 * Get the branch's description (if any).
+	 * @return description
 	 */
 	String getDescription();
 	
 	/**
 	 * Return true if the branch spec is locked.
+	 * @return true if locked
 	 */
 	boolean isLocked();
 	

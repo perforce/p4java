@@ -27,105 +27,109 @@ import static java.util.Objects.nonNull;
  */
 public class GroupDelegator extends BaseDelegator implements IGroupDelegator {
 
-    /**
-     * Instantiate a new GroupDelegator for the given server implementation.
-     * 
-     * @param server
-     *            the server to delegate for
-     */
-    public GroupDelegator(IOptionsServer server) {
-        super(server);
-    }
+	/**
+	 * Instantiate a new GroupDelegator for the given server implementation.
+	 *
+	 * @param server the server to delegate for
+	 */
+	public GroupDelegator(IOptionsServer server) {
+		super(server);
+	}
 
-    @Override
-    public IUserGroup getUserGroup(@Nonnull final String name)
-            throws ConnectionException, RequestException, AccessException {
-        Validate.notBlank(name, "Group name shouldn't use null or empty");
+	@Override
+	public IUserGroup getUserGroup(@Nonnull final String name) throws ConnectionException, RequestException, AccessException {
+		Validate.notBlank(name, "Group name shouldn't use null or empty");
 
-        List<Map<String, Object>> resultMaps = execMapCmdList(GROUP, new String[] { "-o", name },
-                null);
-        UserGroup ugImpl = null;
+		List<Map<String, Object>> resultMaps = execMapCmdList(GROUP, new String[]{"-o", name}, null);
+		UserGroup ugImpl = null;
 
-        if (nonNull(resultMaps)) {
-            Map<String, Object> firstResultMap = resultMaps.get(0);
-            if (nonNull(firstResultMap)) {
-                ResultMapParser.handleErrorStr(firstResultMap);
-                ugImpl = new UserGroup(firstResultMap);
-            }
-        }
+		if (nonNull(resultMaps)) {
+			Map<String, Object> firstResultMap = resultMaps.get(0);
+			if (nonNull(firstResultMap)) {
+				ResultMapParser.handleErrorStr(firstResultMap);
+				ugImpl = new UserGroup(firstResultMap);
+			}
+		}
 
-        return ugImpl;
-    }
+		return ugImpl;
+	}
 
-    @Override
-    public String deleteUserGroup(@Nonnull IUserGroup group, @Nullable UpdateUserGroupOptions opts)
-            throws P4JavaException {
+	@Override
+	public String deleteUserGroup(@Nonnull IUserGroup group, @Nullable UpdateUserGroupOptions opts) throws P4JavaException {
 
-        Validate.notNull(group);
-        Validate.notBlank(group.getName(), "Group name shouldn't a null or empty.");
+		Validate.notNull(group);
+		Validate.notBlank(group.getName(), "Group name shouldn't a null or empty.");
 
-        List<Map<String, Object>> resultMaps = execMapCmdList(GROUP, Parameters
-                .processParameters(opts, null, new String[] { "-d", group.getName() }, server), null);
+		List<Map<String, Object>> resultMaps = execMapCmdList(GROUP, Parameters.processParameters(opts, null, new String[]{"-d", group.getName()}, server), null);
 
-        return ResultMapParser.parseCommandResultMapAsString(resultMaps);
-    }
+		return ResultMapParser.parseCommandResultMapAsString(resultMaps);
+	}
 
-    @Override
-    public String createUserGroup(@Nonnull final IUserGroup group,
-            @Nullable final UpdateUserGroupOptions opts) throws P4JavaException {
-        return updateUserGroup(group, opts);
-    }
+	@Override
+	public String createUserGroup(@Nonnull final IUserGroup group, @Nullable final UpdateUserGroupOptions opts) throws P4JavaException {
+		return updateUserGroup(group, opts);
+	}
 
-    @Override
-    public String updateUserGroup(@Nonnull final IUserGroup group,
-            @Nullable final UpdateUserGroupOptions opts) throws P4JavaException {
+	@Override
+	public String updateUserGroup(@Nonnull final IUserGroup group, @Nullable final UpdateUserGroupOptions opts) throws P4JavaException {
 
-        Validate.notNull(group);
+		Validate.notNull(group);
 
-        List<Map<String, Object>> resultMaps = execMapCmdList(GROUP,
-                Parameters.processParameters(opts, null, "-i", server), InputMapper.map(group));
+		List<Map<String, Object>> resultMaps = execMapCmdList(GROUP, Parameters.processParameters(opts, null, "-i", server), InputMapper.map(group));
 
-        return ResultMapParser.parseCommandResultMapAsString(resultMaps);
-    }
+		return ResultMapParser.parseCommandResultMapAsString(resultMaps);
+	}
 
-    /**
-     * Implemented on behalf of IServer for backwards compatibility.
-     * 
-     */
-    public String createUserGroup(@Nonnull final IUserGroup group)
-            throws ConnectionException, RequestException, AccessException {
-        Validate.notNull(group);
-        return updateUserGroup(group, false);
-    }
+	/**
+	 * Implemented on behalf of IServer for backwards compatibility.
+	 *
+	 * @param group group
+	 * @return response
+	 * @throws ConnectionException on error
+	 * @throws RequestException    on error
+	 * @throws AccessException     on error
+	 */
+	public String createUserGroup(@Nonnull final IUserGroup group) throws ConnectionException, RequestException, AccessException {
+		Validate.notNull(group);
+		return updateUserGroup(group, false);
+	}
 
-    /**
-     * Implemented on behalf of IServer for backwards compatibility.
-     * 
-     */
-    public String updateUserGroup(@Nonnull final IUserGroup group, final boolean updateIfOwner)
-            throws ConnectionException, RequestException, AccessException {
-        try {
-            return updateUserGroup(group,
-                    new UpdateUserGroupOptions().setUpdateIfOwner(updateIfOwner));
-        } catch (final ConnectionException | AccessException exc) {
-            throw exc;
-        } catch (P4JavaException exc) {
-            throw new RequestException(exc.getMessage(), exc);
-        }
-    }
+	/**
+	 * Implemented on behalf of IServer for backwards compatibility.
+	 *
+	 * @param group         group
+	 * @param updateIfOwner updateIfOwner
+	 * @return response
+	 * @throws ConnectionException on error
+	 * @throws RequestException    on error
+	 * @throws AccessException     on error
+	 */
+	public String updateUserGroup(@Nonnull final IUserGroup group, final boolean updateIfOwner) throws ConnectionException, RequestException, AccessException {
+		try {
+			return updateUserGroup(group, new UpdateUserGroupOptions().setUpdateIfOwner(updateIfOwner));
+		} catch (final ConnectionException | AccessException exc) {
+			throw exc;
+		} catch (P4JavaException exc) {
+			throw new RequestException(exc.getMessage(), exc);
+		}
+	}
 
-    /**
-     * Implemented on behalf of IServer for backwards compatibility.
-     * 
-     */
-    public String deleteUserGroup(@Nonnull final IUserGroup group)
-            throws ConnectionException, RequestException, AccessException {
-        try {
-            return deleteUserGroup(group, new UpdateUserGroupOptions());
-        } catch (final ConnectionException | AccessException exc) {
-            throw exc;
-        } catch (P4JavaException exc) {
-            throw new RequestException(exc.getMessage(), exc);
-        }
-    }
+	/**
+	 * Implemented on behalf of IServer for backwards compatibility.
+	 *
+	 * @param group group
+	 * @return response
+	 * @throws ConnectionException on error
+	 * @throws RequestException    on error
+	 * @throws AccessException     on error
+	 */
+	public String deleteUserGroup(@Nonnull final IUserGroup group) throws ConnectionException, RequestException, AccessException {
+		try {
+			return deleteUserGroup(group, new UpdateUserGroupOptions());
+		} catch (final ConnectionException | AccessException exc) {
+			throw exc;
+		} catch (P4JavaException exc) {
+			throw new RequestException(exc.getMessage(), exc);
+		}
+	}
 }

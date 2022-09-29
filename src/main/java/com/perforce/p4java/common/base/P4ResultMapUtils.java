@@ -35,6 +35,9 @@ public final class P4ResultMapUtils {
 	}
 
 	/**
+	 * @param map map
+	 * @param key key
+	 * @return value
 	 * @throws NumberFormatException if the string does not contain a parsable integer.
 	 */
 	public static int parseInt(@Nonnull Map<String, Object> map, String key) {
@@ -42,6 +45,9 @@ public final class P4ResultMapUtils {
 	}
 
 	/**
+	 * @param map map
+	 * @param key key
+	 * @return value
 	 * @throws NumberFormatException if the string does not contain a parsable integer.
 	 */
 	public static long parseLong(@Nonnull Map<String, Object> map, String key) {

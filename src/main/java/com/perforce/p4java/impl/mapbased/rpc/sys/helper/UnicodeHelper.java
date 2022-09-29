@@ -13,8 +13,6 @@ import java.nio.charset.CodingErrorAction;
 /**
  * Provides default and / or bridged (to Eclipse, etc.) Unicode helper
  * methods. May disappear or be moved in a future refactoring.
- * 
- *
  */
 
 public class UnicodeHelper {
@@ -24,14 +22,19 @@ public class UnicodeHelper {
 	 * passed-in charset. Uses inefficient
 	 * heuristics that will be revisited when we're more familiar with likely
 	 * usage patterns.
-	 * 
+	 * <p>
 	 * Note this has been heavily changed since inception and will
 	 * almost certainly disappear in the 10.x timeframe -- HR.
+	 *
+	 * @param bytes         bytes
+	 * @param bytesRead     bytesRead
+	 * @param clientCharset clientCharset
+	 * @return ok
 	 */
 	public static boolean inferCharset(byte[] bytes, int bytesRead, Charset clientCharset) {
 		ByteBuffer byteBuf = ByteBuffer.wrap(bytes, 0, bytesRead);
 		CharBuffer charBuf = CharBuffer.allocate(byteBuf.capacity() * 2);
-		
+
 		if (clientCharset != null) {
 			CharsetDecoder decoder = clientCharset.newDecoder();
 			decoder.onMalformedInput(CodingErrorAction.REPORT);
@@ -42,11 +45,11 @@ public class UnicodeHelper {
 					// Wasn't this one...
 					return false;
 				} else {
-					return true;	// Still only *probably* true, dammit...
+					return true;    // Still only *probably* true, dammit...
 				}
 			}
 		}
-		
+
 		return true;
 	}
 }

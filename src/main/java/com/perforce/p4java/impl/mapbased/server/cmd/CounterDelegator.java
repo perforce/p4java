@@ -58,13 +58,8 @@ public class CounterDelegator extends BaseDelegator implements ICounterDelegator
         
         return ResultListBuilder.buildNullableObjectFromNonInfoMessageCommandResultMaps(
                 resultMaps,
-                new Function<Map, String>() {
-                    @Override
-                    public String apply(Map map) {
-                        return parseString(map, VALUE);
-                    }
-                }
-        );
+				map -> parseString(map, VALUE)
+		);
     }
 
     @Override
@@ -96,13 +91,8 @@ public class CounterDelegator extends BaseDelegator implements ICounterDelegator
 
         return ResultListBuilder.buildNullableObjectFromNonInfoMessageCommandResultMaps(
                 resultMaps,
-                new Function<Map, String>() {
-                    @Override
-                    public String apply(Map map) {
-                        return parseString(map, VALUE);
-                    }
-                }
-        );
+				map -> parseString(map, VALUE)
+		);
     }
 
     @Override

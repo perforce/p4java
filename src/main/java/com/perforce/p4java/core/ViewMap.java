@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.core;
 
@@ -19,11 +19,11 @@ import java.util.List;
  * normally used in Perforce clients, labels, branches, etc., to map one type
  * of path (a depot path, for example) to a different type of path (e.g. a
  * client path).<p>
- * 
+ *
  * View maps work in a manner that's described in the main Perforce documentation
  * for the basic client view, but in summary, map entries can be inclusive,
  * exclusive, or overlays, and map entry order is (of course) deeply significant.<p>
- * 
+ *
  * This implementation of view maps does not (yet) include advanced Perforce
  * functionality (such as translation or testing the map to see whether a
  * path is mapped or not), but future versions will; the emphasis here is on
@@ -38,7 +38,7 @@ public class ViewMap<E extends IMapEntry> implements Iterable<E> {
 	}
 
 	protected List<E> entryList = null;
-	
+
 	/**
 	 * Default constructor. Creates a new ViewMap with an
 	 * empty (but not null) entry list.
@@ -46,20 +46,20 @@ public class ViewMap<E extends IMapEntry> implements Iterable<E> {
 	public ViewMap() {
 		this.entryList = new ArrayList<E>();
 	}
-	
+
 	/**
 	 * Constructs a new ViewMap from the passed-in entry list. The passed-in
 	 * list is inspected for consistency before being used.
-	 * 
+	 *
 	 * @param entryList non-null (but possibly-empty) entry list.
 	 */
 	public ViewMap(List<E> entryList) {
 		checkEntryList(entryList);
 		this.entryList = entryList;
 	}
-	
+
 	/**
-	 * Return the number of elements in the associated entry list.
+	 * @return the number of elements in the associated entry list.
 	 */
 	public int getSize() {
 		return this.entryList.size();
@@ -70,7 +70,7 @@ public class ViewMap<E extends IMapEntry> implements Iterable<E> {
 	 * if order is out of bounds. The order field of the deleted entry
 	 * will be set to ORDER_UNKNOWN; the order fields of any entries
 	 * "below" the deletion will be updated with their new order.
-	 * 
+	 *
 	 * @param position order of entry to be deleted
 	 */
 	public synchronized void deleteEntry(int position) {
@@ -84,15 +84,16 @@ public class ViewMap<E extends IMapEntry> implements Iterable<E> {
 	/**
 	 * Get the map entry at the specified position. Will throw a P4JavaError
 	 * if order is out of bounds.
-	 * 
+	 *
 	 * @param position list position to use
+	 * @return map entry
 	 */
 	public synchronized E getEntry(int position) {
-		if ((position < 0) || (position >=this.entryList.size())) {
+		if ((position < 0) || (position >= this.entryList.size())) {
 			throw new P4JavaError("Position out of range: "
 					+ position + "; list size: " + this.entryList.size());
 		}
-		
+
 		E entry = this.entryList.get(position);
 		if (entry == null) {
 			throw new NullPointerError("Null entry in ViewMap list");
@@ -105,7 +106,7 @@ public class ViewMap<E extends IMapEntry> implements Iterable<E> {
 
 	/**
 	 * Get the entry list associated with this view map.
-	 * 
+	 *
 	 * @return non-null entry list
 	 */
 	public List<E> getEntryList() {
@@ -115,7 +116,7 @@ public class ViewMap<E extends IMapEntry> implements Iterable<E> {
 	/**
 	 * Add a map new entry at the end of the view map. The value of the entry's
 	 * order field will be set to the order in the entry list.
-	 * 
+	 *
 	 * @param entry non-null map entry.
 	 */
 	public synchronized void addEntry(E entry) {
@@ -129,12 +130,12 @@ public class ViewMap<E extends IMapEntry> implements Iterable<E> {
 
 	/**
 	 * Set (replace) a specific map position.<p>
-	 *  
+	 *
 	 * Will throw a P4JavaError if order is out of bounds or if the new entry
 	 * is null. The value of the entry's order field will be set to the
 	 * order in the entry list; the value of the replaced entry's
 	 * order field will be set to ORDER_UNKNOWN.
-	 * 
+	 *
 	 * @param position list order of replacement
 	 * @param entry non-null replacement entry
 	 */
@@ -154,21 +155,22 @@ public class ViewMap<E extends IMapEntry> implements Iterable<E> {
 
 	/**
 	 * Set the entry list associated with this view map.
-	 * 
+	 *
 	 * @param entryList non-null entry list
 	 */
 	public void setEntryList(List<E> entryList) {
 		checkEntryList(entryList);
 		this.entryList = entryList;
 	}
-	
+
 	/**
 	 * Do some sanity checks on the passed-in entry list. This includes
 	 * checking for null list, null entries, and whether each entry's order
 	 * field matches its actual order in the list. Throws NullPointerError
 	 * or P4JavaError as appropriate.
+	 *
+	 * @param entryList list of entries
 	 */
-	
 	public synchronized void checkEntryList(List<E> entryList) {
 		if (entryList == null) {
 			throw new NullPointerError(
@@ -188,7 +190,7 @@ public class ViewMap<E extends IMapEntry> implements Iterable<E> {
 			}
 		}
 	}
-	
+
 	/**
 	 * Update the entry list entry positions after an update by reassigning entry-internal
 	 * positions as appropriate.
@@ -218,12 +220,12 @@ public class ViewMap<E extends IMapEntry> implements Iterable<E> {
 	 */
 	public String translate(String from, MapDirection dir) {
 		MapTable mt = new MapTable();
-		for(E i : this) {
+		for (E i : this) {
 			mt.insert(i.getLeft(), i.getRight(),
 					i.getType() == IMapEntry.EntryType.EXCLUDE ? MapFlag.MfUnmap :
-					i.getType() == IMapEntry.EntryType.OVERLAY ? MapFlag.MfRemap :
-					i.getType() == IMapEntry.EntryType.DITTO   ? MapFlag.MfAndmap :
-							                                     MapFlag.MfMap);
+							i.getType() == IMapEntry.EntryType.OVERLAY ? MapFlag.MfRemap :
+									i.getType() == IMapEntry.EntryType.DITTO ? MapFlag.MfAndmap :
+											MapFlag.MfMap);
 		}
 		MapWrap mw = mt.translate(dir == MapDirection.MapLeftRight ? MapTableT.LHS : MapTableT.RHS, from);
 		return mw != null ? mw.getTo() : null;

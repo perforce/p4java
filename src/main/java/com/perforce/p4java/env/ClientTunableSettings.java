@@ -19,6 +19,7 @@ public class ClientTunableSettings {
    * Set to 0 to prevent writing utf8 files BOM
    * Set to 1 to write utf8 files with a BOM - default
    * Set to 2 to write utf8 BOM only on Windows
+   * @return true, if UTF8 BOM needed
    */
   //TODO: sshou should implement read it from 'p4envrio' with server:port prefix as well
   public static boolean needWriteUtf8Bom() {

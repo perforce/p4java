@@ -21,7 +21,84 @@ import com.perforce.p4java.server.callback.IParallelCallback;
 import com.perforce.p4java.server.callback.IProgressCallback;
 import com.perforce.p4java.server.callback.ISSOCallback;
 import com.perforce.p4java.server.callback.IStreamingCallback;
-import com.perforce.p4java.server.delegator.*;
+import com.perforce.p4java.server.delegator.IAttributeDelegator;
+import com.perforce.p4java.server.delegator.IBranchDelegator;
+import com.perforce.p4java.server.delegator.IBranchesDelegator;
+import com.perforce.p4java.server.delegator.IChangeDelegator;
+import com.perforce.p4java.server.delegator.IChangesDelegator;
+import com.perforce.p4java.server.delegator.IClientDelegator;
+import com.perforce.p4java.server.delegator.IClientsDelegator;
+import com.perforce.p4java.server.delegator.ICommitDelegator;
+import com.perforce.p4java.server.delegator.IConfigureDelegator;
+import com.perforce.p4java.server.delegator.ICounterDelegator;
+import com.perforce.p4java.server.delegator.ICountersDelegator;
+import com.perforce.p4java.server.delegator.IDBSchemaDelegator;
+import com.perforce.p4java.server.delegator.IDepotDelegator;
+import com.perforce.p4java.server.delegator.IDepotsDelegator;
+import com.perforce.p4java.server.delegator.IDescribeDelegator;
+import com.perforce.p4java.server.delegator.IDiff2Delegator;
+import com.perforce.p4java.server.delegator.IDirsDelegator;
+import com.perforce.p4java.server.delegator.IDiskspaceDelegator;
+import com.perforce.p4java.server.delegator.IDuplicateDelegator;
+import com.perforce.p4java.server.delegator.IExportDelegator;
+import com.perforce.p4java.server.delegator.IExtensionDelegator;
+import com.perforce.p4java.server.delegator.IFileAnnotateDelegator;
+import com.perforce.p4java.server.delegator.IFileLogDelegator;
+import com.perforce.p4java.server.delegator.IFilesDelegator;
+import com.perforce.p4java.server.delegator.IFixDelegator;
+import com.perforce.p4java.server.delegator.IFixesDelegator;
+import com.perforce.p4java.server.delegator.IFstatDelegator;
+import com.perforce.p4java.server.delegator.IGraphCommitLogDelegator;
+import com.perforce.p4java.server.delegator.IGraphListTreeDelegator;
+import com.perforce.p4java.server.delegator.IGraphReceivePackDelegator;
+import com.perforce.p4java.server.delegator.IGraphRevListDelegator;
+import com.perforce.p4java.server.delegator.IGraphShowRefDelegator;
+import com.perforce.p4java.server.delegator.IGrepDelegator;
+import com.perforce.p4java.server.delegator.IGroupDelegator;
+import com.perforce.p4java.server.delegator.IGroupsDelegator;
+import com.perforce.p4java.server.delegator.IInfoDelegator;
+import com.perforce.p4java.server.delegator.IIntegratedDelegator;
+import com.perforce.p4java.server.delegator.IInterchangesDelegator;
+import com.perforce.p4java.server.delegator.IJobDelegator;
+import com.perforce.p4java.server.delegator.IJobSpecDelegator;
+import com.perforce.p4java.server.delegator.IJobsDelegator;
+import com.perforce.p4java.server.delegator.IJournalWaitDelegator;
+import com.perforce.p4java.server.delegator.IKeyDelegator;
+import com.perforce.p4java.server.delegator.IKeysDelegator;
+import com.perforce.p4java.server.delegator.ILabelDelegator;
+import com.perforce.p4java.server.delegator.ILabelsDelegator;
+import com.perforce.p4java.server.delegator.ILicenseDelegator;
+import com.perforce.p4java.server.delegator.ILogTailDelegator;
+import com.perforce.p4java.server.delegator.ILogin2Delegator;
+import com.perforce.p4java.server.delegator.ILoginDelegator;
+import com.perforce.p4java.server.delegator.ILogoutDelegator;
+import com.perforce.p4java.server.delegator.IMonitorDelegator;
+import com.perforce.p4java.server.delegator.IMoveDelegator;
+import com.perforce.p4java.server.delegator.IObliterateDelegator;
+import com.perforce.p4java.server.delegator.IOpenedDelegator;
+import com.perforce.p4java.server.delegator.IPasswdDelegator;
+import com.perforce.p4java.server.delegator.IPrintDelegator;
+import com.perforce.p4java.server.delegator.IPropertyDelegator;
+import com.perforce.p4java.server.delegator.IProtectDelegator;
+import com.perforce.p4java.server.delegator.IProtectsDelegator;
+import com.perforce.p4java.server.delegator.IReloadDelegator;
+import com.perforce.p4java.server.delegator.IRenameUserDelegator;
+import com.perforce.p4java.server.delegator.IReposDelegator;
+import com.perforce.p4java.server.delegator.IReviewDelegator;
+import com.perforce.p4java.server.delegator.IReviewsDelegator;
+import com.perforce.p4java.server.delegator.ISearchDelegator;
+import com.perforce.p4java.server.delegator.ISizesDelegator;
+import com.perforce.p4java.server.delegator.ISpecDelegator;
+import com.perforce.p4java.server.delegator.IStatDelegator;
+import com.perforce.p4java.server.delegator.IStreamDelegator;
+import com.perforce.p4java.server.delegator.IStreamlogDelegator;
+import com.perforce.p4java.server.delegator.IStreamsDelegator;
+import com.perforce.p4java.server.delegator.ITagDelegator;
+import com.perforce.p4java.server.delegator.ITriggersDelegator;
+import com.perforce.p4java.server.delegator.IUnloadDelegator;
+import com.perforce.p4java.server.delegator.IUserDelegator;
+import com.perforce.p4java.server.delegator.IUsersDelegator;
+import com.perforce.p4java.server.delegator.IVerifyDelegator;
 
 import java.io.InputStream;
 import java.nio.charset.UnsupportedCharsetException;
@@ -32,13 +109,11 @@ import java.util.Properties;
 /**
  * Provides an interface onto a Perforce SCM server.
  * <p>
- * <p>
  * This is the main interface for Perforce services that are typically Perforce
  * client workspace-independent, or that affect entire Perforce depots or
  * servers. Some of these services are also available through various client,
  * job, changelist, etc., interfaces methods, but in general, most Perforce
  * services are always available through methods on this interface as well.
- * <p>
  * <p>
  * IServer interfaces for specific Perforce servers are issued by the P4Javs
  * server factory class, ServerFactory; the factory can return interfaces that
@@ -47,43 +122,41 @@ import java.util.Properties;
  * @see com.perforce.p4java.server.ServerFactory
  */
 
-public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBranchDelegator, IBranchesDelegator,
-		IChangeDelegator, IChangesDelegator, IClientDelegator, IClientsDelegator, IConfigureDelegator,
-		ICounterDelegator, ICountersDelegator, IDBSchemaDelegator, IDepotDelegator, IDepotsDelegator,
-		IReposDelegator, IDescribeDelegator, IDiff2Delegator, IDirsDelegator, IDiskspaceDelegator,
-		IDuplicateDelegator, IExportDelegator, IFileAnnotateDelegator, IFileLogDelegator, IFilesDelegator,
-		IFixDelegator, IFixesDelegator, IFstatDelegator, IGrepDelegator, IGroupDelegator, IGroupsDelegator,
-		IInfoDelegator, IIntegratedDelegator, IInterchangesDelegator, IStatDelegator, IJobDelegator,
-		IJobsDelegator, IJobSpecDelegator, IJournalWaitDelegator, IKeyDelegator, IKeysDelegator,
-		ILabelDelegator, ILabelsDelegator, ILoginDelegator, ILogoutDelegator, ILogTailDelegator,
-		IMonitorDelegator, IMoveDelegator, IObliterateDelegator, IOpenedDelegator, IPasswdDelegator,
-		IPrintDelegator, IPropertyDelegator, IProtectDelegator, IProtectsDelegator, IReloadDelegator,
-		IRenameUserDelegator, IReviewDelegator, IReviewsDelegator, ISearchDelegator, ISizesDelegator,
-		IStreamDelegator, IStreamsDelegator, ITagDelegator, ITriggersDelegator, IUnloadDelegator,
-		IUserDelegator, IUsersDelegator, IVerifyDelegator, IGraphListTreeDelegator, ICommitDelegator,
-		IGraphRevListDelegator, IGraphCommitLogDelegator, IGraphReceivePackDelegator, IListDelegator,
-		IGraphShowRefDelegator, ILogin2Delegator, ISpecDelegator, ILicenseDelegator, IExtensionDelegator,
-		IStreamlogDelegator{
+public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBranchDelegator, IBranchesDelegator, IChangeDelegator, IChangesDelegator, IClientDelegator, IClientsDelegator, IConfigureDelegator, ICounterDelegator, ICountersDelegator, IDBSchemaDelegator, IDepotDelegator, IDepotsDelegator, IReposDelegator, IDescribeDelegator, IDiff2Delegator, IDirsDelegator, IDiskspaceDelegator, IDuplicateDelegator, IExportDelegator, IFileAnnotateDelegator, IFileLogDelegator, IFilesDelegator, IFixDelegator, IFixesDelegator, IFstatDelegator, IGrepDelegator, IGroupDelegator, IGroupsDelegator, IInfoDelegator, IIntegratedDelegator, IInterchangesDelegator, IStatDelegator, IJobDelegator, IJobsDelegator, IJobSpecDelegator, IJournalWaitDelegator, IKeyDelegator, IKeysDelegator, ILabelDelegator, ILabelsDelegator, ILoginDelegator, ILogoutDelegator, ILogTailDelegator, IMonitorDelegator, IMoveDelegator, IObliterateDelegator, IOpenedDelegator, IPasswdDelegator, IPrintDelegator, IPropertyDelegator, IProtectDelegator, IProtectsDelegator, IReloadDelegator, IRenameUserDelegator, IReviewDelegator, IReviewsDelegator, ISearchDelegator, ISizesDelegator, IStreamDelegator, IStreamsDelegator, ITagDelegator, ITriggersDelegator, IUnloadDelegator, IUserDelegator, IUsersDelegator, IVerifyDelegator, IGraphListTreeDelegator, ICommitDelegator, IGraphRevListDelegator, IGraphCommitLogDelegator, IGraphReceivePackDelegator, IListDelegator, IGraphShowRefDelegator, ILogin2Delegator, ISpecDelegator, ILicenseDelegator, IExtensionDelegator, IStreamlogDelegator {
 
 	String ATTRIBUTE_STREAM_MAP_KEY = "attributeInstream";
+
 	/**
 	 * Property key for overriding the default tagged/non-tagged behavior of a
 	 * command. This is a per-command property, set on a command's "inMap".
 	 */
 	String IN_MAP_USE_TAGS_KEY = "useTags";
 
+	/**
+	 * Try to get the Perforce server version. This is likely to be the first
+	 * time
+	 * actual connectivity is tested for the server...
+	 * Since this is called before we know much about the state or type of the
+	 * Perforce server, we do virtually no real error checking or recovery -- we
+	 * either get a suitable response and dig out the server version, or we just
+	 * leave things alone.
+	 * <p>
+	 * NOTE: has the side effect of setting the server impl's serverVersion
+	 * field.
+	 *
+	 * @return version
+	 * @throws ConnectionException on error
+	 */
 	int getServerVersion() throws ConnectionException;
 
 	/**
 	 * Connect to the Perforce server associated with this server object.
-	 * <p>
 	 * <p>
 	 * This method's detailed semantics depend on the underlying transport
 	 * implementation, but in general, it's intended to be called before any
 	 * attempt is made to issue a command to the associated Perforce server.
 	 * It's also intended to be called after any (intentional or accidental)
 	 * disconnect.
-	 * <p>
 	 * <p>
 	 * Note that certain implementations may try to request a client, etc., on
 	 * connection (in response to property values passed in through the URL,
@@ -95,7 +168,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request
 	 * @throws ConfigException     if local I/O exception occurs
 	 */
-
 	void connect() throws ConnectionException, AccessException, RequestException, ConfigException;
 
 	/**
@@ -108,9 +180,7 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request.
 	 * @throws AccessException     if the Perforce server denies access to the caller.
 	 */
-
-	String createUserGroup(IUserGroup group)
-			throws ConnectionException, RequestException, AccessException;
+	String createUserGroup(IUserGroup group) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Delete a Perforce user group from the Perforce server.
@@ -122,15 +192,12 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request.
 	 * @throws AccessException     if the Perforce server denies access to the caller.
 	 */
-
-	String deleteUserGroup(IUserGroup group)
-			throws ConnectionException, RequestException, AccessException;
+	String deleteUserGroup(IUserGroup group) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Disconnect from this Perforce server. Does not affect the current
 	 * IServer's current user, password, or client settings, but if you later
 	 * reconnect to the same Perforce server, you may also need to re-login.
-	 * <p>
 	 * <p>
 	 * This command should be run at the point at which this server is not going
 	 * to be used any more, and attempts to disconnect from the associated
@@ -138,25 +205,24 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * underlying transport mechanism, but in practice it will mean that
 	 * attempting to use this server object to issue Perforce commands will
 	 * fail, usually with a ConnectionException exception.
+	 *
+	 * @throws ConnectionException on error
+	 * @throws AccessException     on error
 	 */
-
 	void disconnect() throws ConnectionException, AccessException;
 
 	/**
 	 * Issue an arbitrary P4Java command to the Perforce server and return the
 	 * results as a map.
 	 * <p>
-	 * <p>
 	 * This method is intended for low-level commands in the spirit and format
 	 * of the p4 command line interpreter, and offers a simple way to issue
 	 * commands to the associated Perforce server without the overhead of the
 	 * more abstract Java interfaces and methods.
 	 * <p>
-	 * <p>
 	 * No guidance is given here on the format of the returned map; however, it
 	 * produces the same output as the p4 command line interpreter in -G (Python
 	 * map) mode.
-	 * <p>
 	 * <p>
 	 * Note that this method does not allow you to set "usage" options for the
 	 * command; these may be added later. Note also that although option
@@ -185,21 +251,17 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @throws P4JavaException if an error occurs processing this method and its parameters
 	 * @since 2011.1
 	 */
-
-	Map<String, Object>[] execInputStringMapCmd(String cmdName, String[] cmdArgs, String inString)
-			throws P4JavaException;
+	Map<String, Object>[] execInputStringMapCmd(String cmdName, String[] cmdArgs, String inString) throws P4JavaException;
 
 	/**
 	 * Issue a streaming map command to the Perforce server, using an optional
 	 * string for any input expected by the server (such as label or job specs,
 	 * etc.).
 	 * <p>
-	 * <p>
 	 * Streaming commands allow users to get each result from a suitably-issued
 	 * command as it comes in from the server, rather than waiting for the
 	 * entire command method to complete (and getting the results back as a
 	 * completed List or Map or whatever).
-	 * <p>
 	 * <p>
 	 * The results are sent to the user using the IStreamingCallback
 	 * handleResult method; see the IStreamingCallback Javadoc for details. The
@@ -208,7 +270,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * knowledge and technology to be able to parse it and use it suitably in
 	 * much the same way as a user unpacks or processes the results from the
 	 * other low-level exec methods like execMapCommand.
-	 * <p>
 	 * <p>
 	 * NOTE: 'streaming' here has nothing at all to do with Perforce 'streams',
 	 * which are (or will be) implemented elsewhere.
@@ -237,24 +298,20 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * {@link com.perforce.p4java.server.IOptionsServer#execInputStringStreamingMapCmd(java.lang.String, java.lang.String[], java.lang.String, com.perforce.p4java.server.callback.IStreamingCallback, int)}
 	 */
 	@Deprecated
-	void execInputStringStreamingMapComd(String cmdName, String[] cmdArgs, String inString,
-	                                     IStreamingCallback callback, int key) throws P4JavaException;
+	void execInputStringStreamingMapComd(String cmdName, String[] cmdArgs, String inString, IStreamingCallback callback, int key) throws P4JavaException;
 
 	/**
 	 * Issue an arbitrary P4Java command to the Perforce server and return the
 	 * results as a map.
-	 * <p>
 	 * <p>
 	 * This method is intended for low-level commands in the spirit and format
 	 * of the p4 command line interpreter, and offers a simple way to issue
 	 * commands to the associated Perforce server without the overhead of the
 	 * more abstract Java interfaces and methods.
 	 * <p>
-	 * <p>
 	 * No guidance is given here on the format of the returned map; however, it
 	 * produces the same output as the p4 command line interpreter in -G (Python
 	 * map) mode.
-	 * <p>
 	 * <p>
 	 * Note that this method does not allow you to set "usage" options for the
 	 * command; these may be added later. Note also that although option
@@ -283,14 +340,11 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	Map<String, Object>[] execMapCmd(String cmdName, String[] cmdArgs, Map<String, Object> inMap)
-			throws ConnectionException, RequestException, AccessException;
+	Map<String, Object>[] execMapCmd(String cmdName, String[] cmdArgs, Map<String, Object> inMap) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Issue an arbitrary P4Java command to the Perforce server and return the
 	 * results as a map without invoking any command callbacks.
-	 * <p>
 	 * <p>
 	 * Basically equivalent to execMapCmd with temporary disabling of any
 	 * ICommandCallback calls and / or listeners; this turns out to be useful
@@ -316,15 +370,11 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	Map<String, Object>[] execQuietMapCmd(String cmdName, String[] cmdArgs,
-	                                      Map<String, Object> inMap)
-			throws ConnectionException, RequestException, AccessException;
+	Map<String, Object>[] execQuietMapCmd(String cmdName, String[] cmdArgs, Map<String, Object> inMap) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Issue an arbitrary P4Java command to the Perforce server and get the
 	 * results as a stream without invoking any command callbacks.
-	 * <p>
 	 * <p>
 	 * Basically equivalent to execStreamCmd with temporary disabling of any
 	 * ICommandCallback calls and / or listeners; this turns out to be useful
@@ -347,21 +397,17 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	InputStream execQuietStreamCmd(String cmdName, String[] cmdArgs)
-			throws ConnectionException, RequestException, AccessException;
+	InputStream execQuietStreamCmd(String cmdName, String[] cmdArgs) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Issue a streaming map command to the Perforce server, using an optional
 	 * map for any input expected by the server (such as label or job specs,
 	 * etc.).
 	 * <p>
-	 * <p>
 	 * Streaming commands allow users to get each result from a suitably-issued
 	 * command as it comes in from the server, rather than waiting for the
 	 * entire command method to complete (and getting the results back as a
 	 * completed List or Map or whatever).
-	 * <p>
 	 * <p>
 	 * The results are sent to the user using the IStreamingCallback
 	 * handleResult method; see the IStreamingCallback Javadoc for details. The
@@ -370,7 +416,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * knowledge and technology to be able to parse it and use it suitably in
 	 * much the same way as a user unpacks or processes the results from the
 	 * other low-level exec methods like execMapCommand.
-	 * <p>
 	 * <p>
 	 * NOTE: 'streaming' here has nothing at all to do with Perforce 'streams',
 	 * which are (or will be) implemented elsewhere.
@@ -394,22 +439,17 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @throws P4JavaException if an error occurs processing this method and its parameters.
 	 * @since 2011.1
 	 */
-
-	void execStreamingMapCommand(String cmdName, String[] cmdArgs, Map<String, Object> inMap,
-	                             IStreamingCallback callback, int key) throws P4JavaException;
+	void execStreamingMapCommand(String cmdName, String[] cmdArgs, Map<String, Object> inMap, IStreamingCallback callback, int key) throws P4JavaException;
 
 	/**
-	 *
 	 * Issue a parallelised streaming map command to the Perforce server, using an optional
 	 * map for any input expected by the server (such as label or job specs,
 	 * etc.).
-	 * <p>
 	 * <p>
 	 * Streaming commands allow users to get each result from a suitably-issued
 	 * command as it comes in from the server, rather than waiting for the
 	 * entire command method to complete (and getting the results back as a
 	 * completed List or Map or whatever).
-	 * <p>
 	 * <p>
 	 * The results are sent to the user using the IStreamingCallback
 	 * handleResult method; see the IStreamingCallback Javadoc for details. The
@@ -419,33 +459,30 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * much the same way as a user unpacks or processes the results from the
 	 * other low-level exec methods like execMapCommand.
 	 * <p>
-	 * <p>
 	 * NOTE: 'streaming' here has nothing at all to do with Perforce 'streams',
 	 * which are (or will be) implemented elsewhere.
 	 *
-	 * @param cmdName  the command to be issued; must be non-null, and correspond to
-	 *                 a Perforce command recognized by P4Java and defined in
-	 *                 CmdSpec.
-	 * @param cmdArgs  the array of command arguments (options and file arguments,
-	 *                 etc.) to be sent to the Perforce server. These must be in the
-	 *                 form used by the corresponding p4 command line interpreter.
-	 *                 Ignored if null.
-	 * @param inMap    an optional map to be sent to the server as standard input,
-	 *                 using the Python map format (-G) form. You must remember to
-	 *                 issue the relevant command-specific option to enable this if
-	 *                 needed.
-	 * @param callback a non-null IStreamingCallback to be used to process the
-	 *                 incoming results.
-	 * @param key      an opaque integer key that is passed to the IStreamingCallback
-	 *                 callback methods to identify the action as being associated
-	 *                 with this specific call.
+	 * @param cmdName          the command to be issued; must be non-null, and correspond to
+	 *                         a Perforce command recognized by P4Java and defined in
+	 *                         CmdSpec.
+	 * @param cmdArgs          the array of command arguments (options and file arguments,
+	 *                         etc.) to be sent to the Perforce server. These must be in the
+	 *                         form used by the corresponding p4 command line interpreter.
+	 *                         Ignored if null.
+	 * @param inMap            an optional map to be sent to the server as standard input,
+	 *                         using the Python map format (-G) form. You must remember to
+	 *                         issue the relevant command-specific option to enable this if
+	 *                         needed.
+	 * @param callback         a non-null IStreamingCallback to be used to process the
+	 *                         incoming results.
+	 * @param key              an opaque integer key that is passed to the IStreamingCallback
+	 *                         callback methods to identify the action as being associated
+	 *                         with this specific call.
 	 * @param parallelCallback IParallelCallback used to parallelise the task
-	 * @throws P4JavaException
+	 * @throws P4JavaException on error
 	 * @since 2017.1
 	 */
-	public void execStreamingMapCommand(String cmdName, String[] cmdArgs, Map<String, Object> inMap,
-	                                    IStreamingCallback callback, int key, IParallelCallback parallelCallback)
-										throws P4JavaException;
+	public void execStreamingMapCommand(String cmdName, String[] cmdArgs, Map<String, Object> inMap, IStreamingCallback callback, int key, IParallelCallback parallelCallback) throws P4JavaException;
 
 	/**
 	 * Return the current Perforce authentication ticket being used by this
@@ -454,7 +491,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *
 	 * @return possibly-null Perforce authentication ticket
 	 */
-
 	String getAuthTicket();
 
 	/**
@@ -469,8 +505,8 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	/**
 	 * Return the Perforce authentication ticket for specified user.
 	 *
-     * @param userName non-null Perforce user name
-     * @param serverId non-null Perforce server's auth.id/IP:port
+	 * @param userName non-null Perforce user name
+	 * @param serverId non-null Perforce server's auth.id/IP:port
 	 * @return possibly-null Perforce authentication ticket
 	 * @since 2021.2
 	 */
@@ -483,13 +519,11 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * submitted changelist. This method (like the similar "p4 describe"
 	 * command) will not return diffs for pending changelists.
 	 * <p>
-	 * <p>
 	 * This is one of the guaranteed "live" method on this interface, and will
 	 * return the diff output as it exists when called (rather than when the
 	 * underlying implementation object was created). This can be an expensive
 	 * method to evaluate, and can generate reams and reams (and reams) of
 	 * output, so don't use it willy-nilly.
-	 * <p>
 	 * <p>
 	 * Note that unlike the corresponding command-line command, which keeps
 	 * going in the face of errors by moving on to the next file (or whatever),
@@ -505,10 +539,7 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	InputStream getChangelistDiffs(int id, DiffType diffType)
-			throws ConnectionException, RequestException, AccessException;
-
+	InputStream getChangelistDiffs(int id, DiffType diffType) throws ConnectionException, RequestException, AccessException;
 
 
 	/**
@@ -520,8 +551,7 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-	List<IFileSpec> getCommitFiles(final String repo, final String commit)
-			throws ConnectionException, RequestException, AccessException;
+	List<IFileSpec> getCommitFiles(final String repo, final String commit) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Get the current charset name for the server connection. May be null, in
@@ -529,7 +559,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *
 	 * @return charset name associated with this server; may be null.
 	 */
-
 	String getCharsetName();
 
 	int getGenericCode(Map<String, Object> map);
@@ -539,13 +568,11 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * (unsupported). Corresponds fairly closely to the p4 interchanges command
 	 * for filespecs.
 	 * <p>
-	 * <p>
 	 * Note that if showFiles is true, the returned files are attached to the
 	 * associated changelist, and can be retrieved using the getFiles(false)
 	 * method -- and note that if you call getFiles(true) you will get a
 	 * refreshed list of <i>all</i> files associated with the changelist, which
 	 * is probably different from the list associated with the integration.
-	 * <p>
 	 * <p>
 	 * Note also that if there are no qualifying changes, this method will
 	 * return an empty list rather than throw an exception; this behaviour is
@@ -568,23 +595,18 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IChangelist> getInterchanges(IFileSpec fromFile, IFileSpec toFile, boolean showFiles,
-	                                  boolean longDesc, int maxChangelistId)
-			throws ConnectionException, RequestException, AccessException;
+	List<IChangelist> getInterchanges(IFileSpec fromFile, IFileSpec toFile, boolean showFiles, boolean longDesc, int maxChangelistId) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Get a list of changes and / or associated files not yet integrated, based
 	 * on branchspecs (unsupported). Corresponds fairly closely to the p4
 	 * interchanges command for branchspecs.
 	 * <p>
-	 * <p>
 	 * Note that if showFiles is true, the returned files are attached to the
 	 * associated changelist, and can be retrieved using the getFiles(false)
 	 * method -- and note that if you call getFiles(true) you will get a
 	 * refreshed list of <i>all</i> files associated with the changelist, which
 	 * is probably different from the list associated with the integration.
-	 * <p>
 	 * <p>
 	 * Note also that if there are no qualifying changes, this method will
 	 * return an empty list rather than throw an exception; this behaviour is
@@ -601,6 +623,7 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @param maxChangelistId if greater than zero, only consider integration
 	 * @param reverseMapping  if true, reverse the mappings in the branch view, with the
 	 *                        target files and source files exchanging place.
+	 * @param biDirectional   if true, bi-directional option
 	 * @return non-null (but possibly empty) list of qualifying changelists.
 	 * Note that the changelists returned here may not have all fields
 	 * set (only description, ID, date, user, and client are known to be
@@ -610,21 +633,15 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	List<IChangelist> getInterchanges(String branchSpecName, List<IFileSpec> fromFileList,
-	                                  List<IFileSpec> toFileList, boolean showFiles, boolean longDesc, int maxChangelistId,
-	                                  boolean reverseMapping, boolean biDirectional)
-			throws ConnectionException, RequestException, AccessException;
+	List<IChangelist> getInterchanges(String branchSpecName, List<IFileSpec> fromFileList, List<IFileSpec> toFileList, boolean showFiles, boolean longDesc, int maxChangelistId, boolean reverseMapping, boolean biDirectional) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Return an array of strings representing "known" charsets (e.g. "utf8" or
 	 * "utf32le".
 	 * <p>
-	 * <p>
 	 * Note that in this context, "known" simply means that Perforce servers
 	 * supported by this API can potentially recognize the charset name and
 	 * (hopefully) act accordingly.
-	 * <p>
 	 * <p>
 	 * Charset support in Perforce is described in more detail in the main p4
 	 * command documentation; in summary, although the list returned here is
@@ -638,7 +655,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @return a non-null array of strings representing lower-case charset names
 	 * known to the server.
 	 */
-
 	String[] getKnownCharsets();
 
 	/**
@@ -650,7 +666,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *
 	 * @return Properties object; may be empty but will not be null.
 	 */
-
 	Properties getProperties();
 
 	/**
@@ -663,7 +678,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @return positive integer version number or -1 if not known or
 	 * unavailable.
 	 */
-
 	int getServerVersionNumber();
 
 	int getSeverityCode(Map<String, Object> map);
@@ -673,12 +687,10 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *
 	 * @return non-null ServerStatus representing the server status.
 	 */
-
 	ServerStatus getStatus();
 
 	/**
 	 * Get a list of Perforce user groups from the server.
-	 * <p>
 	 * <p>
 	 * Note that the Perforce server considers it an error to have both indirect
 	 * and displayValues parameters set true; this will cause the server to
@@ -690,16 +702,14 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                        belongs to indirectly via subgroups.
 	 * @param displayValues   if true, display the MaxResults, MaxScanRows, MaxLockTime, and
 	 *                        Timeout values for the named group.
-	 * @param maxGroups       if > 0, display only the first m results.
+	 * @param maxGroups       if &gt; 0, display only the first m results.
 	 * @return a non-zero but possibly-empty list of qualifying groups.
 	 * @throws ConnectionException if the Perforce server is unreachable or is not connected.
 	 * @throws RequestException    if the Perforce server encounters an error during its
 	 *                             processing of the request.
 	 * @throws AccessException     if the Perforce server denies access to the caller.
 	 */
-
-	List<IUserGroup> getUserGroups(String userOrGroupName, boolean indirect, boolean displayValues,
-	                               int maxGroups) throws ConnectionException, RequestException, AccessException;
+	List<IUserGroup> getUserGroups(String userOrGroupName, boolean indirect, boolean displayValues, int maxGroups) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Return the user name currently associated with this server, if any. User
@@ -708,7 +718,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @return the user name currently associated with this server, if any; null
 	 * otherwise.
 	 */
-
 	String getUserName();
 
 	/**
@@ -727,7 +736,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @return IClient representing the current client, or null if no client
 	 * associated with this server.
 	 */
-
 	IClient getCurrentClient();
 
 	/**
@@ -742,7 +750,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * Return true iff and the server object is connected to the associated
 	 * Perforce server.
 	 * <p>
-	 * <p>
 	 * The meaning of "connected" is generally dependent on the underlying
 	 * transport layer, but in general, if the server is not connected, issuing
 	 * server commands to the associated Perforce server will fail with a
@@ -750,12 +757,10 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *
 	 * @return - true iff connected, false otherwise
 	 */
-
 	boolean isConnected();
 
 	/**
 	 * Register a P4Java command callback with this Perforce server.
-	 * <p>
 	 * <p>
 	 * See the ICommandCallback javadocs for callback semantics. Note that only
 	 * one command callback can be active and registered for a given server at
@@ -765,12 +770,10 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                 callbacks are disabled.
 	 * @return the previous command callback, if it existed; null otherwise
 	 */
-
 	ICommandCallback registerCallback(ICommandCallback callback);
 
 	/**
 	 * Register a P4Java command progress callback with this Perforce server.
-	 * <p>
 	 * <p>
 	 * See the IProgressCallback javadocs for callback semantics. Note that only
 	 * one progress callback can be active and registered for a given server at
@@ -780,18 +783,15 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                 callbacks are disabled.
 	 * @return the previous progress callback, if it existed; null otherwise
 	 */
-
 	IProgressCallback registerProgressCallback(IProgressCallback callback);
 
 	/**
 	 * Register a Perforce Single Sign On (SSO) callback and key for this
 	 * server.
 	 * <p>
-	 * <p>
 	 * See the ISSOCallback Javadoc comments for an explanation of the SSO
 	 * callback feature; note that only one SSO callback can be active and
 	 * registered for a given P4Jserver object at any one time.
-	 * <p>
 	 * <p>
 	 * Note that SSO callbacks work only with the (default) pure Java (RPC)
 	 * protocol implementation.
@@ -801,22 +801,19 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @param ssoKey   opaque string to be passed untouched to the callback; can be
 	 *                 null, in which case null is passed in to the callback
 	 */
-
 	void registerSSOCallback(ISSOCallback callback, String ssoKey);
 
 	/**
 	 * Register a Perforce browser callback to launch the browser for a given
 	 * url for this server.
 	 * <p>
-	 * <p>
 	 * See the IBrowserCallback Javadoc comments for an explanation of the browser
 	 * callback feature; note that only one browser callback can be active and
 	 * registered for a given P4server object at any one time.
 	 * <p>
-	 * <p>
 	 *
 	 * @param browserCallback BrowserCallback object to be registered; if null, browser
-	 * 						  callbacks are disabled.
+	 *                        callbacks are disabled.
 	 */
 	void registerBrowserCallback(IBrowserCallback browserCallback);
 
@@ -825,7 +822,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * If the string is null, auth tickets won't be used when talking to the
 	 * associated Perforce server; otherwise, the auth ticket will be used to
 	 * authenticate against the Perforce server for each call to the server.
-	 * <p>
 	 * <p>
 	 * No checking is performed on the passed-in ticket, and any changes to
 	 * existing tickets can cause authentication failures, so you should ensure
@@ -869,20 +865,18 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @throws UnsupportedCharsetException if the Perforce server doesn't support or recognize the
 	 *                                     charset name.
 	 */
-
 	boolean setCharsetName(String charsetName) throws UnsupportedCharsetException;
 
 	/**
 	 * Set the Perforce client associated with this server.
 	 *
+	 * @param client client object
 	 * @throws ConnectionException if the Perforce server is unreachable or is not connected.
 	 * @throws RequestException    if the Perforce server encounters an error during its
 	 *                             processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
-	void setCurrentClient(IClient client)
-			throws ConnectionException, RequestException, AccessException;
+	void setCurrentClient(IClient client) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * Set the Perforce user name to be used with this server. This does not
@@ -890,14 +884,12 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * session. Once set, the user name is used with all commands where it makes
 	 * sense.
 	 * <p>
-	 * <p>
 	 * Note that the auth ticket (if available) for this user will also be set
 	 * to this server instance.
 	 *
 	 * @param userName Perforce user name; can be null, which is interpreted as
 	 *                 "don't associate a user name with this server".
 	 */
-
 	void setUserName(String userName);
 
 	/**
@@ -908,7 +900,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * working directory is used instead (which is almost always a safe option
 	 * unless you're using Perforce alt roots).
 	 * <p>
-	 * <p>
 	 * Note: no checking is done at call time for correctness (or otherwise) of
 	 * the passed-in path.
 	 *
@@ -918,13 +909,13 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 
 	/**
 	 * Set the Perforce P4CLIENTPATH - directories the client can access.
-	 *
+	 * <p>
 	 * A list of directories to which Perforce applications are permitted to write.
 	 * Any attempt by a Perforce application to access or modify files outside these
 	 * areas of the filesystem will result in an error message. To specify more than
 	 * one directory, separate the directories with semicolons.
 	 *
-	 * @param clientPath
+	 * @param clientPath client path
 	 */
 	void setClientPath(String clientPath);
 
@@ -945,7 +936,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
 	boolean supportsSmartMove() throws ConnectionException, RequestException, AccessException;
 
 	/**
@@ -961,7 +951,6 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
-
 	boolean supportsUnicode() throws ConnectionException, RequestException, AccessException;
 
 	/**
@@ -976,7 +965,5 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 *                             processing of the request.
 	 * @throws AccessException     if the Perforce server denies access to the caller.
 	 */
-
-	String updateUserGroup(IUserGroup group, boolean updateIfOwner)
-			throws ConnectionException, RequestException, AccessException;
+	String updateUserGroup(IUserGroup group, boolean updateIfOwner) throws ConnectionException, RequestException, AccessException;
 }

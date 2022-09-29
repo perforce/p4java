@@ -78,6 +78,8 @@ public class ClientSummary extends ServerResource implements IClientSummary {
 	 * this object is complete, updateable, and refreshable; otherwise, it's
 	 * complete and neither updateable nor refresheable. Intended mostly for use
 	 * with extended ClientSummary objects such as the full Client class.
+	 *
+	 * @param summaryOnly summaryOnly
 	 */
 	public ClientSummary(final boolean summaryOnly) {
 		super(!summaryOnly, !summaryOnly);
@@ -86,6 +88,8 @@ public class ClientSummary extends ServerResource implements IClientSummary {
 	/**
 	 * Clone a client summary by copying all fields. If clientSummary is null,
 	 * this is equivalent to calling the default constructor.
+	 *
+	 * @param clientSummary clientSummary
 	 */
 	public ClientSummary(final IClientSummary clientSummary) {
 		super(false, false);
@@ -111,7 +115,7 @@ public class ClientSummary extends ServerResource implements IClientSummary {
 	 * Server map constructor. Attempts to construct a new ClientSummary
 	 * object from the passed-in map, which is assumed to have come from
 	 * a Perforce server in response to a client list command. If map is null,
-	 * this is equivalent to calling the default constructor.<p>
+	 * this is equivalent to calling the default constructor.
 	 * <p>
 	 * Note that fields set here may be overridden in a full Client constructor,
 	 * as the field keys and formats can be subtly (and not so subtly) different
@@ -119,6 +123,9 @@ public class ClientSummary extends ServerResource implements IClientSummary {
 	 * is false, this map is assumed to be from a full client retrieval, meaning
 	 * some of the fields retrieved in the full Client constructor are not
 	 * set here. Otherwise, it attempts to retrieve all known ClientSummary fields.
+	 *
+	 * @param map         map
+	 * @param summaryOnly summaryOnly
 	 */
 	public ClientSummary(final Map<String, Object> map, final boolean summaryOnly) {
 		super(false, false);
@@ -165,8 +172,7 @@ public class ClientSummary extends ServerResource implements IClientSummary {
 					streamAtChange = parseInt(map, STREAMATCHANGE_KEY);
 				}
 
-				if (nonNull(map.get(ISUNLOADED_KEY))
-						&& "1".equals(parseString(map, ISUNLOADED_KEY))) {
+				if (nonNull(map.get(ISUNLOADED_KEY)) && "1".equals(parseString(map, ISUNLOADED_KEY))) {
 					unloaded = true;
 				}
 
@@ -184,19 +190,20 @@ public class ClientSummary extends ServerResource implements IClientSummary {
 	 * Explicit-value constructor.  Intended mostly for use with "pure" ClientSummary
 	 * objects. Sets ServerResource superclass fields to indicate complete and neither
 	 * refreshable nor updateable.
+	 *
+	 * @param name           name
+	 * @param accessed       accessed
+	 * @param updated        updated
+	 * @param description    description
+	 * @param hostName       hostName
+	 * @param ownerName      ownerName
+	 * @param root           root
+	 * @param lineEnd        lineEnd
+	 * @param options        options
+	 * @param submitOptions  submitOptions
+	 * @param alternateRoots alternateRoots
 	 */
-	public ClientSummary(
-			final String name,
-			final Date accessed,
-			final Date updated,
-			final String description,
-			final String hostName,
-			final String ownerName,
-			final String root,
-			final ClientLineEnd lineEnd,
-			final IClientOptions options,
-			final IClientSubmitOptions submitOptions,
-			final List<String> alternateRoots) {
+	public ClientSummary(final String name, final Date accessed, final Date updated, final String description, final String hostName, final String ownerName, final String root, final ClientLineEnd lineEnd, final IClientOptions options, final IClientSubmitOptions submitOptions, final List<String> alternateRoots) {
 
 		this(name, accessed, updated, description, hostName, ownerName, root, lineEnd, options, submitOptions, alternateRoots, null, null);
 	}
@@ -205,21 +212,22 @@ public class ClientSummary extends ServerResource implements IClientSummary {
 	 * Explicit-value constructor.  Intended mostly for use with "pure" ClientSummary
 	 * objects. Sets ServerResource superclass fields to indicate complete and neither
 	 * refreshable nor updateable.
+	 *
+	 * @param name           name
+	 * @param accessed       accessed
+	 * @param updated        updated
+	 * @param description    description
+	 * @param hostName       hostName
+	 * @param ownerName      ownerName
+	 * @param root           root
+	 * @param lineEnd        lineEnd
+	 * @param options        options
+	 * @param submitOptions  submitOptions
+	 * @param alternateRoots alternateRoots
+	 * @param stream         stream
+	 * @param type           type
 	 */
-	public ClientSummary(
-			final String name,
-			final Date accessed,
-			final Date updated,
-			final String description,
-			final String hostName,
-			final String ownerName,
-			final String root,
-			final ClientLineEnd lineEnd,
-			final IClientOptions options,
-			final IClientSubmitOptions submitOptions,
-			final List<String> alternateRoots,
-			final String stream,
-			final String type) {
+	public ClientSummary(final String name, final Date accessed, final Date updated, final String description, final String hostName, final String ownerName, final String root, final ClientLineEnd lineEnd, final IClientOptions options, final IClientSubmitOptions submitOptions, final List<String> alternateRoots, final String stream, final String type) {
 
 		super(false, false);
 		this.name = name;

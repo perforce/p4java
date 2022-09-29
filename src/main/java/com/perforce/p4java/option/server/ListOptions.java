@@ -11,7 +11,6 @@ import java.util.List;
  * that forms the options part of the 'p4 list' command
  * <p>
  * Usage: list [-l label [-d]] [-C] [-M] files...
- * <p>
  */
 public class ListOptions extends Options {
 

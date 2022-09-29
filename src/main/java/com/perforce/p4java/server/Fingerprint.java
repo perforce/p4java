@@ -2,8 +2,8 @@ package com.perforce.p4java.server;
 
 /**
  * Object representing the three parts of a Perforce fingerprint, the server
- * address, the user name, and the ticket token value. <p>
- * 
+ * address, the user name, and the ticket token value.
+ * <p>
  * Note: currently the user portion should be "******" as it is not used.
  */
 public class Fingerprint {
@@ -22,10 +22,10 @@ public class Fingerprint {
 	/**
 	 * Create a fingerprint with the specified server address, user name, and
 	 * fingerprint value.
-	 * 
-	 * @param serverAddress
-	 * @param userName
-	 * @param fingerprintValue
+	 *
+	 * @param serverAddress    serverAddress
+	 * @param userName         userName
+	 * @param fingerprintValue fingerprintValue
 	 */
 	public Fingerprint(String serverAddress, String userName, String fingerprintValue) {
 		this.serverAddress = serverAddress;
@@ -41,8 +41,7 @@ public class Fingerprint {
 	}
 
 	/**
-	 * @param serverAddress
-	 *            the serverAddress to set
+	 * @param serverAddress the serverAddress to set
 	 */
 	public void setServerAddress(String serverAddress) {
 		this.serverAddress = serverAddress;
@@ -56,8 +55,7 @@ public class Fingerprint {
 	}
 
 	/**
-	 * @param userName
-	 *            the userName to set
+	 * @param userName the userName to set
 	 */
 	public void setUserName(String userName) {
 		this.userName = userName;
@@ -71,8 +69,7 @@ public class Fingerprint {
 	}
 
 	/**
-	 * @param fingerprintValue
-	 *            the fingerprintValue to set
+	 * @param fingerprintValue the fingerprintValue to set
 	 */
 	public void setFingerprintValue(String fingerprintValue) {
 		this.fingerprintValue = fingerprintValue;

@@ -1,34 +1,34 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option.server;
-
-import java.util.List;
 
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
  * Options class for Perforce reload methods.
  * <p>
- * 
+ *
  * Note that the full semantics of these options are found in the main 'p4 help
  * reload' documentation.
  */
 public class ReloadOptions extends Options {
-	
+
 	/**
 	 * Options: [-f] [-c client | -l label | -s stream]
 	 */
 	public static final String OPTIONS_SPECS = "b:f s:c s:l s:s";
-	
-	
+
+
 	/**
 	 * If true, forces the unloading of the specified client or label.
 	 * Corresponds to the -f flag.
 	 * <p>
-	 * 
+	 *
 	 * By default, users can only unload their own clients or labels. The -f
 	 * flag requires 'admin' access, which is granted by 'p4 protect'.
 	 */
@@ -62,27 +62,32 @@ public class ReloadOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public ReloadOptions(String... options) {
 		super(options);
 	}
-	
+
 	/**
 	 * Explicit value constructor.
+	 *
+	 * @param force  force
+	 * @param client client
+	 * @param label  label
 	 */
 	public ReloadOptions(boolean force, String client, String label) {
 		super();
@@ -96,10 +101,10 @@ public class ReloadOptions extends Options {
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
 		this.optionList = this.processFields(OPTIONS_SPECS,
-								this.isForce(),
-								this.getClient(),
-								this.getLabel(),
-								this.getStream());
+				this.isForce(),
+				this.getClient(),
+				this.getLabel(),
+				this.getStream());
 
 		return this.optionList;
 	}

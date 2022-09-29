@@ -10,8 +10,8 @@ public class Login2Options extends Options {
 
 	/**
 	 * Options:
-	 *     p4 login2 [ -p -R ] [ -h host ] [ -S state ] [ -m method ] [ username ]
-	 *     p4 login2 -s [ -a | -h host ] [ username ]
+	 * p4 login2 [ -p -R ] [ -h host ] [ -S state ] [ -m method ] [ username ]
+	 * p4 login2 -s [ -a | -h host ] [ username ]
 	 */
 	public static final String OPTIONS_SPECS = "b:p b:R s:h s:S s:m b:s b:a";
 
@@ -67,7 +67,7 @@ public class Login2Options extends Options {
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
 	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
@@ -76,6 +76,7 @@ public class Login2Options extends Options {
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
 	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public Login2Options(String... options) {
@@ -86,17 +87,9 @@ public class Login2Options extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-				this.persist,
-				this.restart,
-				this.host,
-				this.state,
-				this.method,
-				this.status,
-				this.allHosts);
+		this.optionList = this.processFields(OPTIONS_SPECS, this.persist, this.restart, this.host, this.state, this.method, this.status, this.allHosts);
 		return this.optionList;
 	}
-
 
 
 	public boolean isPersist() {

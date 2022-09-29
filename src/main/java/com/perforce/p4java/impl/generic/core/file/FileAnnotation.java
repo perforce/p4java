@@ -1,15 +1,15 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.impl.generic.core.file;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 
 import com.perforce.p4java.Log;
 import com.perforce.p4java.client.IClientSummary.ClientLineEnd;
 import com.perforce.p4java.core.file.IFileAnnotation;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Simple generic implementation class for IFileAnnotation interface.
@@ -25,12 +25,17 @@ public class FileAnnotation implements IFileAnnotation {
 	private static final String localLineEndStr = System.getProperty("line.separator", "\n");
 	private List<IFileAnnotation> contributingSources = null;
 	private int ordering = -1;
-	
+
 	/**
 	 * Default all-field constructor.
+	 *
+	 * @param upper     upper
+	 * @param lower     lower
+	 * @param depotPath depotPath
+	 * @param line      line
+	 * @param lineEnd   lineEnd
 	 */
-	public FileAnnotation(int upper, int lower, String depotPath,
-			String line, ClientLineEnd lineEnd) {
+	public FileAnnotation(int upper, int lower, String depotPath, String line, ClientLineEnd lineEnd) {
 		this.upper = upper;
 		this.lower = lower;
 		this.depotPath = depotPath;
@@ -38,7 +43,7 @@ public class FileAnnotation implements IFileAnnotation {
 		this.lineEnd = lineEnd;
 		handleLineEnding();
 	}
-	
+
 	private void handleLineEnding() {
 		// Data comes back with unwanted trailing newline; get rid of this here:
 		if (this.line != null) {
@@ -53,13 +58,17 @@ public class FileAnnotation implements IFileAnnotation {
 			}
 		}
 	}
-	
+
 	/**
 	 * Construct a suitable FileAnnotation object from the passed-in
 	 * map; this map must be in the format and use the fields returned from
-	 * a Perforce server annotate command.<p>
-	 * 
+	 * a Perforce server annotate command.
+	 * <p>
 	 * Leave lineEnd null for normal use.
+	 *
+	 * @param map       map
+	 * @param depotPath depotPath
+	 * @param lineEnd   lineEnd
 	 */
 	public FileAnnotation(Map<String, Object> map, String depotPath, ClientLineEnd lineEnd) {
 		if (map != null) {
@@ -74,24 +83,30 @@ public class FileAnnotation implements IFileAnnotation {
 				Log.exception(thr);
 			}
 		}
-		
+
 		this.depotPath = depotPath; // May, of course, be null...
 	}
-	
+
 	/**
 	 * Create a new non-data file annotation with the passed-in parameters.
+	 *
+	 * @param order     order
+	 * @param depotPath depotPath
+	 * @param upper     upper
+	 * @param lower     lower
 	 */
-	
 	public FileAnnotation(int order, String depotPath, int upper, int lower) {
 		this.ordering = order;
 		this.depotPath = depotPath;
 		this.upper = upper;
 		this.lower = lower;
 	}
-	
+
 	/**
 	 * Add an integration annotation to the contributingSources list. If the list
 	 * is null, a new list will be created; otherwise it's added to the end of the list.
+	 *
+	 * @param annotation annotation
 	 */
 	public void addIntegrationAnnotation(IFileAnnotation annotation) {
 		if (annotation != null) {
@@ -115,24 +130,24 @@ public class FileAnnotation implements IFileAnnotation {
 	public String getLine() {
 		return this.line;
 	}
-	
+
 	/**
 	 * @see com.perforce.p4java.core.file.IFileAnnotation#getLine(boolean)
 	 */
-	public String getLine(boolean processLineEndings) {		
+	public String getLine(boolean processLineEndings) {
 		if (processLineEndings && this.line != null && hadLineEnd) {
 			if (lineEnd != null) {
 				switch (lineEnd) {
-				case UNIX:
-				case SHARE:
-					return this.line + "\n";
-				case MAC:
-					return this.line + "\r";
-				case WIN:
-					return this.line + "\r\n";
-				case LOCAL:
-				default:
-					return this.line + localLineEndStr;
+					case UNIX:
+					case SHARE:
+						return this.line + "\n";
+					case MAC:
+						return this.line + "\r";
+					case WIN:
+						return this.line + "\r\n";
+					case LOCAL:
+					default:
+						return this.line + localLineEndStr;
 				}
 			} else {
 				return this.line + localLineEndStr;
@@ -140,9 +155,9 @@ public class FileAnnotation implements IFileAnnotation {
 		}
 		return this.line;
 	}
-	
+
 	/**
-	 * @see com.perforce.p4java.core.file.IFileAnnotation#getContributingSources()
+	 * @see com.perforce.p4java.core.file.IFileAnnotation#getAllIntegrations()
 	 */
 	public List<IFileAnnotation> getAllIntegrations() {
 		return this.contributingSources;

@@ -74,7 +74,7 @@ public class ChangelistOptions extends Options {
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
 	 * 
 	 * <b>NOTE: setting options this way always bypasses the internal options
@@ -83,6 +83,7 @@ public class ChangelistOptions extends Options {
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
 	 * 
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public ChangelistOptions(String... options) {

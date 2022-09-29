@@ -8,7 +8,7 @@ package com.perforce.p4java.impl.mapbased;
  * implementation as static String fields. Note that the task here is
  * made harder by case and tense variants, etc.; normal names with suffix
  * are the commonest, typically upper-case first character and the
- * rest lower-case.<p>
+ * rest lower-case.
  * <p>
  * NOTE: not yet in general usage; will be used more with
  * refactoring over time -- HR.

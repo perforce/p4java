@@ -9,19 +9,18 @@ package com.perforce.p4java;
  * through the server factory to define things like calling-program
  * name and version, but note that (as individually noted below) some
  * properties defined here must be defined at load time through the
- * system properties or they will have no effect.<p>
+ * system properties or they will have no effect.
  * <p>
  * Unless otherwise noted in the individual definitions below,
- * properties defined here apply to all protocol implementations.<p>
+ * properties defined here apply to all protocol implementations.
  * <p>
  * Unless noted otherwise below, most properties can have an optional short
  * form which is typically just the full form without the cumbersome
  * com.perforce.p4java (etc.) prefix; use of the short form is particularly
  * convenient for passing in properties through the server factory url
  * mechanism, but you have to be careful that there are no system or
- * environment properties with a conflicting name.<p>
+ * environment properties with a conflicting name.
  */
-
 public class PropertyDefs {
 
 	/**
@@ -104,7 +103,7 @@ public class PropertyDefs {
 	 * Property name key for the P4Java API's temporary directory. Unless
 	 * otherwise noted, this directory will be used for temporary files, and,
 	 * unless set by this property, it will default to whatever's in the
-	 * system java.io.tmpdir property.<p>
+	 * system java.io.tmpdir property.
 	 * <p>
 	 * Note that sync operations will sync to temporary files in the enclosing
 	 * directory of the target file rather than to the default tmp directory if
@@ -125,8 +124,7 @@ public class PropertyDefs {
 	 * mechanism. If set, an IServer returned from the server factory will
 	 * have its user name set to this value.
 	 */
-	public static final String USER_NAME_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ USER_NAME_KEY_SHORTFORM;
+	public static final String USER_NAME_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + USER_NAME_KEY_SHORTFORM;
 
 	/**
 	 * Short form password key.
@@ -138,8 +136,7 @@ public class PropertyDefs {
 	 * mechanism. If set, an IServer returned from the server factory will
 	 * have its password set to this value.
 	 */
-	public static final String PASSWORD_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ PASSWORD_KEY_SHORTFORM;
+	public static final String PASSWORD_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + PASSWORD_KEY_SHORTFORM;
 
 	/**
 	 * Short form client name key.
@@ -151,8 +148,7 @@ public class PropertyDefs {
 	 * mechanism. If set, an IServer returned from the server factory will
 	 * have its client name set to this value.
 	 */
-	public static final String CLIENT_NAME_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ CLIENT_NAME_KEY_SHORTFORM;
+	public static final String CLIENT_NAME_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + CLIENT_NAME_KEY_SHORTFORM;
 
 	/**
 	 * Short form client path key.
@@ -164,8 +160,7 @@ public class PropertyDefs {
 	 * mechanism. If set, an IServer returned from the server factory will
 	 * have its client path set to this value.
 	 */
-	public static final String CLIENT_PATH_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ CLIENT_PATH_KEY_SHORTFORM;
+	public static final String CLIENT_PATH_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + CLIENT_PATH_KEY_SHORTFORM;
 	/**
 	 * Short form autoconnect key.
 	 */
@@ -176,8 +171,7 @@ public class PropertyDefs {
 	 * connect with the client name, if the clientName is also set.
 	 * Will be done after any auto logins (see below).
 	 */
-	public static final String AUTO_CONNECT_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ AUTO_CONNECT_KEY_SHORTFORM;
+	public static final String AUTO_CONNECT_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + AUTO_CONNECT_KEY_SHORTFORM;
 
 	/**
 	 * Short form auto login key.
@@ -190,8 +184,7 @@ public class PropertyDefs {
 	 * userName and password are also set through the properties menachnism.
 	 */
 
-	public static final String AUTO_LOGIN_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ AUTO_LOGIN_KEY_SHORTFORM;
+	public static final String AUTO_LOGIN_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + AUTO_LOGIN_KEY_SHORTFORM;
 
 	/**
 	 * If this property is set, attempt to use this path as the p4tickets file.
@@ -201,26 +194,24 @@ public class PropertyDefs {
 	/**
 	 * If this property is set, attempt to use this path as the p4tickets file.
 	 */
-	public static final String TICKET_PATH_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ TICKET_PATH_KEY_SHORT_FORM;
+	public static final String TICKET_PATH_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + TICKET_PATH_KEY_SHORT_FORM;
 
 	/**
 	 * If DEFAULT_CHARSET_KEY is set in the Java system properties, it defines the
 	 * name of the charset used to convert strings to and from the Perforce server
 	 * if that server is <i>NOT</i> in Unicode mode. Note that this property is
 	 * fundamental and <i>must</i> be set early on, i.e. in the System properties
-	 * at P4Java startup / load time.<p>
+	 * at P4Java startup / load time.
 	 * <p>
 	 * If this property is not set at P4Java load time, the default charset name
-	 * is the current JVM default charset name if not null.<p>
+	 * is the current JVM default charset name if not null.
 	 * <p>
 	 * Note that this value has no effect whatever when running against a non-Unicode
-	 * Perforce server.<p>
+	 * Perforce server.
 	 * <p>
 	 * Note also that this property has no short form.
 	 */
-	public static final String DEFAULT_CHARSET_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ "defaultCharset";
+	public static final String DEFAULT_CHARSET_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + "defaultCharset";
 
 	/**
 	 * Short form of the WRITE_IN_PLACE_KEY, below.
@@ -231,7 +222,7 @@ public class PropertyDefs {
 	 * If WRITE_IN_PLACE_KEY is true, certain operations listed below may
 	 * write file contents from the Perforce server directly to the target
 	 * client file rather than to a temporary file (which is then renamed to
-	 * the target file).<p>
+	 * the target file).
 	 * <p>
 	 * In general, this property should not be used unless you're
 	 * on a Windows box and seeing performance issues with sync operations;
@@ -243,12 +234,11 @@ public class PropertyDefs {
 	 * partial file content syncs in cases where network errors occur,
 	 * but this is very rare and will not result in server-side data
 	 * loss or corruption (in fact it's yet to be observed at all within
-	 * Perforce).<p>
+	 * Perforce).
 	 * <p>
 	 * Currently only the sync command honors this property.
 	 */
-	public static final String WRITE_IN_PLACE_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ WRITE_IN_PLACE_SHORT_FORM;
+	public static final String WRITE_IN_PLACE_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + WRITE_IN_PLACE_SHORT_FORM;
 
 	/**
 	 * Short form of the NON_CHECKED_SYNC property (below).
@@ -262,7 +252,7 @@ public class PropertyDefs {
 	 * other operations (see below) against 2010.2 or later Perforce servers will not
 	 * have integrity checks performed during the operations. The default is to
 	 * use integrity checks on these operations with 2010.2 or later servers (these
-	 * additional checks are not done for earlier server versions).<p>
+	 * additional checks are not done for earlier server versions).
 	 * <p>
 	 * By default, for 2010.2 and later servers, the integrity checks are performed on
 	 * the client for sync, revert, unshelve, and integ operations, and on the server
@@ -271,8 +261,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2011.1
 	 */
-	public static final String NON_CHECKED_SYNC = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ NON_CHECKED_SYNC_SHORT_FORM;
+	public static final String NON_CHECKED_SYNC = Metadata.P4JAVA_PROPS_KEY_PREFIX + NON_CHECKED_SYNC_SHORT_FORM;
 
 	/**
 	 * Short form of the ENABLE_TRACKING property (below).
@@ -287,15 +276,14 @@ public class PropertyDefs {
 	 * for applicable commands. You can see what tables a command is accessing,
 	 * and implicitly locking. In addition to the command's usual output, the
 	 * "track" information includes the table name and the type of locks
-	 * obtained on that table. <p>
+	 * obtained on that table.
 	 * <p>
 	 * Note that using "-Ztrack" users will have to handle tracking information
 	 * return from the lower level "raw" IServer.exec* methods.
 	 *
 	 * @since 2012.1
 	 */
-	public static final String ENABLE_TRACKING = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ ENABLE_TRACKING_SHORT_FORM;
+	public static final String ENABLE_TRACKING = Metadata.P4JAVA_PROPS_KEY_PREFIX + ENABLE_TRACKING_SHORT_FORM;
 
 	/**
 	 * Short form of the ENABLE_STREAMS property (below).
@@ -310,8 +298,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2017.1
 	 */
-	public static final String ENABLE_STREAMS = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ ENABLE_STREAMS_SHORT_FORM;
+	public static final String ENABLE_STREAMS = Metadata.P4JAVA_PROPS_KEY_PREFIX + ENABLE_STREAMS_SHORT_FORM;
 
 	/**
 	 * Short form of the ENABLE_ANDMAPS property (below).
@@ -326,8 +313,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2017.1
 	 */
-	public static final String ENABLE_ANDMAPS = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ ENABLE_ANDMAPS_SHORT_FORM;
+	public static final String ENABLE_ANDMAPS = Metadata.P4JAVA_PROPS_KEY_PREFIX + ENABLE_ANDMAPS_SHORT_FORM;
 
 	/**
 	 * Short form of the ENABLE_GRAPH property (below).
@@ -342,8 +328,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2017.1
 	 */
-	public static final String ENABLE_GRAPH = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ ENABLE_GRAPH_SHORT_FORM;
+	public static final String ENABLE_GRAPH = Metadata.P4JAVA_PROPS_KEY_PREFIX + ENABLE_GRAPH_SHORT_FORM;
 
 	/**
 	 * Short form of the FILESYS_RESTRICTSYMLINKS property (below).
@@ -358,8 +343,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2019.1
 	 */
-	public static final String FILESYS_RESTRICTSYMLINKS = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ FILESYS_RESTRICTSYMLINKS_SHORT_FORM;
+	public static final String FILESYS_RESTRICTSYMLINKS = Metadata.P4JAVA_PROPS_KEY_PREFIX + FILESYS_RESTRICTSYMLINKS_SHORT_FORM;
 
 	/**
 	 * Short form of the FILESYS_UTF8BOM property (below).
@@ -374,8 +358,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2017.2
 	 */
-	public static final String FILESYS_UTF8BOM = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ FILESYS_UTF8BOM_SHORT_FORM;
+	public static final String FILESYS_UTF8BOM = Metadata.P4JAVA_PROPS_KEY_PREFIX + FILESYS_UTF8BOM_SHORT_FORM;
 
 	/**
 	 * Short form of the ENABLE_PROGRESS property (below).
@@ -389,16 +372,14 @@ public class PropertyDefs {
 	 * "progress" will be set to 1 to indicate that the server should send
 	 * progress messages to the client if they are available for that command.
 	 * <p>
-	 * <p>
-	 * Note that the progress indicator (p4 -I <command>) flag makes sense to be
+	 * Note that the progress indicator {@code (p4 -I <command>)} flag makes sense to be
 	 * used with P4Java's lower level "raw" IServer.execStreamingMapCommand()
 	 * method. This streaming method takes a callback handler and continuously
 	 * report progress (in a result map) during the lifetime of a command.
 	 *
 	 * @since 2012.3
 	 */
-	public static final String ENABLE_PROGRESS = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ ENABLE_PROGRESS_SHORT_FORM;
+	public static final String ENABLE_PROGRESS = Metadata.P4JAVA_PROPS_KEY_PREFIX + ENABLE_PROGRESS_SHORT_FORM;
 
 	/**
 	 * Short form of the QUIET_MODE property (below).
@@ -413,8 +394,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2013.1
 	 */
-	public static final String QUIET_MODE = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ QUIET_MODE_SHORT_FORM;
+	public static final String QUIET_MODE = Metadata.P4JAVA_PROPS_KEY_PREFIX + QUIET_MODE_SHORT_FORM;
 
 	/**
 	 * If this property is set, attempt to use this ignore file name.
@@ -428,8 +408,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2012.1
 	 */
-	public static final String IGNORE_FILE_NAME_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ IGNORE_FILE_NAME_KEY_SHORT_FORM;
+	public static final String IGNORE_FILE_NAME_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + IGNORE_FILE_NAME_KEY_SHORT_FORM;
 
 	/**
 	 * If this property is set, attempt to use this path as the p4trust file.
@@ -443,8 +422,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2012.1
 	 */
-	public static final String TRUST_PATH_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ TRUST_PATH_KEY_SHORT_FORM;
+	public static final String TRUST_PATH_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + TRUST_PATH_KEY_SHORT_FORM;
 
 	/**
 	 * If this property is set (to any value), attempt to use memory instead of
@@ -460,8 +438,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2012.3
 	 */
-	public static final String USE_AUTH_MEMORY_STORE_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ USE_AUTH_MEMORY_STORE_KEY_SHORT_FORM;
+	public static final String USE_AUTH_MEMORY_STORE_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + USE_AUTH_MEMORY_STORE_KEY_SHORT_FORM;
 
 	/**
 	 * Short form of the UNICODE_MAPPING property (below).
@@ -477,8 +454,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2012.3
 	 */
-	public static final String UNICODE_MAPPING = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ UNICODE_MAPPING_SHORT_FORM;
+	public static final String UNICODE_MAPPING = Metadata.P4JAVA_PROPS_KEY_PREFIX + UNICODE_MAPPING_SHORT_FORM;
 
 	/**
 	 * If this property is set, attempt to use this value as the number of tries
@@ -494,8 +470,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2015.2
 	 */
-	public static final String AUTH_FILE_LOCK_TRY_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ AUTH_FILE_LOCK_TRY_KEY_SHORT_FORM;
+	public static final String AUTH_FILE_LOCK_TRY_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + AUTH_FILE_LOCK_TRY_KEY_SHORT_FORM;
 
 	/**
 	 * If this property is set, attempt to use this value as the number of milliseconds
@@ -511,8 +486,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2015.2
 	 */
-	public static final String AUTH_FILE_LOCK_DELAY_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ AUTH_FILE_LOCK_DELAY_KEY_SHORT_FORM;
+	public static final String AUTH_FILE_LOCK_DELAY_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + AUTH_FILE_LOCK_DELAY_KEY_SHORT_FORM;
 
 	/**
 	 * If this property is set, attempt to use this value as the number of milliseconds
@@ -530,8 +504,7 @@ public class PropertyDefs {
 	 *
 	 * @since 2015.2
 	 */
-	public static final String AUTH_FILE_LOCK_WAIT_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ AUTH_FILE_LOCK_WAIT_KEY_SHORT_FORM;
+	public static final String AUTH_FILE_LOCK_WAIT_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + AUTH_FILE_LOCK_WAIT_KEY_SHORT_FORM;
 
 	/**
 	 * If this property is set, allows the configuration of custom specs (undoc).
@@ -545,7 +518,6 @@ public class PropertyDefs {
 	 *
 	 * @since 2020.1
 	 */
-	public static final String CUSTOM_SPEC_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX
-			+ CUSTOM_SPEC_KEY_SHORT_FORM;
+	public static final String CUSTOM_SPEC_KEY = Metadata.P4JAVA_PROPS_KEY_PREFIX + CUSTOM_SPEC_KEY_SHORT_FORM;
 
 }

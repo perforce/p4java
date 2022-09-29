@@ -34,13 +34,12 @@ public class GraphReceivePackDelegator extends BaseDelegator implements IGraphRe
 	/**
 	 * Invokes the receive-pack command on the sever.
 	 *
-	 * @param options
-	 * @throws P4JavaException
+	 * @param options options
+	 * @throws P4JavaException on error
 	 */
 	@Override
 	public void doGraphReceivePack(GraphReceivePackOptions options) throws P4JavaException {
-		List<Map<String, Object>> resultMaps = execMapCmdList(
-				GRAPH, Parameters.processParameters(options, server), null);
+		List<Map<String, Object>> resultMaps = execMapCmdList(GRAPH, Parameters.processParameters(options, server), null);
 
 		if (nonNull(resultMaps)) {
 			for (Map<String, Object> map : resultMaps) {

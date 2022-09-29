@@ -132,7 +132,7 @@ public class InterchangesDelegator extends BaseDelegator implements IInterchange
                     // which case we pick the files off as best we can and then
                     // associate
                     // them with the changelist constructed as above.
-                    String errStr = server.handleFileErrorStr(map);
+                    String errStr = ResultMapParser.handleFileErrorStr(map);
                     if (isNotBlank(errStr)) {
                         // What we're doing here is weeding out the "all
                         // revision(s)

@@ -57,12 +57,7 @@ public class KeyDelegator extends BaseDelegator implements IKeyDelegator {
 
         return parseValueFromResultMaps(
                 resultMaps,
-                rethrowFunction(new FunctionWithException<Map, Boolean>() {
-                    @Override
-                    public Boolean apply(Map map) throws P4JavaException {
-                        return handleErrorStr(map);
-                    }
-                })
+                rethrowFunction(map -> handleErrorStr(map))
         );
     }
 
@@ -73,18 +68,13 @@ public class KeyDelegator extends BaseDelegator implements IKeyDelegator {
         List<Map<String, Object>> resultMaps = execMapCmdList(KEY, new String[]{keyName}, null);
         return parseValueFromResultMaps(
                 resultMaps,
-                rethrowFunction(new FunctionWithException<Map, Boolean>() {
-                    @Override
-                    public Boolean apply(Map map) throws P4JavaException {
-                        return handleErrorStr(map);
-                    }
-                })
+                rethrowFunction(map -> handleErrorStr(map))
         );
     }
 
     private String parseValueFromResultMaps(
             final List<Map<String, Object>> resultMaps,
-            final Function<Map, Boolean> construct) throws RequestException {
+            final Function<Map<String, Object>, Boolean> construct) throws RequestException {
         if (nonNull(resultMaps)) {
             for (Map<String, Object> map : resultMaps) {
                 if (nonNull(map) && !construct.apply(map) && map.containsKey(VALUE)) {

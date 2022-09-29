@@ -3,10 +3,10 @@
  */
 package com.perforce.p4java.impl.mapbased.server;
 
+import com.perforce.p4java.server.IServerAddress.Protocol;
+
 import java.net.URISyntaxException;
 import java.util.Properties;
-
-import com.perforce.p4java.server.IServerAddress.Protocol;
 
 /**
  * The purpose of this class is for building a server address object.
@@ -24,19 +24,18 @@ public class ServerAddressBuilder {
 	/**
 	 * Instantiates an empty server address builder.
 	 */
-	public ServerAddressBuilder() {}
-	
+	public ServerAddressBuilder() {
+	}
+
 	/**
 	 * Instantiates a new server address builder from a string.
-	 * 
-	 * @param serverAddress
-	 *            the server address
-	 * @throws URISyntaxException
+	 *
+	 * @param serverAddress the server address
+	 * @throws URISyntaxException on error
 	 */
 	public ServerAddressBuilder(String serverAddress) throws URISyntaxException {
 		if (serverAddress == null) {
-			throw new IllegalArgumentException(
-					"The server address cannot be null.");
+			throw new IllegalArgumentException("The server address cannot be null.");
 		}
 		parseUri(serverAddress);
 	}
@@ -44,26 +43,22 @@ public class ServerAddressBuilder {
 	/**
 	 * Parse the URI.
 	 * <p>
-	 * 
 	 * Note: assume the URI string is not encoded.
-	 * 
-	 * @param query
-	 *            the query
-	 * @throws URISyntaxException
+	 *
+	 * @param uri the uri
+	 * @throws URISyntaxException on error
 	 */
 	private void parseUri(String uri) throws URISyntaxException {
 
 		this.uri = uri;
-		
+
 		int protoPartEnd = uri.indexOf("://");
 		if (protoPartEnd < 0) {
-			throw new URISyntaxException(uri,
-					"missing or malformed Perforce scheme / protocol part");
+			throw new URISyntaxException(uri, "missing or malformed Perforce scheme / protocol part");
 		}
 		String protoPart = uri.substring(0, protoPartEnd);
 		if ((protoPart.length() + 3) >= uri.length()) {
-			throw new URISyntaxException(uri,
-					"missing or malformed Perforce server hostname");
+			throw new URISyntaxException(uri, "missing or malformed Perforce server hostname");
 		}
 		this.protocol = Protocol.fromString(protoPart);
 		if (protocol == null) {
@@ -79,22 +74,19 @@ public class ServerAddressBuilder {
 			int portStart = restStr.lastIndexOf(":");
 			int queryStart = restStr.indexOf("?");
 			if (portStart == 0) {
-				throw new URISyntaxException(uri,
-						"missing or malformed Perforce server hostname");
+				throw new URISyntaxException(uri, "missing or malformed Perforce server hostname");
 			}
 			if ((portStart < 0) || ((queryStart > 0) && (queryStart < portStart))) {
-				throw new URISyntaxException(uri,
-						"missing or malformed Perforce server port specifier");
+				throw new URISyntaxException(uri, "missing or malformed Perforce server port specifier");
 			}
 			this.host = restStr.substring(0, portStart);
-	
+
 			String portPart = null;
 			if (queryStart > 0) {
 				portPart = restStr.substring(portStart + 1, queryStart);
-	
+
 				if (queryStart >= restStr.length()) {
-					throw new URISyntaxException(uri,
-							"empty or malformed P4Java query string");
+					throw new URISyntaxException(uri, "empty or malformed P4Java query string");
 				}
 				this.query = restStr.substring(queryStart + 1);
 			} else {
@@ -103,10 +95,9 @@ public class ServerAddressBuilder {
 			try {
 				this.port = new Integer(portPart);
 			} catch (NumberFormatException nfe) {
-				throw new URISyntaxException(uri,
-						"non-numeric Perforce server port specifier");
+				throw new URISyntaxException(uri, "non-numeric Perforce server port specifier");
 			}
-	
+
 			if (this.query != null) {
 				if (this.properties == null) {
 					this.properties = new Properties();
@@ -134,7 +125,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Builds the server address.
-	 * 
+	 *
 	 * @return the server address
 	 */
 	public ServerAddress build() {
@@ -143,7 +134,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Gets the protocol.
-	 * 
+	 *
 	 * @return the protocol
 	 */
 	public Protocol getProtocol() {
@@ -152,7 +143,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Sets the protocol.
-	 * 
+	 *
 	 * @param protocol the protocol
 	 */
 	public void setProtocol(Protocol protocol) {
@@ -161,7 +152,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Gets the host.
-	 * 
+	 *
 	 * @return the host
 	 */
 	public String getHost() {
@@ -170,7 +161,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Sets the host.
-	 * 
+	 *
 	 * @param host the host
 	 */
 	public void setHost(String host) {
@@ -179,7 +170,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Gets the port.
-	 * 
+	 *
 	 * @return the port
 	 */
 	public int getPort() {
@@ -188,7 +179,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Sets the port.
-	 * 
+	 *
 	 * @param port the port
 	 */
 	public void setPort(int port) {
@@ -197,7 +188,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Gets the query.
-	 * 
+	 *
 	 * @return the query
 	 */
 	public String getQuery() {
@@ -206,7 +197,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Gets the properties (parsed from the query string).
-	 * 
+	 *
 	 * @return the properties
 	 */
 	public Properties getProperties() {
@@ -215,13 +206,12 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Gets the uri.
-	 * 
+	 *
 	 * @return the uri
 	 */
 	public String getUri() {
-		if (this.uri != null)
-			return this.uri;
-		
+		if (this.uri != null) return this.uri;
+
 		String newUri = protocol.toString() + "://";
 		if (protocol == Protocol.P4JRSH || protocol == Protocol.P4JRSHNTS) {
 			newUri += this.rsh;
@@ -233,7 +223,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Gets the rsh command.
-	 * 
+	 *
 	 * @return the rsh command
 	 */
 	public String getRsh() {
@@ -242,7 +232,7 @@ public class ServerAddressBuilder {
 
 	/**
 	 * Sets the rsh command.
-	 * 
+	 *
 	 * @param rsh the rsh command
 	 */
 	public void setRsh(String rsh) {

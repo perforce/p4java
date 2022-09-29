@@ -18,7 +18,6 @@ import com.perforce.p4java.impl.generic.core.MapEntry;
  * Note that the order of this trigger entry in the triggers table is part of
  * the trigger entry key when pass to the server for updating the triggers
  * table.
- * <p>
  * 
  * <pre>
  * Triggers0 example1 change-submit //depot/... "echo %changelist%"
@@ -75,6 +74,12 @@ public class TriggerEntry extends MapEntry implements ITriggerEntry {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param order       order
+	 * @param name        name
+	 * @param triggerType triggerType
+	 * @param path        path
+	 * @param command     command
 	 */
 	public TriggerEntry(int order, String name, TriggerType triggerType, String path, String command) {
 		super(order, null);
@@ -88,6 +93,9 @@ public class TriggerEntry extends MapEntry implements ITriggerEntry {
 	/**
 	 * Constructs a TriggerEntry from the passed-in trigger as a string and its
 	 * order.
+	 *
+	 * @param triggerEntry triggerEntry
+	 * @param order        order
 	 */
 	public TriggerEntry(String triggerEntry, int order) {
 		if (triggerEntry != null) {

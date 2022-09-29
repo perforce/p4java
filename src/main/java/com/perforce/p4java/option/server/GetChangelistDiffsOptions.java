@@ -1,55 +1,55 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option.server;
-
-import java.util.List;
 
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
  * Options class for IOptionsServer.getChangelistDiffs method(s).
- * 
+ *
  * @see com.perforce.p4java.server.IOptionsServer#getChangelistDiffs(int, com.perforce.p4java.option.server.GetChangelistDiffsOptions)
  */
 public class GetChangelistDiffsOptions extends Options implements DiffsOptions<GetChangelistDiffsOptions> {
-	
+
 	/**
 	 * Options: "-S", "-dn", "-dc[n]", "-ds", "-du[n]" "-db", "-dw", "-dl"
 	 */
 	public static final String OPTIONS_SPECS = "b:S b:dn i:dc:dcn b:ds i:du:dcn b:db b:dw b:dl";
-	
+
 	/** If true, output diffs of shelved files for the changelist */
 	protected boolean outputShelvedDiffs = false;
-	
+
 	/** If true, use RCS diff; corresponds to -dn. */
 	protected boolean rcsDiffs = false;
-	
+
 	/**
 	 * If positive, specifies the number of context diff lines;
 	 * if zero, lets server pick context number; if negative,
 	 * no options are generated. Corresponds to -dc[n], with -dc
-	 * generated for diffContext == 0, -dcn for diffContext > 0,
+	 * generated for diffContext == 0, -dcn for diffContext &gt; 0,
 	 * where "n" is of course the value of diffContext.
 	 */
 	protected int diffContext = -1;
-	
+
 	/** If true, perform summary diff; corresponds to -ds. */
 	protected boolean summaryDiff = false;
-	
+
 	/** If true, do a unified diff; corresponds to -du[n] with -du
-	 * generated for unifiedDiff == 0, -dun for unifiedDiff > 0,
+	 * generated for unifiedDiff == 0, -dun for unifiedDiff &gt; 0,
 	 * where "n" is of course the value of unifiedDiff. */
 	protected int unifiedDiff = -1;
-	
+
 	/** If true, ignore whitespace changes; corresponds to -db. */
 	protected boolean ignoreWhitespaceChanges = false;
-	
+
 	/** If true, ignore whitespace; corresponds to -dw. */
 	protected boolean ignoreWhitespace = false;
-	
+
 	/** If true, ignore line endings; corresponds to -dl. */
 	protected boolean ignoreLineEndings = false;
 
@@ -63,19 +63,20 @@ public class GetChangelistDiffsOptions extends Options implements DiffsOptions<G
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public GetChangelistDiffsOptions(String... options) {
@@ -84,11 +85,17 @@ public class GetChangelistDiffsOptions extends Options implements DiffsOptions<G
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param outputShelvedDiffs      outputShelvedDiffs
+	 * @param rcsDiffs                rcsDiffs
+	 * @param diffContext             diffContext
+	 * @param summaryDiff             summaryDiff
+	 * @param unifiedDiff             unifiedDiff
+	 * @param ignoreWhitespaceChanges ignoreWhitespaceChanges
+	 * @param ignoreWhitespace        ignoreWhitespace
+	 * @param ignoreLineEndings       ignoreLineEndings
 	 */
-	public GetChangelistDiffsOptions(boolean outputShelvedDiffs,
-			boolean rcsDiffs, int diffContext, boolean summaryDiff,
-			int unifiedDiff, boolean ignoreWhitespaceChanges,
-			boolean ignoreWhitespace, boolean ignoreLineEndings) {
+	public GetChangelistDiffsOptions(boolean outputShelvedDiffs, boolean rcsDiffs, int diffContext, boolean summaryDiff, int unifiedDiff, boolean ignoreWhitespaceChanges, boolean ignoreWhitespace, boolean ignoreLineEndings) {
 		super();
 		this.outputShelvedDiffs = outputShelvedDiffs;
 		this.rcsDiffs = rcsDiffs;
@@ -100,20 +107,12 @@ public class GetChangelistDiffsOptions extends Options implements DiffsOptions<G
 		this.ignoreLineEndings = ignoreLineEndings;
 	}
 
-	/** 
+	/**
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-								this.isOutputShelvedDiffs(),
-								this.isRcsDiffs(),
-								this.getDiffContext(),
-								this.isSummaryDiff(),
-								this.isUnifiedDiff(),
-								this.isIgnoreWhitespaceChanges(),
-								this.isIgnoreWhitespace(),
-								this.isIgnoreLineEndings());
-		
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isOutputShelvedDiffs(), this.isRcsDiffs(), this.getDiffContext(), this.isSummaryDiff(), this.isUnifiedDiff(), this.isIgnoreWhitespaceChanges(), this.isIgnoreWhitespace(), this.isIgnoreLineEndings());
+
 		return this.optionList;
 	}
 

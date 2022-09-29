@@ -99,7 +99,6 @@ public class JobDelegator extends BaseDelegator implements IJobDelegator {
      * @see com.perforce.p4java.server.delegator.IJobDelegator#getJob(java.lang.
      * String)
      */
-    @SuppressWarnings("unchecked")
     @Override
     public IJob getJob(final String jobId)
             throws ConnectionException, RequestException, AccessException {
@@ -111,13 +110,8 @@ public class JobDelegator extends BaseDelegator implements IJobDelegator {
 
         return ResultListBuilder.buildNullableObjectFromNonInfoMessageCommandResultMaps(
                 resultMaps,
-                new Function<Map, IJob>() {
-                    @Override
-                    public IJob apply(Map map) {
-                        return new Job(server, map);
-                    }
-                }
-        );
+				(Function<Map<String, Object>, IJob>) map -> new Job(server, map)
+		);
     }
 
     /*

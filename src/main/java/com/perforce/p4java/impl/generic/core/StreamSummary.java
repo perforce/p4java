@@ -33,6 +33,11 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 
 		/**
 		 * Explicit-value constructor.
+		 *
+		 * @param ownerSubmit  ownerSubmit
+		 * @param locked       locked
+		 * @param noToParent   noToParent
+		 * @param noFromParent noFromParent
 		 */
 		public Options(boolean ownerSubmit, boolean locked, boolean noToParent, boolean noFromParent) {
 			this(ownerSubmit, locked, noToParent, noFromParent, false);
@@ -40,6 +45,12 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 
 		/**
 		 * Explicit-value constructor.
+		 *
+		 * @param ownerSubmit  ownerSubmit
+		 * @param locked       locked
+		 * @param noToParent   noToParent
+		 * @param noFromParent noFromParent
+		 * @param mergeAny     mergeAny
 		 */
 		public Options(boolean ownerSubmit, boolean locked, boolean noToParent, boolean noFromParent, boolean mergeAny) {
 			setOwnerSubmit(ownerSubmit);
@@ -55,6 +66,8 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 		 * "allsubmit/ownersubmit, [un]locked, [no]toparent, [no]fromparent". If
 		 * optionsString is null, this is equivalent to calling the default
 		 * constructor.
+		 *
+		 * @param optionsString options
 		 */
 		public Options(String optionsString) {
 			if (optionsString == null) {
@@ -82,49 +95,75 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 		 * optionsString) constructor.
 		 */
 		public String toString() {
-			return (isOwnerSubmit() ? "ownersubmit" : "allsubmit")
-					+ (isLocked() ? " locked" : " unlocked")
-					+ (isNoToParent() ? " notoparent" : " toparent")
-					+ (isNoFromParent() ? " nofromparent" : " fromparent")
-					+ (isMergeAny() ? " mergeany" : " mergedown");
+			return (isOwnerSubmit() ? "ownersubmit" : "allsubmit") + (isLocked() ? " locked" : " unlocked") + (isNoToParent() ? " notoparent" : " toparent") + (isNoFromParent() ? " nofromparent" : " fromparent") + (isMergeAny() ? " mergeany" : " mergedown");
 		}
 
+		/**
+		 * @return owner if true
+		 */
 		public boolean isOwnerSubmit() {
 			return ownerSubmit;
 		}
 
+		/**
+		 * @param ownerSubmit owner if true
+		 */
 		public void setOwnerSubmit(boolean ownerSubmit) {
 			this.ownerSubmit = ownerSubmit;
 		}
 
+		/**
+		 * @return if true
+		 */
 		public boolean isLocked() {
 			return locked;
 		}
 
+		/**
+		 * @param locked if true
+		 */
 		public void setLocked(boolean locked) {
 			this.locked = locked;
 		}
 
+		/**
+		 * @return if true
+		 */
 		public boolean isNoToParent() {
 			return noToParent;
 		}
 
+		/**
+		 * @param noToParent if true
+		 */
 		public void setNoToParent(boolean noToParent) {
 			this.noToParent = noToParent;
 		}
 
+		/**
+		 * @return if true
+		 */
 		public boolean isNoFromParent() {
 			return noFromParent;
 		}
 
+		/**
+		 * @param noFromParent if true
+		 */
 		public void setNoFromParent(boolean noFromParent) {
 			this.noFromParent = noFromParent;
 		}
 
+		/**
+		 * @return if true
+		 */
 		public boolean isMergeAny() {
 			return mergeAny;
 		}
 
+		/**
+		 * @param mergeAny if true
+		 */
 		public void setMergeAny(boolean mergeAny) {
 			this.mergeAny = mergeAny;
 		}
@@ -142,6 +181,7 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 	 * Default constructor; same as no-argument default constructor, except that
 	 * it sets the ServerResource superclass fields appropriately for summary
 	 * only (everything false) or full stream spec (updateable and refreshable).
+	 * @param summaryOnly if true
 	 */
 	public StreamSummary(boolean summaryOnly) {
 		super(!summaryOnly, !summaryOnly);
@@ -151,10 +191,19 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 	 * Explicit-value constructor. If summaryOnly is true, refreshable and
 	 * updeateable are set true in the ServerResource superclass, otherwise
 	 * they're set false.
+	 *
+	 * @param summaryOnly summaryOnly
+	 * @param stream      stream
+	 * @param accessed    accessed
+	 * @param updated     updated
+	 * @param name        name
+	 * @param ownerName   ownerName
+	 * @param description description
+	 * @param parent      parent
+	 * @param type        type
+	 * @param options     options
 	 */
-	public StreamSummary(boolean summaryOnly, String stream, Date accessed,
-						 Date updated, String name, String ownerName, String description,
-						 String parent, Type type, Options options) {
+	public StreamSummary(boolean summaryOnly, String stream, Date accessed, Date updated, String name, String ownerName, String description, String parent, Type type, Options options) {
 		super(!summaryOnly, !summaryOnly);
 		setStream(stream);
 		setAccessed(accessed);
@@ -176,6 +225,8 @@ public class StreamSummary extends ServerResource implements IStreamSummary {
 	 *
 	 * If map is null, this is equivalent to calling the default
 	 * summaryOnly-argument constructor.
+	 * @param map         spec map
+	 * @param summaryOnly if true
 	 */
 	public StreamSummary(Map<String, Object> map, boolean summaryOnly) {
 		super(!summaryOnly, !summaryOnly);

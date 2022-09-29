@@ -103,46 +103,64 @@ public interface IExtension extends IServerResource, IExtensionSummary {
 
 	/**
 	 * Set the description of the Extension being configured.
+	 *
+	 * @param extDescription description
 	 */
 	void setExtDescription(String extDescription);
 
 	/**
 	 * Set maximum seconds the Extension may be run.
+	 *
+	 * @param extMaxScriptTime time
 	 */
 	void setExtMaxScriptTime(String extMaxScriptTime);
 
 	/**
 	 * Set maximum megabytes the Extension may use.
+	 *
+	 * @param extMaxScriptMem memory
 	 */
 	void setExtMaxScriptMem(String extMaxScriptMem);
 
 	/**
 	 * Set the user who created this Extension config.
-	 **/
+	 *
+	 * @param owner owner
+	 */
 	void setOwner(String owner);
 
 	/**
 	 * Set update time for the Extension config spec.
+	 *
+	 * @param update date
 	 */
 	void setUpdate(String update);
 
 	/**
 	 * Set the description of this Extension config.
+	 *
+	 * @param description description
 	 */
 	void setDescription(String description);
 
 	/**
 	 * Set the extension config.
+	 *
+	 * @param extConfig config map
 	 */
 	void setExtConfig(Map<String, String> extConfig);
 
 	/**
 	 * Set groups whose members may configure the Extension.
-	 **/
+	 *
+	 * @param extAllowedGroups groups
+	 */
 	void setExtAllowedGroups(List<String> extAllowedGroups);
 
 	/**
 	 * Set Perforce user account for the Extension to use.
+	 *
+	 * @param extP4USER Perforce user
 	 */
 	void setExtP4USER(String extP4USER);
 
@@ -152,6 +170,8 @@ public interface IExtension extends IServerResource, IExtensionSummary {
 	 * the instance of the Extension will append execution traces to
 	 * a log file named '.p4-debug-tracing.txt' in the Extension data
 	 * directory.
+	 *
+	 * @param extDebug debug
 	 */
 	void setExtDebug(String extDebug);
 }

@@ -7,7 +7,7 @@ import java.io.PushbackInputStream;
 /**
  * InputStream wrapper that detects and skips the Unicode BOM (Byte Order Mark)
  * in Unicode encoded text files.
- * 
+ *
  * <pre>
  * EF BB BF    = UTF-8 BOM
  * FF FE       = UTF-16, little-endian BOM
@@ -38,47 +38,32 @@ public class RpcUnicodeInputStream extends InputStream {
 		/**
 		 * Default to no BOM.
 		 */
-		public static final BOM NONE = new BOM(new byte[] {}, "NONE");
+		public static final BOM NONE = new BOM(new byte[]{}, "NONE");
 
 		/**
 		 * UTF-8 BOM (EF BB BF).
 		 */
-		public static final BOM UTF_8 = new BOM(new byte[] {
-				(byte) 0xEF,
-				(byte) 0xBB,
-				(byte) 0xBF }, "UTF-8");
+		public static final BOM UTF_8 = new BOM(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF}, "UTF-8");
 
 		/**
 		 * UTF-16, little-endian (FF FE).
 		 */
-		public static final BOM UTF_16_LE = new BOM(new byte[] {
-				(byte) 0xFF,
-				(byte) 0xFE }, "UTF-16 little-endian");
+		public static final BOM UTF_16_LE = new BOM(new byte[]{(byte) 0xFF, (byte) 0xFE}, "UTF-16 little-endian");
 
 		/**
 		 * UTF-16, big-endian (FE FF).
 		 */
-		public static final BOM UTF_16_BE = new BOM(new byte[] {
-				(byte) 0xFE,
-				(byte) 0xFF }, "UTF-16 big-endian");
+		public static final BOM UTF_16_BE = new BOM(new byte[]{(byte) 0xFE, (byte) 0xFF}, "UTF-16 big-endian");
 
 		/**
 		 * UTF-32, little-endian (FF FE 00 00).
 		 */
-		public static final BOM UTF_32_LE = new BOM(new byte[] {
-				(byte) 0xFF,
-				(byte) 0xFE,
-				(byte) 0x00,
-				(byte) 0x00 }, "UTF-32 little-endian");
+		public static final BOM UTF_32_LE = new BOM(new byte[]{(byte) 0xFF, (byte) 0xFE, (byte) 0x00, (byte) 0x00}, "UTF-32 little-endian");
 
 		/**
 		 * UTF-32, big-endian (00 00 FE FF).
 		 */
-		public static final BOM UTF_32_BE = new BOM(new byte[] {
-				(byte) 0x00,
-				(byte) 0x00,
-				(byte) 0xFE,
-				(byte) 0xFF }, "UTF-32 big-endian");
+		public static final BOM UTF_32_BE = new BOM(new byte[]{(byte) 0x00, (byte) 0x00, (byte) 0xFE, (byte) 0xFF}, "UTF-32 big-endian");
 
 		/**
 		 * Returns the string representation of this BOM.
@@ -89,6 +74,8 @@ public class RpcUnicodeInputStream extends InputStream {
 
 		/**
 		 * Returns the bytes of this BOM.
+		 *
+		 * @return bytes
 		 */
 		public final byte[] getBytes() {
 			final int length = bytes.length;
@@ -100,6 +87,10 @@ public class RpcUnicodeInputStream extends InputStream {
 
 	/**
 	 * Constructs a new RpcUnicodeInputStream that wraps the InputStream.
+	 *
+	 * @param inputStream inputStream
+	 * @throws NullPointerException on error
+	 * @throws IOException          on error
 	 */
 	public RpcUnicodeInputStream(final InputStream inputStream) throws NullPointerException, IOException {
 		if (inputStream == null) {
@@ -112,52 +103,43 @@ public class RpcUnicodeInputStream extends InputStream {
 		final int read = in.read(bom);
 
 		switch (read) {
-		
-		case 4:
-			if ((bom[0] == (byte) 0xFF)
-					&& (bom[1] == (byte) 0xFE)
-					&& (bom[2] == (byte) 0x00)
-					&& (bom[3] == (byte) 0x00)) {
-				this.bom = BOM.UTF_32_LE;
-				break;
-			} else if ((bom[0] == (byte) 0x00)
-					&& (bom[1] == (byte) 0x00)
-					&& (bom[2] == (byte) 0xFE)
-					&& (bom[3] == (byte) 0xFF)) {
-				this.bom = BOM.UTF_32_BE;
-				break;
-			}
 
-		case 3:
-			if ((bom[0] == (byte) 0xEF)
-					&& (bom[1] == (byte) 0xBB)
-					&& (bom[2] == (byte) 0xBF)) {
-				this.bom = BOM.UTF_8;
-				break;
-			}
+			case 4:
+				if ((bom[0] == (byte) 0xFF) && (bom[1] == (byte) 0xFE) && (bom[2] == (byte) 0x00) && (bom[3] == (byte) 0x00)) {
+					this.bom = BOM.UTF_32_LE;
+					break;
+				} else if ((bom[0] == (byte) 0x00) && (bom[1] == (byte) 0x00) && (bom[2] == (byte) 0xFE) && (bom[3] == (byte) 0xFF)) {
+					this.bom = BOM.UTF_32_BE;
+					break;
+				}
 
-		case 2:
-			if ((bom[0] == (byte) 0xFF)
-					&& (bom[1] == (byte) 0xFE)) {
-				this.bom = BOM.UTF_16_LE;
-				break;
-			} else if ((bom[0] == (byte) 0xFE)
-					&& (bom[1] == (byte) 0xFF)) {
-				this.bom = BOM.UTF_16_BE;
-				break;
-			}
+			case 3:
+				if ((bom[0] == (byte) 0xEF) && (bom[1] == (byte) 0xBB) && (bom[2] == (byte) 0xBF)) {
+					this.bom = BOM.UTF_8;
+					break;
+				}
 
-		default:
-			this.bom = BOM.NONE;
-			break;
+			case 2:
+				if ((bom[0] == (byte) 0xFF) && (bom[1] == (byte) 0xFE)) {
+					this.bom = BOM.UTF_16_LE;
+					break;
+				} else if ((bom[0] == (byte) 0xFE) && (bom[1] == (byte) 0xFF)) {
+					this.bom = BOM.UTF_16_BE;
+					break;
+				}
+
+			default:
+				this.bom = BOM.NONE;
+				break;
 		}
 
-		if (read > 0)
-			in.unread(bom, 0, read);
+		if (read > 0) in.unread(bom, 0, read);
 	}
 
 	/**
 	 * Returns the BOM found in the InputStream.
+	 *
+	 * @return BOM
 	 */
 	public final BOM getBOM() {
 		return bom;
@@ -165,6 +147,9 @@ public class RpcUnicodeInputStream extends InputStream {
 
 	/**
 	 * Skips the BOM found in the InputStream.
+	 *
+	 * @return this
+	 * @throws IOException on error
 	 */
 	public final synchronized RpcUnicodeInputStream skipBOM() throws IOException {
 		if (!skipped) {
@@ -191,8 +176,7 @@ public class RpcUnicodeInputStream extends InputStream {
 	/**
 	 * {@inheritDoc}
 	 */
-	public int read(final byte b[], final int off, final int len)
-			throws IOException, NullPointerException {
+	public int read(final byte b[], final int off, final int len) throws IOException, NullPointerException {
 		return in.read(b, off, len);
 	}
 

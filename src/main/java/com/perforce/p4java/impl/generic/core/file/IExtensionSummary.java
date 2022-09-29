@@ -100,63 +100,86 @@ public interface IExtensionSummary {
 
 	/**
 	 * Set the name of the Extension being configured.
+	 *
+	 * @param extName name
 	 */
 	void setExtName(String extName);
 
-	/** Set the version of the Extension being configured.
+	/**
+	 * Set the version of the Extension being configured.
 	 *
+	 * @param extVersion version
 	 */
 	void setExtVersion(String extVersion);
 
 	/**
 	 * Set the UUID/key of the Extension being configured.
+	 *
+	 * @param extUUID UUID
 	 */
 	void setExtUUID(String extUUID);
 
 	/**
 	 * Set the revision of the Extension being configured.
+	 *
+	 * @param extRev revision
 	 */
 	void setExtRev(String extRev);
 
 	/**
 	 * Enable or disable the extension
+	 *
 	 * @param extEnabled true/false
 	 */
 	void setExtEnabled(String extEnabled);
 
 	/**
 	 * Set the namespace of this Extension config.
+	 *
+	 * @param name name
 	 */
 	void setNameSpace(String name);
 
 	/**
 	 * Set the extension developer field.
+	 *
+	 * @param extDeveloper developer
 	 */
 	void setExtDeveloper(String extDeveloper);
 
 	/**
-	 *  Set the Extension description snippet.
+	 * Set the Extension description snippet.
+	 *
+	 * @param extDescriptionSnippet description
 	 */
 	void setExtDescriptionSnippet(String extDescriptionSnippet);
 
 	/**
 	 * Set the path to the file in the server extension’s unpacked archive directory.
 	 * This path is relative to the server.extensions.dir configurable.
+	 *
+	 * @param extArchDir archive directory
 	 */
 	void setExtArchDir(String extArchDir);
 
 	/**
 	 * Set path in which the server extension will store the files it creates.
+	 *
+	 * @param extDataDir data directory
 	 */
 	void setExtDataDir(String extDataDir);
 
 	/**
 	 * Set extension as a global.
+	 *
+	 * @param extGlobalConf is global
 	 */
 	void setExtGlobalConf(boolean extGlobalConf);
 
 	/**
 	 * Set extension as an instance.
+	 *
+	 * @param extInstanceConf is instance
 	 */
 	void setExtInstanceConf(boolean extInstanceConf);
 }

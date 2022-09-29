@@ -55,16 +55,12 @@ public class CommitDelegator extends BaseDelegator implements ICommitDelegator {
 	@Override
 	public ICommit getCommitObject(String sha) throws P4JavaException {
 
-		List<Map<String, Object>> resultMaps = execMapCmdList(
-				GRAPH,
-				Parameters.processParameters(
-						null, null, new String[]{"cat-file", "commit", sha}, server),
-				null);
+		List<Map<String, Object>> resultMaps = execMapCmdList(GRAPH, Parameters.processParameters(null, null, new String[]{"cat-file", "commit", sha}, server), null);
 
 		List<ICommit> commits = parseCommitList(resultMaps);
 
 		// should only return a single result
-		if(commits != null && !commits.isEmpty()) {
+		if (commits != null && !commits.isEmpty()) {
 			return commits.get(0);
 		}
 
@@ -74,16 +70,12 @@ public class CommitDelegator extends BaseDelegator implements ICommitDelegator {
 	@Override
 	public ICommit getCommitObject(String sha, String repo) throws P4JavaException {
 
-		List<Map<String, Object>> resultMaps = execMapCmdList(
-				GRAPH,
-				Parameters.processParameters(
-						null, null, new String[]{"cat-file", "-n", repo, "commit", sha}, server),
-				null);
+		List<Map<String, Object>> resultMaps = execMapCmdList(GRAPH, Parameters.processParameters(null, null, new String[]{"cat-file", "-n", repo, "commit", sha}, server), null);
 
 		List<ICommit> commits = parseCommitList(resultMaps);
 
 		// should only return a single result
-		if(commits != null && !commits.isEmpty()) {
+		if (commits != null && !commits.isEmpty()) {
 			return commits.get(0);
 		}
 
@@ -93,11 +85,7 @@ public class CommitDelegator extends BaseDelegator implements ICommitDelegator {
 	@Override
 	public InputStream getBlobObject(String repo, String sha) throws P4JavaException {
 
-		InputStream inputStream = execStreamCmd(
-				GRAPH,
-				Parameters.processParameters(
-						null, null, new String[]{"cat-file", "-n", repo, "blob", sha}, server)
-		);
+		InputStream inputStream = execStreamCmd(GRAPH, Parameters.processParameters(null, null, new String[]{"cat-file", "-n", repo, "blob", sha}, server));
 
 		return inputStream;
 	}
@@ -105,11 +93,7 @@ public class CommitDelegator extends BaseDelegator implements ICommitDelegator {
 	@Override
 	public IGraphObject getGraphObject(String sha) throws P4JavaException {
 
-		List<Map<String, Object>> resultMaps = execMapCmdList(
-				CmdSpec.GRAPH,
-				Parameters.processParameters(
-						null, null, new String[]{"cat-file", "-t", sha}, server),
-				null);
+		List<Map<String, Object>> resultMaps = execMapCmdList(CmdSpec.GRAPH, Parameters.processParameters(null, null, new String[]{"cat-file", "-t", sha}, server), null);
 
 		if (!nonNull(resultMaps)) {
 			return null;
@@ -143,18 +127,17 @@ public class CommitDelegator extends BaseDelegator implements ICommitDelegator {
 	}
 
 	/**
-	 * Returns a List<IGraphCommitLog> encapsulating a commit logs which holds the
+	 * Returns a {@code List<ICommit>} encapsulating a commit logs which holds the
 	 * data retrieved as part of the 'p4 graph log -n command'
 	 *
 	 * @param options Various options supported by the command
-	 * @return List<IGraphCommitLog>
-	 * @throws P4JavaException
+	 * @return list of commits
+	 * @throws P4JavaException on error
 	 */
 	@Override
 	public List<ICommit> getGraphCommitLogList(GraphCommitLogOptions options) throws P4JavaException {
 
-		List<Map<String, Object>> resultMaps = execMapCmdList(
-				GRAPH, Parameters.processParameters(options, server), null);
+		List<Map<String, Object>> resultMaps = execMapCmdList(GRAPH, Parameters.processParameters(options, server), null);
 
 		if (!nonNull(resultMaps)) {
 			return null;

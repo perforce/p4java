@@ -17,12 +17,17 @@ public class FilesHelper {
 
 	/**
 	 * Copy source file to destination file.
+	 *
+	 * @param source      source
+	 * @param destination destination
+	 * @return status
+	 * @throws IOException on error
 	 */
 	public static boolean copy(File source, File destination) throws IOException {
 		boolean copied = false;
 		if (source != null && destination != null) {
-		    FileInputStream reader = null;
-		    FileOutputStream writer = null;
+			FileInputStream reader = null;
+			FileOutputStream writer = null;
 			try {
 				ISystemFileCommandsHelper helper = ServerFactory.getRpcFileSystemHelper();
 				if (helper == null) {
@@ -60,6 +65,9 @@ public class FilesHelper {
 
 	/**
 	 * Create all directories, including nonexistent parent directories.
+	 *
+	 * @param file file
+	 * @return status
 	 */
 	public static boolean mkdirs(File file) {
 		if (file != null) {
@@ -67,7 +75,7 @@ public class FilesHelper {
 			if (parent != null) {
 				File parentDir = new File(parent);
 				if (!parentDir.exists()) {
-					if(parentDir.mkdirs()) {
+					if (parentDir.mkdirs()) {
 						return true;
 					} else {
 						return parentDir.exists();
@@ -76,7 +84,7 @@ public class FilesHelper {
 			}
 			return true;
 		}
-		
+
 		return false;
 	}
 }

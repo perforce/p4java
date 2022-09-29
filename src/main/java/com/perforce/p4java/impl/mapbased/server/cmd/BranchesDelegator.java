@@ -44,12 +44,7 @@ public class BranchesDelegator extends BaseDelegator implements IBranchesDelegat
 
         return ResultListBuilder.buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, IBranchSpecSummary>() {
-                    @Override
-                    public IBranchSpecSummary apply(Map map) {
-                        return new BranchSpecSummary(map, true);
-                    }
-                });
+				map -> new BranchSpecSummary(map, true));
     }
 
     @Override

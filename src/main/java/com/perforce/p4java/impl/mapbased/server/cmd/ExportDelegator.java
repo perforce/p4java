@@ -79,15 +79,12 @@ public class ExportDelegator extends BaseDelegator implements IExportDelegator {
 
         return buildNonNullObjectListFromCommandResultMaps(
                 resultMaps,
-                new Function<Map, Map<String, Object>>() {
-                    @Override
-                    public Map<String, Object> apply(Map map) {
-                        if (map.containsKey(FUNCTION)) {
-                            map.remove(FUNCTION);
-                        }
-                        return map;
-                    }
-                });
+				map -> {
+					if (map.containsKey(FUNCTION)) {
+						map.remove(FUNCTION);
+					}
+					return map;
+				});
     }
 
     @Override

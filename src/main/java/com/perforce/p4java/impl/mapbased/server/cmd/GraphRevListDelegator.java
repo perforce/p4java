@@ -37,9 +37,9 @@ public class GraphRevListDelegator extends BaseDelegator implements IGraphRevLis
      * Returns a List encapsulating a RevListCommit which holds the
      * data retrieved as part of the 'p4 graph rev-list -n'
      *
-     * @param options
-     * @return
-     * @throws P4JavaException
+     * @param options options
+     * @return List of graph revision items
+     * @throws P4JavaException on error
      */
     @Override
     public List<IRevListCommit> getGraphRevList(GraphRevListOptions options) throws P4JavaException {

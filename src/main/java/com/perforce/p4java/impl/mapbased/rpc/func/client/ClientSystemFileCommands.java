@@ -39,6 +39,7 @@ import com.perforce.p4java.impl.mapbased.rpc.sys.helper.AppleFileHelper;
 import com.perforce.p4java.impl.mapbased.rpc.sys.helper.SymbolicLinkHelper;
 import com.perforce.p4java.impl.mapbased.rpc.sys.helper.SysFileHelperBridge;
 import com.perforce.p4java.util.FilesHelper;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -47,6 +48,7 @@ import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.UnmappableCharacterException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -80,8 +82,7 @@ public class ClientSystemFileCommands {
 
 	private String tmpDirName = null;
 
-	private ISystemFileCommandsHelper fileCommands
-			= SysFileHelperBridge.getSysFileCommands();
+	private ISystemFileCommandsHelper fileCommands = SysFileHelperBridge.getSysFileCommands();
 
 	// Keeping track of file data progress info
 	private String filePath = null;
@@ -90,14 +91,11 @@ public class ClientSystemFileCommands {
 
 	private ClientSystemFileMatchCommands fileMatchCommands;
 
-	protected ClientSystemFileCommands(Properties props, RpcServer server,
-	                                   ClientSystemFileMatchCommands fileMatchCommands) {
+	protected ClientSystemFileCommands(Properties props, RpcServer server, ClientSystemFileMatchCommands fileMatchCommands) {
 		this.props = props;
 		this.server = server;
 		this.fileMatchCommands = fileMatchCommands;
-		this.tmpDirName = RpcPropertyDefs.getProperty(this.props,
-				PropertyDefs.P4JAVA_TMP_DIR_KEY,
-				System.getProperty(SYSTEM_TMPDIR_PROPS_KEY));
+		this.tmpDirName = RpcPropertyDefs.getProperty(this.props, PropertyDefs.P4JAVA_TMP_DIR_KEY, System.getProperty(SYSTEM_TMPDIR_PROPS_KEY));
 
 		if (tmpDirName == null) {
 			// This can really only happen if someone has nuked or played with
@@ -107,17 +105,20 @@ public class ClientSystemFileCommands {
 
 			tmpDirName = SYSTEM_TMPDIR_DEFAULT;
 
-			Log.warn("Unable to get tmp name from P4 props or System; using "
-					+ tmpDirName + " instead");
+			Log.warn("Unable to get tmp name from P4 props or System; using " + tmpDirName + " instead");
 		}
 	}
 
 	/**
 	 * Change the r/w (etc.) mode of a file locally.
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult chmodFile(RpcConnection rpcConnection,
-	                                              CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult chmodFile(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in chmodFile().");
@@ -171,19 +172,10 @@ public class ClientSystemFileCommands {
 						break;
 				}
 			} else {
-				cmdEnv.handleResult(
-						new RpcMessage(
-								ClientMessageId.CANT_CHMOD_FILE,
-								MessageSeverityCode.E_INFO,
-								MessageGenericCode.EV_CLIENT,
-								new String[]{path}
-						).toMap()
-				);
+				cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CHMOD_FILE, MessageSeverityCode.E_INFO, MessageGenericCode.EV_CLIENT, new String[]{path}).toMap());
 			}
 		} catch (NumberFormatException nfe) {
-			throw new ProtocolError(
-					"Unexpected conversion error in ClientSystemFileCommands.chmodFile: "
-							+ nfe.getLocalizedMessage());
+			throw new ProtocolError("Unexpected conversion error in ClientSystemFileCommands.chmodFile: " + nfe.getLocalizedMessage());
 		} catch (Exception exc) {
 			// FIXME: better error handling here -- HR.
 
@@ -198,10 +190,10 @@ public class ClientSystemFileCommands {
 	 * Open a client file for writing. We have to process things like NOCLOBBER,
 	 * and ensure we write to a temp file if a file already exists, etc. Much of
 	 * the logic here is straight from the C++ API, currently minus the OpenDiff
-	 * functionality (which will probably be factored out elsewhere).<p>
+	 * functionality (which will probably be factored out elsewhere).
 	 * <p>
 	 * We also have to leave the associated file descriptor (or channel equivalent)
-	 * lying around for the rest of the function sequence to be able to pick up.<p>
+	 * lying around for the rest of the function sequence to be able to pick up.
 	 * <p>
 	 * Note that we also now implement the 10.2 sync (etc.) transfer integrity
 	 * checks; this is actually fairly easy as it can be done on the raw (un-translated)
@@ -209,14 +201,17 @@ public class ClientSystemFileCommands {
 	 * has to consider the translated data). We do most of this work in the RpcOutputStream
 	 * and RpcPerforceFile classes after setting things up here; closeFile does the final
 	 * round up and delivers the verdict. This all only happens if Server.nonCheckedSyncs
-	 * is false.<p>
+	 * is false.
 	 * <p>
 	 * The temp file created here will be deleted in the subsequent closeFile() method call.
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult openFile(RpcConnection rpcConnection,
-	                                             CommandEnv cmdEnv, Map<String, Object> resultsMap)
-			throws ConnectionException {
+	protected RpcPacketDispatcherResult openFile(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in openFile().");
@@ -311,31 +306,15 @@ public class ClientSystemFileCommands {
 				if (doChecksum) {
 					if (!rpcConnection.getDigest(fileType, cfile.getFile(), RpcPerforceDigestType.GetType(digestType)).equals(digest)) {
 						handler.setError(true);
-						cmdEnv.handleResult(
-								new RpcMessage(
-										ClientMessageId.NO_MODIFIED_FILE,
-										MessageSeverityCode.E_FAILED,
-										MessageGenericCode.EV_CLIENT,
-										new String[]{"update", clientPath}
-								).toMap());
+						cmdEnv.handleResult(new RpcMessage(ClientMessageId.NO_MODIFIED_FILE, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"update", clientPath}).toMap());
 						return RpcPacketDispatcherResult.CONTINUE_LOOP;
 					}
 				}
 
 				// Handle noclobber.
-				if (cfile.getFile().exists()
-						&& cfile.getFile().isFile()
-						&& (noClobber != null)
-						&& cfile.getFile().canWrite()) {
+				if (cfile.getFile().exists() && cfile.getFile().isFile() && (noClobber != null) && cfile.getFile().canWrite()) {
 					handler.setError(true);
-					cmdEnv.handleResult(
-							new RpcMessage(
-									ClientMessageId.CANT_CLOBBER,
-									MessageSeverityCode.E_FAILED,
-									MessageGenericCode.EV_CLIENT,
-									new String[]{clientPath}
-							).toMap()
-					);
+					cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CLOBBER, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{clientPath}).toMap());
 					return RpcPacketDispatcherResult.CONTINUE_LOOP;
 				}
 
@@ -395,14 +374,7 @@ public class ClientSystemFileCommands {
 
 					if (!FilesHelper.mkdirs(cfile.getFile())) {
 						handler.setError(true);
-						cmdEnv.handleResult(
-								new RpcMessage(
-										ClientMessageId.CANT_CREATE_DIR,
-										MessageSeverityCode.E_FAILED,
-										MessageGenericCode.EV_CLIENT,
-										new String[]{clientPath}
-								).toMap()
-						);
+						cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CREATE_DIR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{clientPath}).toMap());
 
 						return RpcPacketDispatcherResult.CONTINUE_LOOP;
 					}
@@ -429,14 +401,7 @@ public class ClientSystemFileCommands {
 						}
 					} catch (IOException ioexc) {
 						handler.setError(true);
-						cmdEnv.handleResult(
-								new RpcMessage(
-										ClientMessageId.CANT_CREATE_FILE,
-										MessageSeverityCode.E_FAILED,
-										MessageGenericCode.EV_CLIENT,
-										new String[]{clientPath, ioexc.getLocalizedMessage()}
-								).toMap()
-						);
+						cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CREATE_FILE, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{clientPath, ioexc.getLocalizedMessage()}).toMap());
 
 						return RpcPacketDispatcherResult.CONTINUE_LOOP;
 					}
@@ -461,9 +426,7 @@ public class ClientSystemFileCommands {
 			throw p4je;
 		} catch (Exception exc) {
 			Log.exception(exc);
-			throw new P4JavaError(
-					"Unexpected exception in ClientSystemFileCommands.openFile: "
-							+ exc.getLocalizedMessage() + exc, exc);
+			throw new P4JavaError("Unexpected exception in ClientSystemFileCommands.openFile: " + exc.getLocalizedMessage() + exc, exc);
 		}
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
@@ -473,11 +436,14 @@ public class ClientSystemFileCommands {
 	 * Write file contents to the target file. This method assumes that
 	 * fileOpen has previously been called, and that the state map contains
 	 * at least one valid file output stream to write bytes to.
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult writeFile(RpcConnection rpcConnection,
-	                                              CommandEnv cmdEnv, Map<String, Object> resultsMap)
-			throws ConnectionException {
+	protected RpcPacketDispatcherResult writeFile(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in writeFile().");
@@ -503,15 +469,13 @@ public class ClientSystemFileCommands {
 		}
 
 		if (stateMap == null) {
-			throw new NullPointerError(
-					"Null state map in ClientSystemFileCommands.writeFile().");
+			throw new NullPointerError("Null state map in ClientSystemFileCommands.writeFile().");
 		}
 
 		Map<String, Object> origArgs = cfile.getArgs();
 
 		if (origArgs == null) {
-			throw new NullPointerError(
-					"Null original argument map ClientSystemFileCommands.writeFile() state map");
+			throw new NullPointerError("Null original argument map ClientSystemFileCommands.writeFile() state map");
 		}
 
 		String path = (String) origArgs.get(RpcFunctionMapKey.PATH);
@@ -528,21 +492,12 @@ public class ClientSystemFileCommands {
 					tmpPath.delete();
 				} catch (IOException e) {
 					handler.setError(true);
-					cmdEnv.handleResult(
-							new RpcMessage(
-									ClientMessageId.CANT_DELETE_FILE,
-									MessageSeverityCode.E_FAILED,
-									MessageGenericCode.EV_CLIENT,
-									new String[]{"symlink tmpFile", linkPath}
-							).toMap()
-					);
+					cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_DELETE_FILE, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"symlink tmpFile", linkPath}).toMap());
 				}
 			}
 
 			if (linkPath != null) {
-				convertFileDataMap(resultsMap,
-						cmdEnv.getRpcConnection().getClientCharset(),
-						cmdEnv.getRpcConnection().isUnicodeServer());
+				convertFileDataMap(resultsMap, cmdEnv.getRpcConnection().getClientCharset(), cmdEnv.getRpcConnection().isUnicodeServer());
 				String data = (String) resultsMap.get(RpcFunctionMapKey.DATA);
 				if (data != null) {
 					// Remove any newline characters
@@ -557,14 +512,7 @@ public class ClientSystemFileCommands {
 						// Return error message since the symlink creation failed.
 						// Possibly the OS doesn't have support for symlinks.
 						handler.setError(true);
-						cmdEnv.handleResult(
-								new RpcMessage(
-										ClientMessageId.CANT_CREATE_FILE_TYPE,
-										MessageSeverityCode.E_FAILED,
-										MessageGenericCode.EV_CLIENT,
-										new String[]{"symlink", path}
-								).toMap()
-						);
+						cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CREATE_FILE_TYPE, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"symlink", path}).toMap());
 						return RpcPacketDispatcherResult.CONTINUE_LOOP;
 					}
 				}
@@ -579,8 +527,7 @@ public class ClientSystemFileCommands {
 		}
 
 		if (outStream == null) {
-			throw new P4JavaError(
-					"No open file stream in ClientSystemFileCommands.writeFile()");
+			throw new P4JavaError("No open file stream in ClientSystemFileCommands.writeFile()");
 		}
 
 		try {
@@ -596,42 +543,27 @@ public class ClientSystemFileCommands {
 			}
 		} catch (FileDecoderException e) {
 			handler.setError(true);
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.FILE_DECODER_ERROR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{path == null ? "<unknown>" : path}
-					).toMap()
-			);
-
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_DECODER_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{path == null ? "<unknown>" : path}).toMap());
 			Log.error("failed to decode file " + (path == null ? "<unknown>" : path) + "; exception follows...");
 			Log.exception(e);
 		} catch (FileEncoderException e) {
 			handler.setError(true);
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.FILE_ENCODER_ERROR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{path == null ? "<unknown>" : path}
-					).toMap()
-			);
-
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_ENCODER_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{path == null ? "<unknown>" : path}).toMap());
 			Log.error("failed to encode file " + (path == null ? "<unknown>" : path) + "; exception follows...");
 			Log.exception(e);
+			if (ExceptionUtils.getRootCause(e) instanceof UnmappableCharacterException) {
+				Log.warn("cleaning up file " + (path == null ? "<unknown>" : path));
+				try {
+					outStream.close();
+					outStream.getFile().delete();
+				} catch (IOException ex) {
+					Log.error("Unable to close file " + (path == null ? "<unknown>" : path));
+					Log.exception(ex);
+				}
+			}
 		} catch (IOException e) {
 			handler.setError(true);
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.FILE_WRITE_ERROR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{path == null ? "<unknown>" : path,
-									e.getLocalizedMessage()}
-					).toMap()
-			);
-
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{path == null ? "<unknown>" : path, e.getLocalizedMessage()}).toMap());
 			Log.error("failed write for file " + (path == null ? "<unknown>" : path) + "; exception follows...");
 			Log.exception(e);
 		}
@@ -639,8 +571,7 @@ public class ClientSystemFileCommands {
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
-	private void writeToStream(byte[] sourceBytes, int start, int length,
-	                           OutputStream stream) throws IOException {
+	private void writeToStream(byte[] sourceBytes, int start, int length, OutputStream stream) throws IOException {
 		if (ClientLineEnding.CONVERT_TEXT) {
 			for (int i = start; i < length; i++) {
 				if (sourceBytes[i] == ClientLineEnding.FST_L_LF_BYTES[0]) {
@@ -654,8 +585,7 @@ public class ClientSystemFileCommands {
 		}
 	}
 
-	private void translate(byte[] sourceBytes, CharsetConverter converter,
-	                       int length, OutputStream stream) throws IOException, FileDecoderException, FileEncoderException {
+	private void translate(byte[] sourceBytes, CharsetConverter converter, int length, OutputStream stream) throws IOException, FileDecoderException, FileEncoderException {
 		int start = 0;
 
 		if (ClientLineEnding.CONVERT_TEXT) {
@@ -683,17 +613,22 @@ public class ClientSystemFileCommands {
 	}
 
 	/**
-	 * Handles the client-OutputText command.<p>
+	 * Handles the client-OutputText command.
+	 * <p>
 	 * Basically uses writeBinary (below) with the twist that we
 	 * currently throw an exception when we see the trans option (which
-	 * we haven't implemented yet).<p>
+	 * we haven't implemented yet).
 	 * <p>
 	 * Note that -- like the C++ API -- no line end munging is performed -- we
 	 * just throw what's coming at us straight back to whoever's catching it...
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-	protected RpcPacketDispatcherResult writeText(RpcConnection rpcConnection,
-	                                              CommandEnv cmdEnv, Map<String, Object> resultsMap)
-			throws ConnectionException {
+	protected RpcPacketDispatcherResult writeText(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in writeText().");
@@ -708,8 +643,7 @@ public class ClientSystemFileCommands {
 		String trans = (String) resultsMap.get(RpcFunctionMapKey.TRANS);
 
 		if ((trans != null) && !trans.equalsIgnoreCase("no")) {
-			throw new P4JavaError(
-					"trans arg not 'no' or null in writeText: " + trans);
+			throw new P4JavaError("trans arg not 'no' or null in writeText: " + trans);
 		}
 
 		final String handlerName = "writeText";
@@ -730,33 +664,28 @@ public class ClientSystemFileCommands {
 		RpcOutputStream outStream = getTempOutputStream(cmdEnv);
 
 		if (outStream == null) {
-			throw new NullPointerError(
-					"Null output stream in writeText state map");
+			throw new NullPointerError("Null output stream in writeText state map");
 		}
 
 		try {
 			if ((outStream.getFD() != null) && outStream.getFD().valid()) {
-				byte[] sourceBytes = (byte[]) resultsMap
-						.get(RpcFunctionMapKey.DATA);
+				byte[] sourceBytes = (byte[]) resultsMap.get(RpcFunctionMapKey.DATA);
 				int len = sourceBytes.length;
 				int start = 0;
 
 				// Check for trans being null here as it was already checked to
 				// be either null or 'no' so null here signifies it is not 'no'.
 				if (trans == null) {
-					CharsetConverter converter = (CharsetConverter) stateMap
-							.get(RpcServer.RPC_TMP_CONVERTER_KEY);
+					CharsetConverter converter = (CharsetConverter) stateMap.get(RpcServer.RPC_TMP_CONVERTER_KEY);
 					if (converter == null) {
 						Charset charset = rpcConnection.getClientCharset();
 
 						// Look inside results map vector to see if file is
 						// utf-16 since the previous fstat into message will
 						// set it if necessary
-						for (Map<String, Object> map : cmdEnv
-								.getResultMaps()) {
+						for (Map<String, Object> map : cmdEnv.getResultMaps()) {
 							if (map.containsKey(MapKeys.TYPE_LC_KEY)) {
-								String type = map.get(MapKeys.TYPE_LC_KEY)
-										.toString();
+								String type = map.get(MapKeys.TYPE_LC_KEY).toString();
 								if (MapKeys.UTF16_LC_KEY.equals(type)) {
 									charset = CharsetDefs.UTF16;
 									break;
@@ -766,11 +695,8 @@ public class ClientSystemFileCommands {
 
 						// Convert if client charset is not UTF-8
 						if (charset != CharsetDefs.UTF8) {
-							converter = new CharsetConverter(
-									CharsetDefs.UTF8, charset);
-							stateMap.put(
-									RpcServer.RPC_TMP_CONVERTER_KEY,
-									converter);
+							converter = new CharsetConverter(CharsetDefs.UTF8, charset);
+							stateMap.put(RpcServer.RPC_TMP_CONVERTER_KEY, converter);
 						}
 					}
 					if (converter != null) {
@@ -787,52 +713,32 @@ public class ClientSystemFileCommands {
 			}
 		} catch (IOException ioexc) {
 			handler.setError(true);
-			cmdEnv.getResultMaps().add(
-					new RpcMessage(
-							ClientMessageId.FILE_WRITE_ERROR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{"tmp file",
-									ioexc.getLocalizedMessage()}
-					).toMap()
-			);
+			cmdEnv.getResultMaps().add(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", ioexc.getLocalizedMessage()}).toMap());
 		} catch (FileDecoderException e) {
 			handler.setError(true);
-			cmdEnv.getResultMaps().add(
-					new RpcMessage(
-							ClientMessageId.FILE_WRITE_ERROR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{"tmp file",
-									e.getLocalizedMessage()}
-					).toMap()
-			);
+			cmdEnv.getResultMaps().add(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", e.getLocalizedMessage()}).toMap());
 		} catch (FileEncoderException e) {
 			handler.setError(true);
-			cmdEnv.getResultMaps().add(
-					new RpcMessage(
-							ClientMessageId.FILE_WRITE_ERROR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{"tmp file",
-									e.getLocalizedMessage()}
-					).toMap()
-			);
+			cmdEnv.getResultMaps().add(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", e.getLocalizedMessage()}).toMap());
 		}
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
 	/**
-	 * A specialised method to handle the client-OutputBinary command.<p>
+	 * A specialised method to handle the client-OutputBinary command.
 	 * <p>
 	 * Note that this method fakes a handler to keep state around, and assumes
 	 * that the target (tmp) stream has been passed-in by the higher levels in
 	 * the cmdEnv state map.
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-	protected RpcPacketDispatcherResult writeBinary(RpcConnection rpcConnection,
-	                                                CommandEnv cmdEnv, Map<String, Object> resultsMap)
-			throws ConnectionException {
+	protected RpcPacketDispatcherResult writeBinary(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in writeBinary().");
@@ -858,13 +764,12 @@ public class ClientSystemFileCommands {
 		}
 
 		@SuppressWarnings("unused") // used for debugging
-				Map<String, Object> stateMap = cmdEnv.getStateMap();
+		Map<String, Object> stateMap = cmdEnv.getStateMap();
 
 		RpcOutputStream outStream = getTempOutputStream(cmdEnv);
 
 		if (outStream == null) {
-			throw new NullPointerError(
-					"Null output stream in writeText state map");
+			throw new NullPointerError("Null output stream in writeText state map");
 		}
 
 		try {
@@ -876,37 +781,13 @@ public class ClientSystemFileCommands {
 			}
 		} catch (IOException ioexc) {
 			handler.setError(true);
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.FILE_WRITE_ERROR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{"tmp file",
-									ioexc.getLocalizedMessage()}
-					).toMap()
-			);
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", ioexc.getLocalizedMessage()}).toMap());
 		} catch (FileDecoderException e) {
 			handler.setError(true);
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.FILE_WRITE_ERROR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{"tmp file",
-									e.getLocalizedMessage()}
-					).toMap()
-			);
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", e.getLocalizedMessage()}).toMap());
 		} catch (FileEncoderException e) {
 			handler.setError(true);
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.FILE_WRITE_ERROR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{"tmp file",
-									e.getLocalizedMessage()}
-					).toMap()
-			);
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", e.getLocalizedMessage()}).toMap());
 		}
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
@@ -918,11 +799,14 @@ public class ClientSystemFileCommands {
 	 * and / or deleting other files, etc., and stitching up permissions,
 	 * etc. (we are often not allowed to change a file's executable bits
 	 * in places like /tmp, etc., so we do it here...).
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult closeFile(RpcConnection rpcConnection,
-	                                              CommandEnv cmdEnv, Map<String, Object> resultsMap)
-			throws ConnectionException {
+	protected RpcPacketDispatcherResult closeFile(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		//FIXME(S): permissions, cleanup -- HR.
 
@@ -990,21 +874,13 @@ public class ClientSystemFileCommands {
 
 		if (!cfile.isError() && cfile.getServerDigest() != null && commit != null) {
 			if (!cfile.getDigest().equals(cfile.getServerDigest())) {
-				cmdEnv.handleResult(
-						new RpcMessage(
-								ClientMessageId.DIGEST_MISMATCH,
-								MessageSeverityCode.E_FAILED,
-								MessageGenericCode.EV_CLIENT,
-								new String[]{cfile.getFile().getName(), cfile.getDigest(), cfile.getServerDigest()}
-						).toMap()
-				);
+				cmdEnv.handleResult(new RpcMessage(ClientMessageId.DIGEST_MISMATCH, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{cfile.getFile().getName(), cfile.getDigest(), cfile.getServerDigest()}).toMap());
 				return RpcPacketDispatcherResult.CONTINUE_LOOP;
 			}
 		}
 
 		if (cfile.getFile() == null) {
-			throw new NullPointerError(
-					"Null target file ClientSystemFileCommands.closeFile() state map");
+			throw new NullPointerError("Null target file ClientSystemFileCommands.closeFile() state map");
 		}
 
 		if (cfile.isError()) {
@@ -1032,8 +908,7 @@ public class ClientSystemFileCommands {
 			Map<String, Object> origArgs = cfile.getArgs();
 
 			if (origArgs == null) {
-				throw new NullPointerError(
-						"Null original argument map ClientSystemFileCommands.closeFile() state map");
+				throw new NullPointerError("Null original argument map ClientSystemFileCommands.closeFile() state map");
 			}
 
 			String perms = (String) origArgs.get(RpcFunctionMapKey.PERMS);
@@ -1041,8 +916,7 @@ public class ClientSystemFileCommands {
 			try {
 				if (cfile.getTmpStream() != null) {
 					if (cfile.getTmpFile() == null) {
-						throw new NullPointerError(
-								"Null tmp file ClientSystemFileCommands.writeFile() state map");
+						throw new NullPointerError("Null tmp file ClientSystemFileCommands.writeFile() state map");
 					}
 
 					// Before rename (move) tmp file to target file,
@@ -1055,8 +929,7 @@ public class ClientSystemFileCommands {
 						cfile.getTmpStream().flush();
 						cfile.getTmpStream().close();
 					} catch (IOException e) {
-						Log.error("Flushing or closing stream failed in closeFile(); tmp file: "
-								+ cfile.getFile().getName());
+						Log.error("Flushing or closing stream failed in closeFile(); tmp file: " + cfile.getFile().getName());
 					}
 
 					try {
@@ -1074,19 +947,9 @@ public class ClientSystemFileCommands {
 					} catch (IOException e) {
 						// Total failure occurred - was unable to rename
 						// or even copy the file to its target.
-						Log.error("Rename/copy failed completely in closeFile(); tmp file: "
-								+ cfile.getFile().getName()
-								+ "; target file: "
-								+ cfile.getFile().getName());
+						Log.error("Rename/copy failed completely in closeFile(); tmp file: " + cfile.getFile().getName() + "; target file: " + cfile.getFile().getName());
 						handler.setError(true);
-						cmdEnv.handleResult(
-								new RpcMessage(
-										ClientMessageId.FILE_WRITE_ERROR,
-										MessageSeverityCode.E_FAILED,
-										MessageGenericCode.EV_CLIENT,
-										new String[]{cfile.getFile().getName(), e.getLocalizedMessage()}
-								).toMap()
-						);
+						cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{cfile.getFile().getName(), e.getLocalizedMessage()}).toMap());
 
 						return RpcPacketDispatcherResult.CONTINUE_LOOP;
 					}
@@ -1096,17 +959,9 @@ public class ClientSystemFileCommands {
 						try {
 							cfile.getStream().flush();
 						} catch (IOException e) {
-							Log.error("Flushing stream failed in closeFile(); tmp file: "
-									+ cfile.getFile().getName());
+							Log.error("Flushing stream failed in closeFile(); tmp file: " + cfile.getFile().getName());
 							handler.setError(true);
-							cmdEnv.handleResult(
-									new RpcMessage(
-											ClientMessageId.FILE_WRITE_ERROR,
-											MessageSeverityCode.E_FAILED,
-											MessageGenericCode.EV_CLIENT,
-											new String[]{cfile.getFile().getName(), e.getLocalizedMessage()}
-									).toMap()
-							);
+							cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{cfile.getFile().getName(), e.getLocalizedMessage()}).toMap());
 
 							return RpcPacketDispatcherResult.CONTINUE_LOOP;
 						}
@@ -1119,17 +974,9 @@ public class ClientSystemFileCommands {
 						try {
 							cfile.getTmpStream().flush();
 						} catch (IOException e) {
-							Log.error("Flushing stream failed in closeFile(); tmp file: "
-									+ cfile.getFile().getName());
+							Log.error("Flushing stream failed in closeFile(); tmp file: " + cfile.getFile().getName());
 							handler.setError(true);
-							cmdEnv.handleResult(
-									new RpcMessage(
-											ClientMessageId.FILE_WRITE_ERROR,
-											MessageSeverityCode.E_FAILED,
-											MessageGenericCode.EV_CLIENT,
-											new String[]{cfile.getFile().getName(), e.getLocalizedMessage()}
-									).toMap()
-							);
+							cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{cfile.getFile().getName(), e.getLocalizedMessage()}).toMap());
 
 							return RpcPacketDispatcherResult.CONTINUE_LOOP;
 						}
@@ -1141,17 +988,9 @@ public class ClientSystemFileCommands {
 						try {
 							cfile.getStream().flush();
 						} catch (IOException e) {
-							Log.error("Flushing stream failed in closeFile(); target file: "
-									+ cfile.getFile().getName());
+							Log.error("Flushing stream failed in closeFile(); target file: " + cfile.getFile().getName());
 							handler.setError(true);
-							cmdEnv.handleResult(
-									new RpcMessage(
-											ClientMessageId.FILE_WRITE_ERROR,
-											MessageSeverityCode.E_FAILED,
-											MessageGenericCode.EV_CLIENT,
-											new String[]{cfile.getFile().getName(), e.getLocalizedMessage()}
-									).toMap()
-							);
+							cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{cfile.getFile().getName(), e.getLocalizedMessage()}).toMap());
 
 							return RpcPacketDispatcherResult.CONTINUE_LOOP;
 						}
@@ -1161,17 +1000,9 @@ public class ClientSystemFileCommands {
 						try {
 							cfile.getStream().close();
 						} catch (IOException e) {
-							Log.warn("target file close error in ClientSystemFileCommands.closeFile(): "
-									+ e.getLocalizedMessage());
+							Log.warn("target file close error in ClientSystemFileCommands.closeFile(): " + e.getLocalizedMessage());
 							handler.setError(true);
-							cmdEnv.handleResult(
-									new RpcMessage(
-											ClientMessageId.FILE_WRITE_ERROR,
-											MessageSeverityCode.E_FAILED,
-											MessageGenericCode.EV_CLIENT,
-											new String[]{cfile.getFile().getName(), e.getLocalizedMessage()}
-									).toMap()
-							);
+							cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{cfile.getFile().getName(), e.getLocalizedMessage()}).toMap());
 
 							return RpcPacketDispatcherResult.CONTINUE_LOOP;
 						}
@@ -1181,18 +1012,7 @@ public class ClientSystemFileCommands {
 				if ((serverDigest != null) && !cmdEnv.isNonCheckedSyncs()) {
 					if (!serverDigest.equals(localDigest)) {
 						handler.setError(true);
-						cmdEnv.handleResult(
-								new RpcMessage(
-										ClientMessageId.DIGEST_MISMATCH,
-										MessageSeverityCode.E_FAILED,
-										MessageGenericCode.EV_CLIENT,
-										new String[]{
-												cfile.getFile().getPath(),
-												serverDigest,
-												localDigest
-										}
-								).toMap()
-						);
+						cmdEnv.handleResult(new RpcMessage(ClientMessageId.DIGEST_MISMATCH, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{cfile.getFile().getPath(), serverDigest, localDigest}).toMap());
 						return RpcPacketDispatcherResult.CONTINUE_LOOP;
 					}
 				}
@@ -1239,22 +1059,18 @@ public class ClientSystemFileCommands {
 						cfile.getTmpStream().close();
 					}
 				} catch (IOException ioexc) {
-					Log.warn("tmp file close error in ClientSystemFileCommands.closeFile(): "
-							+ ioexc.getLocalizedMessage());
+					Log.warn("tmp file close error in ClientSystemFileCommands.closeFile(): " + ioexc.getLocalizedMessage());
 				}
 				try {
 					if (cfile.getStream() != null) {
 						cfile.getStream().close();
 					}
 				} catch (IOException ioexc) {
-					Log.warn("target file close error in ClientSystemFileCommands.closeFile(): "
-							+ ioexc.getLocalizedMessage());
+					Log.warn("target file close error in ClientSystemFileCommands.closeFile(): " + ioexc.getLocalizedMessage());
 				}
 				if (cfile.getTmpFile() != null) {
 					if (cfile.getTmpFile().exists() && !cfile.getTmpFile().delete()) {
-						Log.warn("Unable to delete tmp file '"
-								+ cfile.getTmpFile().getPath()
-								+ "' in ClientSystemFileCommands.closeFile() -- unknown cause");
+						Log.warn("Unable to delete tmp file '" + cfile.getTmpFile().getPath() + "' in ClientSystemFileCommands.closeFile() -- unknown cause");
 					}
 				}
 			}
@@ -1266,9 +1082,14 @@ public class ClientSystemFileCommands {
 	/**
 	 * Move a file from one location to another. Supports the new 2009.1 smart
 	 * move command.
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-	protected RpcPacketDispatcherResult moveFile(RpcConnection rpcConnection,
-	                                             CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult moveFile(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in moveFile().");
@@ -1306,34 +1127,37 @@ public class ClientSystemFileCommands {
 		handler.setError(false);
 
 		if (!RpcPerforceFile.fileExists(fromFile, fromFstSymlink)) {
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.FILE_NONEXISTENT,
-							MessageSeverityCode.E_INFO,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{clientPath}
-					).toMap()
-			);
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_NONEXISTENT, MessageSeverityCode.E_INFO, MessageGenericCode.EV_CLIENT, new String[]{clientPath}).toMap());
 
 			return RpcPacketDispatcherResult.CONTINUE_LOOP;
 		}
 
-		boolean caseSensitive
-				= !(cmdEnv.getServerProtocolSpecsMap().containsKey(RpcFunctionMapKey.NOCASE));
+		boolean targetIsSubdir = false;
+		// Either clientPath = A and targetPath = A/A
+		// or clientPath = A/A and targetPath = A
+		if ((clientPath.contains(targetPath) || targetPath.contains(clientPath))) {
 
-		if (RpcPerforceFile.fileExists(toFile, toFstSymlink) && (!caseSensitive || !clientPath.equalsIgnoreCase(targetPath))) {
+			//targetPath is a directory subpath of clientPath
+			String[] contents = toFile.list();
+			int count = 0;
+			if (contents != null) {
+				count = contents.length;
+			}
+			if (count == 1) {
+				//client file is the only object in target dir
+				targetIsSubdir = true;
+			} else if (count > 1) {
+				cmdEnv.handleResult(new RpcMessage(ClientMessageId.DIR_NOT_EMPTY, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{targetPath}).toMap());
+			}
+		}
+
+		boolean caseSensitive = !(cmdEnv.getServerProtocolSpecsMap().containsKey(RpcFunctionMapKey.NOCASE));
+		if (RpcPerforceFile.fileExists(toFile, toFstSymlink) && (!caseSensitive || !clientPath.equalsIgnoreCase(targetPath)) && !targetIsSubdir) {
 			// Target file exists, but this could be a case change, in which case allow this only if
 			// the server is case sensitive (logic copied directly from the C++ equivalent)
 			// Not sure about the logic here -- seems odd to allow this... (HR).
 
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.CANT_CLOBBER,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{targetPath}
-					).toMap()
-			);
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CLOBBER, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{targetPath}).toMap());
 			return RpcPacketDispatcherResult.CONTINUE_LOOP;
 		}
 
@@ -1341,14 +1165,7 @@ public class ClientSystemFileCommands {
 
 		if (!FilesHelper.mkdirs(toFile)) {
 			handler.setError(true);
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.CANT_CREATE_DIR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{targetPath}
-					).toMap()
-			);
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CREATE_DIR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{targetPath}).toMap());
 
 			return RpcPacketDispatcherResult.CONTINUE_LOOP;
 		}
@@ -1358,10 +1175,7 @@ public class ClientSystemFileCommands {
 
 			resultsMap.remove(RpcFunctionMapKey.FUNCTION);
 
-			RpcPacket respPacket = RpcPacket.constructRpcPacket(
-					confirm,
-					resultsMap,
-					null);
+			RpcPacket respPacket = RpcPacket.constructRpcPacket(confirm, resultsMap, null);
 
 			rpcConnection.putRpcPacket(respPacket);
 		} else {
@@ -1370,19 +1184,9 @@ public class ClientSystemFileCommands {
 			/// fix on the fly, so report it to the user and the log and don't
 			// ack a confirm back to the server...
 
-			Log.error("Rename failed completely in moveFile (cause unknown); source file: "
-					+ clientPath
-					+ "; target file: "
-					+ targetPath);
+			Log.error("Rename failed completely in moveFile (cause unknown); source file: " + clientPath + "; target file: " + targetPath);
 
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.FILE_MOVE_ERROR,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{clientPath, "(cause unknown)"}
-					).toMap()
-			);
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_MOVE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{clientPath, "(cause unknown)"}).toMap());
 		}
 
 		if (rmdir != null) {
@@ -1394,26 +1198,23 @@ public class ClientSystemFileCommands {
 			File dir = fromFile.getParentFile();
 
 			if (dir != null) {
-			    /*
-			     *  Don't delete parent directories that are symbolic links. This mimics the
-                 *  server behaviour that prevents a subsequent sync filling a disc when there
-                 *  were symbolic links.
-                 */
+				/*
+				 *  Don't delete parent directories that are symbolic links. This mimics the
+				 *  server behaviour that prevents a subsequent sync filling a disc when there
+				 *  were symbolic links.
+				 */
 				if (!SymbolicLinkHelper.isSymbolicLink(dir.getAbsolutePath()) && !dir.delete()) {
-					Log.stats("Unable to delete parent directory for delete for file '"
-							+ clientPath + "'; (unknown cause)");
+					Log.stats("Unable to delete parent directory for delete for file '" + clientPath + "'; (unknown cause)");
 				}
 			} else {
-				Log.warn("Unable to open parent directory for delete for file '"
-						+ clientPath + "'; (no parent directory)");
+				Log.warn("Unable to open parent directory for delete for file '" + clientPath + "'; (no parent directory)");
 			}
 		}
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
-	protected RpcPacketDispatcherResult deleteFile(RpcConnection rpcConnection,
-	                                               CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult deleteFile(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in deleteFile().");
@@ -1467,13 +1268,7 @@ public class ClientSystemFileCommands {
 				}
 
 				handler.setError(true);
-				cmdEnv.handleResult(
-						new RpcMessage(
-								ClientMessageId.NO_MODIFIED_FILE,
-								MessageSeverityCode.E_FAILED,
-								MessageGenericCode.EV_CLIENT,
-								new String[]{"delete", clientPath}
-						).toMap());
+				cmdEnv.handleResult(new RpcMessage(ClientMessageId.NO_MODIFIED_FILE, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"delete", clientPath}).toMap());
 				return RpcPacketDispatcherResult.CONTINUE_LOOP;
 			}
 		}
@@ -1481,8 +1276,7 @@ public class ClientSystemFileCommands {
 		// Don't clobber poor file
 		// noclobber, handle new to 99.1
 		// be safe about clientHandle being set
-		if (file.exists() && file.isFile() && (noClobber != null)
-				&& file.canWrite() && clientHandle != null && !fstSymlink) {
+		if (file.exists() && file.isFile() && (noClobber != null) && file.canWrite() && clientHandle != null && !fstSymlink) {
 			RpcHandler handler = cmdEnv.getHandler(clientHandle);
 
 			if (handler == null) {
@@ -1494,14 +1288,7 @@ public class ClientSystemFileCommands {
 			}
 
 			handler.setError(true);
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.CANT_CLOBBER,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{clientPath}
-					).toMap()
-			);
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CLOBBER, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{clientPath}).toMap());
 			return RpcPacketDispatcherResult.CONTINUE_LOOP;
 		}
 
@@ -1525,14 +1312,7 @@ public class ClientSystemFileCommands {
 			// Unfortunately we have no ack or anything to give to the
 			// server on file delete, so we just let this go with a warning...
 
-			cmdEnv.handleResult(
-					new RpcMessage(
-							ClientMessageId.CANT_DELETE_FILE,
-							MessageSeverityCode.E_FAILED,
-							MessageGenericCode.EV_CLIENT,
-							new String[]{clientPath}
-					).toMap()
-			);
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_DELETE_FILE, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{clientPath}).toMap());
 
 			return RpcPacketDispatcherResult.CONTINUE_LOOP;
 		}
@@ -1548,20 +1328,18 @@ public class ClientSystemFileCommands {
 			do {
 				dir = dir.getParentFile();
 				if (dir != null) {
-				    /*
-				     *  Don't delete parent directories that are symbolic links. This mimics the
-				     *  server behaviour that prevents a subsequent sync filling a disc when there
-				     *  were symbolic links.
-				     */
+					/*
+					 *  Don't delete parent directories that are symbolic links. This mimics the
+					 *  server behaviour that prevents a subsequent sync filling a disc when there
+					 *  were symbolic links.
+					 */
 					if (!SymbolicLinkHelper.isSymbolicLink(dir.getAbsolutePath()) && !dir.delete()) {
-						Log.stats("Unable to delete parent directory for delete for file '"
-								+ clientPath + "'; (unknown cause)");
+						Log.stats("Unable to delete parent directory for delete for file '" + clientPath + "'; (unknown cause)");
 						// Stop when unable to delete the parent directory
 						break;
 					}
 				} else {
-					Log.warn("Unable to open parent directory for delete for file '"
-							+ clientPath + "' (unknown cause)");
+					Log.warn("Unable to open parent directory for delete for file '" + clientPath + "' (unknown cause)");
 					// Stop when unable to open the parent directory
 					break;
 				}
@@ -1575,44 +1353,48 @@ public class ClientSystemFileCommands {
 	 * The infamous checkFile omnibus method, used to, well, check files
 	 * on the Perforce client side. Basically copied and transliterated
 	 * into Java from the C++ original; not all of it currently makes
-	 * sense in a Java environment, but this will be fixed (HR).<p>
+	 * sense in a Java environment, but this will be fixed (HR).
 	 * <p>
 	 * Much of the work happens off-stage in the support methods
 	 * elsewhere.
 	 * <p>
-	 * What follows is copied from the C++ API:<p>
+	 * What follows is copied from the C++ API:
 	 * <p>
-	 * This routine, for compatibility purposes, has several modes.<p>
+	 * This routine, for compatibility purposes, has several modes.
 	 * <p>
 	 * 1.	If clientType is set, we know the type and we're checking to see
 	 * if the file exists and (if digest is set) if the file has the same
 	 * fingerprint.  We return this in "status" with a value of "missing",
-	 * "exists", or "same".  This starts around version 1742.<p>
+	 * "exists", or "same".  This starts around version 1742.
 	 * <p>
 	 * 2.	If clientType is unset, we're looking for the type of the file,
 	 * and we'll return it in "type".  This is sort of overloaded, 'cause
 	 * it can also get set with pseudo-types like "missing".  In this
 	 * case, we use the "xfiles" protocol check to make sure we don't
-	 * return something the server doesn't expect.<p>
-	 * <pre>
+	 * return something the server doesn't expect.
+	 * <pre>{@code
 	 * 	- xfiles unset: return text, binary.
 	 * 	- xfiles >= 0: also return xtext, xbinary.
 	 * 	- xfiles >= 1: also return symlink.
 	 * 	- xfiles >= 2; also return resource (mac resource file).
 	 * 	- xfiles >= 3; also return ubinary
 	 * 	- xfiles >= 4; also return apple
-	 * </pre>
+	 * }</pre>
 	 * If forceType is set, we'll use that in preference over what
 	 * we've discovered.  We still check the file (to make sure they're
 	 * not adding a directory, and so they get to right warning if
 	 * they add an empty file), but we'll just override that back to
-	 * the (typemap's) forceType.<p>
+	 * the (typemap's) forceType.
 	 * <p>
 	 * We map empty/missing/unreadable into forceType/"text".
+	 *
+	 * @param rpcConnection rpcConnection
+	 * @param cmdEnv        cmdEnv
+	 * @param resultsMap    resultsMap
+	 * @return RpcPacketDispatcherResult
+	 * @throws ConnectionException on error
 	 */
-
-	protected RpcPacketDispatcherResult checkFile(RpcConnection rpcConnection,
-	                                              CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult checkFile(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in checkFile().");
@@ -1639,6 +1421,10 @@ public class ClientSystemFileCommands {
 		try {
 			checkLinksN = checkLinksNs != null ? Integer.valueOf(checkLinksNs) : 0;
 		} catch (NumberFormatException nfe) {
+		}
+
+		if (null == clientPath && (null != checkLinks || null != ignore || null == clientType)) {
+			return RpcPacketDispatcherResult.CONTINUE_LOOP;
 		}
 
 		if (digest != null && digestType != null) {
@@ -1703,17 +1489,14 @@ public class ClientSystemFileCommands {
 				RpcFunctionSpec funcSpec = RpcFunctionSpec.decode(ignore);
 				if (funcSpec == RpcFunctionSpec.CLIENT_ACK) {
 
-					if (confirm.length() > 0) {
+					if (null != confirm && confirm.length() > 0) {
 						Map<String, Object> respMap = new HashMap<String, Object>();
 						for (Map.Entry<String, Object> entry : resultsMap.entrySet()) {
 							if ((entry.getKey() != null) && !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.FUNCTION)) {
 								respMap.put(entry.getKey(), entry.getValue());
 							}
 						}
-						RpcPacket respPacket = RpcPacket.constructRpcPacket(
-								confirm,
-								respMap,
-								null);
+						RpcPacket respPacket = RpcPacket.constructRpcPacket(confirm, respMap, null);
 						rpcConnection.putRpcPacket(respPacket);
 					}
 
@@ -1735,9 +1518,9 @@ public class ClientSystemFileCommands {
 
 			/*
 			 * If we do know the type, we want to know if it's missing.
-		     * If it isn't missing and a digest is given, we want to know if
-		     * it is the same.
-		     */
+			 * If it isn't missing and a digest is given, we want to know if
+			 * it is the same.
+			 */
 
 			if (!RpcPerforceFile.fileExists(file, fstSymlink)) {
 				status = "missing";
@@ -1759,22 +1542,13 @@ public class ClientSystemFileCommands {
 
 			// Infer the file type, since it's not given.
 			File file = new File(clientPath);
-			fileType = RpcPerforceFileType.inferFileType(file, scan,
-					cmdEnv.getRpcConnection().isUnicodeServer(),
-					cmdEnv.getRpcConnection().getClientCharset());
+			fileType = RpcPerforceFileType.inferFileType(file, scan, cmdEnv.getRpcConnection().isUnicodeServer(), cmdEnv.getRpcConnection().getClientCharset());
 			fstSymlink = (fileType == RpcPerforceFileType.FST_SYMLINK);
 
 			if (!RpcPerforceFile.fileExists(file, fstSymlink)) {
 				status = "missing";
 
-				cmdEnv.handleResult(
-						new RpcMessage(
-								ClientMessageId.FILE_MISSING_ASSUMING_TYPE,
-								MessageSeverityCode.E_INFO,
-								MessageGenericCode.EV_CLIENT,
-								new String[]{clientPath, nType}
-						).toMap()
-				);
+				cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_MISSING_ASSUMING_TYPE, MessageSeverityCode.E_INFO, MessageGenericCode.EV_CLIENT, new String[]{clientPath, nType}).toMap());
 			}
 
 			String serverXLevelStr = (String) cmdEnv.getServerProtocolSpecsMap().get("xfiles");
@@ -1783,21 +1557,13 @@ public class ClientSystemFileCommands {
 				try {
 					serverXLevel = new Integer(serverXLevelStr);
 				} catch (NumberFormatException nfe) {
-					throw new ProtocolError(
-							"Unexpected number conversion exception in "
-									+ TRACE_PREFIX + ".checkFile: "
-									+ nfe.getLocalizedMessage(), nfe);
+					throw new ProtocolError("Unexpected number conversion exception in " + TRACE_PREFIX + ".checkFile: " + nfe.getLocalizedMessage(), nfe);
 				}
 			}
 
 			boolean overSize = false;
 
-			RpcServerTypeStringSpec spec
-					= RpcPerforceFileType.getServerFileTypeString(
-					clientPath,
-					overSize,
-					fileType,
-					forceType, serverXLevel);
+			RpcServerTypeStringSpec spec = RpcPerforceFileType.getServerFileTypeString(clientPath, overSize, fileType, forceType, serverXLevel);
 
 			if (spec.getServerTypeString() == null) {
 
@@ -1829,26 +1595,19 @@ public class ClientSystemFileCommands {
 		respMap.put(RpcFunctionMapKey.STATUS, status);
 
 		for (Map.Entry<String, Object> entry : resultsMap.entrySet()) {
-			if ((entry.getKey() != null) && !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.FUNCTION)
-					&& !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.TYPE)
-					&& !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.STATUS)) {
+			if ((entry.getKey() != null) && !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.FUNCTION) && !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.TYPE) && !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.STATUS)) {
 				respMap.put(entry.getKey(), entry.getValue());
 			}
 		}
 
-		RpcPacket respPacket = RpcPacket.constructRpcPacket(
-				confirm,
-				respMap,
-				null);
+		RpcPacket respPacket = RpcPacket.constructRpcPacket(confirm, respMap, null);
 
 		rpcConnection.putRpcPacket(respPacket);
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
-	protected RpcPacketDispatcherResult checkFileGraph(RpcConnection rpcConnection,
-	                                                   CommandEnv cmdEnv, Map<String, Object> resultsMap)
-			throws ConnectionException {
+	protected RpcPacketDispatcherResult checkFileGraph(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in checkFile().");
@@ -1873,8 +1632,7 @@ public class ClientSystemFileCommands {
 		if (!RpcPerforceFile.fileExists(file, true)) {
 			status = "missing";
 		} else {
-			if (rpcConnection.getDigest(RpcPerforceFileType.decodeFromServerString(clientType), file,
-					RpcPerforceDigestType.GetType(digestType)).equals(digest)) {
+			if (rpcConnection.getDigest(RpcPerforceFileType.decodeFromServerString(clientType), file, RpcPerforceDigestType.GetType(digestType)).equals(digest)) {
 				status = "same";
 			}
 		}
@@ -1884,26 +1642,19 @@ public class ClientSystemFileCommands {
 		respMap.put(RpcFunctionMapKey.STATUS, status);
 
 		for (Map.Entry<String, Object> entry : resultsMap.entrySet()) {
-			if ((entry.getKey() != null) && !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.FUNCTION)
-					&& !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.TYPE)
-					&& !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.STATUS)) {
+			if ((entry.getKey() != null) && !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.FUNCTION) && !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.TYPE) && !entry.getKey().equalsIgnoreCase(RpcFunctionMapKey.STATUS)) {
 				respMap.put(entry.getKey(), entry.getValue());
 			}
 		}
 
-		RpcPacket respPacket = RpcPacket.constructRpcPacket(
-				confirm,
-				respMap,
-				null);
+		RpcPacket respPacket = RpcPacket.constructRpcPacket(confirm, respMap, null);
 
 		rpcConnection.putRpcPacket(respPacket);
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
 	}
 
-	protected RpcPacketDispatcherResult convertFile(
-			RpcConnection rpcConnection, CommandEnv cmdEnv,
-			Map<String, Object> resultsMap) throws ConnectionException {
+	protected RpcPacketDispatcherResult convertFile(RpcConnection rpcConnection, CommandEnv cmdEnv, Map<String, Object> resultsMap) throws ConnectionException {
 
 		if (rpcConnection == null) {
 			throw new NullPointerError("Null rpcConnection in convertFile().");
@@ -2026,33 +1777,28 @@ public class ClientSystemFileCommands {
 	 * Return the temp RPC output stream. If it doesn't exist, try to create a
 	 * new one only if the command is run from a "streamCmd" method or tracking
 	 * is enabled.
+	 *
+	 * @param cmdEnv cmdEnv
+	 * @return RpcOutputStream
+	 * @throws ConnectionException on error
 	 */
-	public RpcOutputStream getTempOutputStream(CommandEnv cmdEnv)
-			throws ConnectionException {
+	public RpcOutputStream getTempOutputStream(CommandEnv cmdEnv) throws ConnectionException {
 		if (cmdEnv == null) {
-			throw new NullPointerError(
-					"Null command env in ClientSystemFileCommands.getTempOutputStream()");
+			throw new NullPointerError("Null command env in ClientSystemFileCommands.getTempOutputStream()");
 		}
 		if (cmdEnv.getStateMap() == null) {
-			throw new NullPointerError(
-					"Null command env state map in ClientSystemFileCommands.getTempOutputStream()");
+			throw new NullPointerError("Null command env state map in ClientSystemFileCommands.getTempOutputStream()");
 		}
 		if (cmdEnv.getProtocolSpecs() == null) {
-			throw new NullPointerError(
-					"Null command env protocol specs in ClientSystemFileCommands.getTempOutputStream()");
+			throw new NullPointerError("Null command env protocol specs in ClientSystemFileCommands.getTempOutputStream()");
 		}
 
-		RpcOutputStream outStream = (RpcOutputStream) cmdEnv.getStateMap().get(
-				RpcServer.RPC_TMP_OUTFILE_STREAM_KEY);
+		RpcOutputStream outStream = (RpcOutputStream) cmdEnv.getStateMap().get(RpcServer.RPC_TMP_OUTFILE_STREAM_KEY);
 
 		if (outStream == null) {
 			if (cmdEnv.isStreamCmd() || cmdEnv.getProtocolSpecs().isEnableTracking()) {
 				try {
-					String tmpFileName = RpcPerforceFile
-							.createTempFileName(RpcPropertyDefs.getProperty(
-									this.server.getProperties(),
-									PropertyDefs.P4JAVA_TMP_DIR_KEY,
-									System.getProperty("java.io.tmpdir")));
+					String tmpFileName = RpcPerforceFile.createTempFileName(RpcPropertyDefs.getProperty(this.server.getProperties(), PropertyDefs.P4JAVA_TMP_DIR_KEY, System.getProperty("java.io.tmpdir")));
 					RpcPerforceFile tmpFile = new RpcPerforceFile(tmpFileName, RpcPerforceFileType.FST_BINARY);
 					outStream = RpcOutputStream.getTmpOutputStream(tmpFile);
 					// Set the new temp RPC output stream to the command env state map
@@ -2060,9 +1806,7 @@ public class ClientSystemFileCommands {
 				} catch (IOException ioexc) {
 					Log.error("tmp file creation error: " + ioexc.getLocalizedMessage());
 					Log.exception(ioexc);
-					throw new ConnectionException("Unable to create temporary file for Perforce file retrieval; " +
-							"reason: " + ioexc.getLocalizedMessage(),
-							ioexc);
+					throw new ConnectionException("Unable to create temporary file for Perforce file retrieval; " + "reason: " + ioexc.getLocalizedMessage(), ioexc);
 				}
 			}
 		}
@@ -2084,9 +1828,7 @@ public class ClientSystemFileCommands {
 
 			if (dataBytes != null) {
 				try {
-					dataString = new String(dataBytes, charset == null ?
-							RpcConnection.NON_UNICODE_SERVER_CHARSET_NAME :
-							(isUnicodeServer ? CharsetDefs.UTF8_NAME : charset.name()));
+					dataString = new String(dataBytes, charset == null ? RpcConnection.NON_UNICODE_SERVER_CHARSET_NAME : (isUnicodeServer ? CharsetDefs.UTF8_NAME : charset.name()));
 					map.put(RpcFunctionMapKey.DATA, dataString);
 				} catch (UnsupportedEncodingException e) {
 					Log.exception(e);
@@ -2117,14 +1859,7 @@ public class ClientSystemFileCommands {
 		if (cfile.isSymlink() && rpcConnection.getFilesysRestrictedSymlinks() == 1) {
 			if (!SymbolicLinkHelper.isSymbolicLinkCapable()) {
 				cfile.setError(true);
-				cmdEnv.handleResult(
-						new RpcMessage(
-								ClientMessageId.CANT_CREATE_FILE_TYPE,
-								MessageSeverityCode.E_FAILED,
-								MessageGenericCode.EV_CLIENT,
-								new String[]{"symlink", cfile.getFile().getAbsolutePath()}
-						).toMap()
-				);
+				cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CREATE_FILE_TYPE, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"symlink", cfile.getFile().getAbsolutePath()}).toMap());
 				// Symlink not supported - return false
 				return false;
 			}
@@ -2144,14 +1879,7 @@ public class ClientSystemFileCommands {
 		}
 
 		cfile.setError(true);
-		cmdEnv.handleResult(
-				new RpcMessage(
-						ClientMessageId.NOT_UNDER_CLIENT_PATH,
-						MessageSeverityCode.E_FAILED,
-						MessageGenericCode.EV_CLIENT,
-						new String[]{file, clientPath}
-				).toMap()
-		);
+		cmdEnv.handleResult(new RpcMessage(ClientMessageId.NOT_UNDER_CLIENT_PATH, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{file, clientPath}).toMap());
 		// Symlink or File is outside P4CLIENTPATH - return false
 		return false;
 	}

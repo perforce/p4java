@@ -37,13 +37,12 @@ public class CharsetConverter {
 	 * Creates a new charset converted that decodes/encodes bytes in the
 	 * specified non-null from/to charset objects specified.
 	 *
-	 * @param fromCharset
-	 * @param toCharset
+	 * @param fromCharset fromCharset
+	 * @param toCharset   toCharset
 	 * @param ignoreBOM   - true to ignore any byte order marks written by the UTF-16
 	 *                    charset and omit them from all return byte buffers
 	 */
-	public CharsetConverter(Charset fromCharset, Charset toCharset,
-	                        boolean ignoreBOM) {
+	public CharsetConverter(Charset fromCharset, Charset toCharset, boolean ignoreBOM) {
 		// Create decoder that reports malformed/unmappable values
 		this.decoder = fromCharset.newDecoder();
 		this.decoder.onMalformedInput(CodingErrorAction.REPORT);
@@ -74,8 +73,8 @@ public class CharsetConverter {
 	 * Creates a new charset converted that decodes/encodes bytes in the
 	 * specified non-null from/to charset objects specified.
 	 *
-	 * @param fromCharset
-	 * @param toCharset
+	 * @param fromCharset fromCharset
+	 * @param toCharset   toCharset
 	 */
 	public CharsetConverter(Charset fromCharset, Charset toCharset) {
 		this(fromCharset, toCharset, false);
@@ -86,11 +85,11 @@ public class CharsetConverter {
 	 * any existing underflow since the characters to convert are already
 	 * complete and known.
 	 *
-	 * @param from
+	 * @param from from
 	 * @return - byte buffer, use {@link ByteBuffer#position()} for starting
 	 * array offset, {@link ByteBuffer#limit()} for number of bytes to
 	 * read, and {@link ByteBuffer#array()} for the byte[] itself.
-	 * @throws FileEncoderException
+	 * @throws FileEncoderException on error
 	 */
 	public ByteBuffer convert(CharBuffer from) throws FileEncoderException {
 		ByteBuffer converted = null;
@@ -125,8 +124,7 @@ public class CharsetConverter {
 						// byte value of -1 == 0xFF
 						// Big Endian BOM = FEFF
 						// Little Endiam BOM = FFFE
-						if ((bom[0] == -2 && bom[1] == -1)
-								|| (bom[0] == -1 && bom[1] == -2)) {
+						if ((bom[0] == -2 && bom[1] == -1) || (bom[0] == -1 && bom[1] == -2)) {
 							// Advance past BOM if detected
 							converted.position(2);
 							converted.limit(limit - 2);
@@ -155,16 +153,16 @@ public class CharsetConverter {
 	 * the byte buffer's backing array.
 	 * <p>
 	 * Any remaining bytes that couldn't be converted are stored locally until
-	 * the next call to {@link #convert(ByteBuffer)}. The from buffer specified
+	 * the next call to . The from buffer specified
 	 * will be joined with the underflow from a previous call on subsequent
-	 * calls to {@link #convert(ByteBuffer)}.
+	 * calls to .
 	 *
 	 * @param from - byte buffer to convert
 	 * @return - byte buffer, use {@link ByteBuffer#position()} for starting
 	 * array offset, {@link ByteBuffer#limit()} for number of bytes to
 	 * read, and {@link ByteBuffer#array()} for the byte[] itself.
-	 * @throws FileEncoderException
-	 * @throws FileDecoderException
+	 * @throws FileEncoderException on error
+	 * @throws FileDecoderException on error
 	 */
 	public ByteBuffer convert(ByteBuffer from) throws FileDecoderException, FileEncoderException {
 		if (CharsetDefs.UTF8.equals(decoder.charset())) {
@@ -192,7 +190,7 @@ public class CharsetConverter {
 	 *
 	 * @param buffer utf8 byte stream
 	 * @return whole utf8 words to convert.
-	 * @throws FileDecoderException
+	 * @throws FileDecoderException on error
 	 */
 	private ByteBuffer getUtf8BufferWindow(ByteBuffer buffer) throws FileDecoderException {
 		// Add remainder from previous calculation

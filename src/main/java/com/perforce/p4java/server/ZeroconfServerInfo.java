@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.server;
 
@@ -8,25 +8,25 @@ package com.perforce.p4java.server;
  * with and locally-visible to zeroconf (assuming zeroconf is available and
  * loaded with P4Java). See ServerFactory.getZeroconfServers and associated
  * methods for a full explanation of Perforce zeroconf usage.<p>
- * 
+ *
  * Most of the fields defined below should be self-explanatory, but note that any
  * or all of them may be null, and the semantics and format of the description
  * and version strings are not defined here at all (but the version string is
  * usually in the standard Perforce format if this ZeroconfServerInfo object was
  * cobbled together from a valid zerconf registration).
- * 
- * @deprecated  As of release 2013.1, ZeroConf is no longer supported by the
+ *
+ * @deprecated As of release 2013.1, ZeroConf is no longer supported by the
  * 				Perforce server 2013.1.
  */
 @Deprecated
 public class ZeroconfServerInfo {
-	
+
 	/**
 	 * The port number used to indicate that the port has not
 	 * been validly set anywhere.
 	 */
 	public static int P4D_ZEROCONF_NOPORT = -1;
-	
+
 	private String name = null;
 	private String type = null;
 	private String description = null;
@@ -34,7 +34,7 @@ public class ZeroconfServerInfo {
 	private String hostAddress = null;
 	private String hostName = null;
 	private int port = P4D_ZEROCONF_NOPORT;
-	
+
 	/**
 	 * Default constructor -- sets all fields to null except
 	 * port, which is set to P4D_ZEROCONF_NOPORT.
@@ -44,9 +44,16 @@ public class ZeroconfServerInfo {
 
 	/**
 	 * Explicit-value constructor.
+	 *
+	 * @param name        name
+	 * @param type        type
+	 * @param description description
+	 * @param version     version
+	 * @param hostAddress hostAddress
+	 * @param hostName    hostName
+	 * @param port        port
 	 */
-	public ZeroconfServerInfo(String name, String type, String description,
-			String version, String hostAddress, String hostName, int port) {
+	public ZeroconfServerInfo(String name, String type, String description, String version, String hostAddress, String hostName, int port) {
 		this.name = name;
 		this.type = type;
 		this.description = description;
@@ -95,7 +102,7 @@ public class ZeroconfServerInfo {
 	public void setPort(int port) {
 		this.port = port;
 	}
-	
+
 	public String getDescription() {
 		return description;
 	}
@@ -128,12 +135,12 @@ public class ZeroconfServerInfo {
 			strBuilder.append(":" + getPort());
 			strBuilder.append(" (" + getHostAddress() + ")");
 		}
-		
+
 		if (getDescription() != null) {
 			strBuilder.append(" Description: " + getDescription());
 			strBuilder.append(";");
 		}
-		
+
 		if (getVersion() != null) {
 			strBuilder.append(" Version: " + getVersion());
 			strBuilder.append(";");

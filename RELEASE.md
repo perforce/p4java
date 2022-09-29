@@ -1,7 +1,7 @@
                             Release Notes for
                        P4Java, the Perforce Java API
 
-                              Version 2021.2 Patch 5
+                              Version 2022.1
 
 Introduction
 
@@ -120,7 +120,35 @@ Known Limitations
 
 	  <java-home>/lib/security/local_policy.jar
 	  <java-home>/lib/security/US_export_policy.jar
-	  
+
+-------------------------------------------
+Updates in 2022.1 (2022/09/29)
+
+	#2345331 (Job #111078)
+        Added support to uncompress the compressed files received from server
+
+	#2325394 (Job #111560)
+		Added functionality to remove file revision attributes
+	
+	#2322763 (Job #110629)
+		Added support for special characters (@, %, # and *) in the file spec 
+		builder by adding  ‘makeFileSpecListSpecialChars’ method
+
+	#2328997, #2330279 (Job #110207)
+		Fixed a bug where sync of unicode files with bad charset was causing 
+		corrupt files on the workspace without throwing an error
+
+	#2346483 (Job #109218)
+		Fixed a bug where moves with an overlap between source and target 
+		file/directory names raised an error.
+
+	#2333818 (Job #112005)
+		Fixed a bug where unending sync operation was being caused when the 
+		client compression option was set
+
+		With this release we have migrated P4Java build from from Maven to 
+		Gradle using Gradle wrapper 7.5
+
 -------------------------------------------
 Updates in 2021.2 Patch 5
 

@@ -54,12 +54,7 @@ public class Diff2Delegator extends BaseDelegator implements IDiff2Delegator {
                 null);
         return buildNonNullObjectListFromNonMessageCommandResultMaps(
                 resultMaps,
-                new Function<Map, IFileDiff>() {
-                    @Override
-                    public IFileDiff apply(Map map) {
-                        return new FileDiff(map);
-                    }
-                });
+				map -> new FileDiff(map));
     }
 
     @Override

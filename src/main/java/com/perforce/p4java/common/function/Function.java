@@ -8,15 +8,16 @@ import com.perforce.p4java.exception.RequestException;
  *
  * @param <T> the type of the input to the function
  * @param <R> the type of the result of the function
- * apiNote: It will be replace by jdk-api if p4java use jdk1.8 in future.
+ *            apiNote: It will be replace by jdk-api if p4java use jdk1.8 in future.
  */
 public interface Function<T, R> {
 
-    /**
-     * Applies this function to the given argument.
-     *
-     * @param t the function argument
-     * @return the function result
-     */
-    R apply(T t) throws RequestException;
+	/**
+	 * Applies this function to the given argument.
+	 *
+	 * @param t the function argument
+	 * @return the function result
+	 * @throws RequestException on error
+	 */
+	R apply(T t) throws RequestException;
 }

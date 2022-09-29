@@ -1,26 +1,26 @@
 /**
- * 
+ *
  */
 package com.perforce.p4java.option.server;
-
-import java.util.List;
 
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.List;
+
 /**
  * Options class for Perforce IOptionsServer.getServerProcesses method.<p>
- * 
+ *
  * See 'p4 help monitor' for help specifying the monitor 'show' flags.
  */
 public class GetServerProcessesOptions extends Options {
-	
+
 	/**
 	 * Options: -a, -e, -l, -s R/T/P/I
 	 */
 	public static final String OPTIONS_SPECS = "b:a b:e b:l s:s";
-	
+
 	/**
 	 * If true, includes the command args. Corresponds to the -a flag.
 	 */
@@ -56,46 +56,47 @@ public class GetServerProcessesOptions extends Options {
 	/**
 	 * Strings-based constructor; see 'p4 help [command]' for possible options.
 	 * <p>
-	 * 
+	 *
 	 * <b>WARNING: you should not pass more than one option or argument in each
 	 * string parameter. Each option or argument should be passed-in as its own
 	 * separate string parameter, without any spaces between the option and the
-	 * option value (if any).<b>
+	 * option value (if any).</b>
 	 * <p>
-	 * 
+	 *
 	 * <b>NOTE: setting options this way always bypasses the internal options
 	 * values, and getter methods against the individual values corresponding to
 	 * the strings passed in to this constructor will not normally reflect the
 	 * string's setting. Do not use this constructor unless you know what you're
 	 * doing and / or you do not also use the field getters and setters.</b>
-	 * 
+	 *
+	 * @param options options
 	 * @see com.perforce.p4java.option.Options#Options(java.lang.String...)
 	 */
 	public GetServerProcessesOptions(String... options) {
 		super(options);
 	}
-	
+
 	/**
 	 * Explicit value constructor.
+	 *
+	 * @param includeCmdArgs includeCmdArgs
+	 * @param includeCmdEnv  includeCmdEnv
+	 * @param longOutput     longOutput
+	 * @param processState   processState
 	 */
-	public GetServerProcessesOptions(boolean includeCmdArgs, boolean includeCmdEnv,
-			boolean longOutput, String processState) {
+	public GetServerProcessesOptions(boolean includeCmdArgs, boolean includeCmdEnv, boolean longOutput, String processState) {
 		super();
 		this.includeCmdArgs = includeCmdArgs;
 		this.includeCmdEnv = includeCmdEnv;
 		this.longOutput = longOutput;
 		this.processState = processState;
 	}
-	
+
 	/**
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS,
-								this.isIncludeCmdArgs(),
-								this.isIncludeCmdEnv(),
-								this.isLongOutput(),
-								this.getProcessState());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isIncludeCmdArgs(), this.isIncludeCmdEnv(), this.isLongOutput(), this.getProcessState());
 
 		return this.optionList;
 	}
