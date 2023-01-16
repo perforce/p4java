@@ -373,9 +373,9 @@ public class RpcOutputStream extends FileOutputStream {
 			case FST_UTF16_GUNZIP:
 			case FST_XUTF16_GUNZIP:
 			case FST_XUNICODE_GUNZIP:
-				sourceBytes = decompressSourceBytes(sourceBytes);
 				// Convert to local charset if set
 				if (this.converter != null) {
+					sourceBytes = decompressSourceBytes(sourceBytes);
 					// Convert line endings before converting to unicode
 					sourceBytes = convertLineEnding(sourceBytes);
 					sourceBytes = convertCharset(sourceBytes);
@@ -451,7 +451,7 @@ public class RpcOutputStream extends FileOutputStream {
 		decompress(sourceBytes, len);
 		byte[] uncompressedBytes = tempBufferToStoreCompressedBytes.toByteArray();
 		len = uncompressedBytes.length;
-		tempBufferToStoreCompressedBytes.close();
+		tempBufferToStoreCompressedBytes.reset();
 		return uncompressedBytes;
 	}
 

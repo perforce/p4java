@@ -122,6 +122,18 @@ Known Limitations
 	  <java-home>/lib/security/US_export_policy.jar
 
 -------------------------------------------
+Updates in 2022.1 Patch 1 (2023/01/12)
+
+	#2390507 (Job #113889)
+        Syncing large files could produce corrupted client files larger than
+        the expected size. Compressed files (binary or +C) are now properly
+        decompressed. When writing converted bytes, we reset the temp buffer for
+        compressed data and not close.
+
+	#2389019 (Job #113888)
+        Syncing +x files will now always set the execute bit.
+
+-------------------------------------------
 Updates in 2022.1 (2022/09/29)
 
 	#2345331 (Job #111078)

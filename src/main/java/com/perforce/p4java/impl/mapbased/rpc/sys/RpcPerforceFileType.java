@@ -313,12 +313,19 @@ public enum RpcPerforceFileType {
 	public boolean isExecutable() {
 		switch (this) {
 			case FST_XTEXT:
+			case FST_XTEXT_GUNZIP:
 			case FST_XRTEXT:
+			case FST_XRTEXT_GUNZIP:
 			case FST_XAPPLEFILE:
+			case FST_XAPPLEFILE_GUNZIP:
 			case FST_XBINARY:
+			case FST_XBINARY_GUNZIP:
 			case FST_XUNICODE:
+			case FST_XUNICODE_GUNZIP:
 			case FST_XUTF8:
+			case FST_XUTF8_GUNZIP:
 			case FST_XUTF16:
+			case FST_XUTF16_GUNZIP:
 			case FST_XGUNZIP:
 				return true;
 			default:
