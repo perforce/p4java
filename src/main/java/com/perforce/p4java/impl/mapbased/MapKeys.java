@@ -26,6 +26,8 @@ public class MapKeys {
 	public static final String DOUBLE_LF = "\n\n";
 	public static final String EMPTY = "";
 
+	public static final String SPACE = " ";
+
 	// Order of definitions below is NOT significant...
 	public static final String ACCESS_KEY = "Access";
 	public static final String ACCESSED_KEY = "Accessed";
@@ -78,6 +80,8 @@ public class MapKeys {
 	public static final String MAXSCANROWS_KEY = "MaxScanRows";
 	public static final String MAXSCANROWS_LC_KEY = "maxScanRows";
 	public static final String MAXOPENFILES_KEY = "MaxOpenFiles";
+
+	public static final String MAX_MEMORY_KEY = "MaxMemory";
 	public static final String NAME_KEY = "Name";
 	public static final String NAME_LC_KEY = "name";
 	public static final String OPTIONS_KEY = "Options";
@@ -91,6 +95,7 @@ public class MapKeys {
 	public static final String PASSWORD_TIMEOUT_KEY = "PasswordTimeout";
 	public static final String PASSWORD_TIMEOUT_LC_KEY = "passTimeout"; // especially egregious, this one...
 	public static final String PATHS_KEY = "Paths";
+	public static final String COMPONENTS_KEY = "Components";
 	public static final String PROG_LC_KEY = "prog";
 	public static final String PROTECTIONS_KEY = "Protections";
 	public static final String REMAPPED_KEY = "Remapped";

@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseInt;
 import static com.perforce.p4java.common.base.P4ResultMapUtils.parseLong;
@@ -73,6 +74,7 @@ import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.SHELV
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.STARTFROMREV;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.START_TO_REV;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.STATUS;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.SYNCTIME;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TIME;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TO_FILE;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.TREE;
@@ -154,6 +156,8 @@ public class FileSpec extends ServerResource implements IFileSpec {
 	private int shelvedChange = IChangelist.UNKNOWN;
 
 	protected IClient client = null;
+
+	private long syncTime;
 
 	/**
 	 * Default constructor. Sets all paths, labels, dates, etc. to null;
@@ -365,6 +369,10 @@ public class FileSpec extends ServerResource implements IFileSpec {
 			if (map.containsKey(PATH + indexStr)) {
 				setLocalPath(new FilePath(PathType.LOCAL, parseString(map, PATH + indexStr), true));
 			}
+			if (map.containsKey(SYNCTIME + indexStr)) {
+				long seconds = Long.parseLong((Objects.requireNonNull(parseString(map, SYNCTIME + indexStr))));
+				setSyncTime(seconds * 1000);
+			}
 			setFileType(parseString(map, TYPE + indexStr));
 			setAction(FileAction.fromString(parseString(map, ACTION + indexStr)));
 			setUserName(parseString(map, USER + indexStr));
@@ -524,6 +532,14 @@ public class FileSpec extends ServerResource implements IFileSpec {
 	@Override
 	public int getChangelistId() {
 		return changeListId;
+	}
+
+	public long getSyncTime() {
+		return syncTime;
+	}
+
+	public void setSyncTime(long syncTime) {
+		this.syncTime = syncTime;
 	}
 
 	@Override

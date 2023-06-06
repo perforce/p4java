@@ -24,11 +24,13 @@ import com.perforce.p4java.core.ILicense;
 import com.perforce.p4java.core.IMapEntry;
 import com.perforce.p4java.core.IReviewSubscription;
 import com.perforce.p4java.core.IStream;
+import com.perforce.p4java.core.IStreamComponentMapping;
 import com.perforce.p4java.core.IStreamSummary;
 import com.perforce.p4java.core.IUser;
 import com.perforce.p4java.core.IUserGroup;
 import com.perforce.p4java.core.ViewMap;
 import com.perforce.p4java.core.file.IFileSpec;
+import com.perforce.p4java.exception.ConnectionException;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.impl.generic.client.ClientView;
 import com.perforce.p4java.impl.mapbased.MapKeys;
@@ -331,11 +333,12 @@ public class InputMapper {
 	/**
 	 * Map a P4Java IUserGroup object to an IServer input map.
 	 *
-	 * @param group candidate user group object
+	 * @param group  candidate user group object
+	 * @param server version of p4d server
 	 * @return non-null map suitable for use with execMapCmd
 	 */
-	public static Map<String, Object> map(IUserGroup group) {
-		Map<String, Object> groupMap = new HashMap<String, Object>();
+	public static Map<String, Object> map(IUserGroup group, IServer server) throws ConnectionException {
+		Map<String, Object> groupMap = new HashMap<>();
 
 		if (group != null) {
 			if (group.getName() != null) groupMap.put(MapKeys.GROUP_KEY, group.getName());
@@ -345,6 +348,9 @@ public class InputMapper {
 			groupMap.put(MapKeys.MAXLOCKTIME_KEY, getUGValue(group.getMaxLockTime()));
 			if (group.getMaxOpenFiles() != -Integer.MAX_VALUE) {
 				groupMap.put(MapKeys.MAXOPENFILES_KEY, getUGValue(group.getMaxOpenFiles()));
+			}
+			if (server.getServerVersion() >= 20222) {
+				groupMap.put(MapKeys.MAX_MEMORY_KEY, getUGValue(group.getMaxMemory()));
 			}
 			groupMap.put(MapKeys.PASSWORD_TIMEOUT_KEY, getUGValue(group.getPasswordTimeout()));
 			if (group.getSubgroups() != null) {
@@ -505,6 +511,15 @@ public class InputMapper {
 		streamMap.putAll(parseMap(stream.getStreamView(), MapKeys.PATHS_KEY));
 		streamMap.putAll(parseMap(stream.getRemappedView(), MapKeys.REMAPPED_KEY));
 		streamMap.putAll(parseMap(stream.getIgnoredView(), MapKeys.IGNORED_KEY));
+
+		if (stream.getComponents() != null && server.getServerVersion() >= 20221) {
+			StringBuffer buffer = new StringBuffer();
+			for (IStreamComponentMapping mapping : stream.getComponents().getEntryList()) {
+				buffer.append(mapping.toString());
+				buffer.append("\n");
+			}
+			streamMap.put(MapKeys.COMPONENTS_KEY, buffer.toString().trim());
+		}
 
 		// For pre 21.1 servers without ParentView.
 		IStreamSummary.ParentView parentView;

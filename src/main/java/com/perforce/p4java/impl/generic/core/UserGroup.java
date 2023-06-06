@@ -51,6 +51,8 @@ public class UserGroup extends ServerResource implements IUserGroup {
 	private List<String> users = new ArrayList<>();
 	private int maxOpenFiles = UNDEFINED;
 
+	private int maxMemory = UNSET;
+
 
 	/**
 	 * Simple convenience factory method to return a new local UserGroup object.
@@ -115,6 +117,7 @@ public class UserGroup extends ServerResource implements IUserGroup {
 				if (map.containsKey(MapKeys.MAXOPENFILES_KEY)) {
 					maxOpenFiles = parseGroupIntValue((String) map.get(MapKeys.MAXOPENFILES_KEY));
 				}
+				maxMemory = parseGroupIntValue((String) map.get(MapKeys.MAX_MEMORY_KEY));
 				timeout = parseGroupIntValue((String) map.get(MapKeys.TIMEOUT_KEY));
 				passwordTimeout = parseGroupIntValue(
 						(String) map.get(MapKeys.PASSWORD_TIMEOUT_KEY));
@@ -235,6 +238,16 @@ public class UserGroup extends ServerResource implements IUserGroup {
 
 	public void setMaxOpenFiles(int maxOpenFiles) {
 		this.maxOpenFiles = maxOpenFiles;
+	}
+
+	@Override
+	public int getMaxMemory() {
+		return this.maxMemory;
+	}
+
+	@Override
+	public void setMaxMemory(int maxMemory) {
+		this.maxMemory = maxMemory;
 	}
 
 	@Override

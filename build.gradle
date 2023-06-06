@@ -12,7 +12,7 @@ targetCompatibility = 1.8
 
 repositories {
     maven { url "https://repo.maven.apache.org/maven2" }
-    maven { url "https://artifactory.bnr.perforce.com:8443/artifactory/snapshots/" }
+    maven { url "https://artifactory.bnr.perforce.com/artifactory/snapshots/" }
 }
 
 dependencies {
@@ -35,6 +35,14 @@ jar {
     into("META-INF/maven/$project.group/$project.name") {
         from { generatePomFileForMavenJavaPublication }
         rename ".*", "pom.xml"
+    }
+    manifest {
+        attributes["Name"] = "com/perforce/p4java/"
+        attributes["Main-Class"] = "com.perforce.p4java.Metadata"
+        attributes["Implementation-Title"] = "p4java"
+        attributes["Implementation-Version"] = archiveVersion
+        attributes["Implementation-Vendor-Id"] = "com.perforce"
+        attributes["Implementation-Vendor"] = "Perforce Software"
     }
 }
 
@@ -94,7 +102,7 @@ publishing {
         }
         maven {
             name = 'artifactory-snapshots'
-            url = 'https://artifactory.bnr.perforce.com:8443/artifactory/snapshots/'
+            url = 'https://artifactory.bnr.perforce.com/artifactory/snapshots/'
             credentials {
                 username = mavenUser
                 password = mavenPassword
@@ -102,7 +110,7 @@ publishing {
         }
         maven {
             name = 'artifactory-release'
-            url = 'https://artifactory.bnr.perforce.com:8443/artifactory/releases/'
+            url = 'https://artifactory.bnr.perforce.com/artifactory/releases/'
             credentials {
                 username = mavenUser
                 password = mavenPassword

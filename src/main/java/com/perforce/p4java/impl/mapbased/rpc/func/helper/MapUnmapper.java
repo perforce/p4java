@@ -480,6 +480,9 @@ public class MapUnmapper {
 			if (inMap.containsKey(MapKeys.MAXOPENFILES_KEY)) {
 				strBuf.append(MapKeys.MAXOPENFILES_KEY + MapKeys.COLON_SPACE + inMap.get(MapKeys.MAXOPENFILES_KEY) + MapKeys.DOUBLE_LF);
 			}
+			if (inMap.containsKey(MapKeys.MAX_MEMORY_KEY)) {
+				strBuf.append(MapKeys.MAX_MEMORY_KEY + MapKeys.COLON_SPACE + inMap.get(MapKeys.MAX_MEMORY_KEY) + MapKeys.DOUBLE_LF);
+			}
 			for (int i = 0; ; i++) {
 				String mapStr = (String) inMap.get(MapKeys.SUBGROUPS_KEY + i);
 

@@ -564,13 +564,11 @@ public class ClientUserInteraction {
 		if (handler != null) {
 			if (handler.isError()) {
 				confirm = decline;
-			}
-		} else {
-
-			// no errors, if syncTime is set, send it
-
-			if (cmdEnv.getSyncTime() != 0) {
-				resultsMap.put(RpcFunctionMapKey.SYNCTIME, cmdEnv.getSyncTime());
+			} else {
+				// no errors, if syncTime is set, send it
+				if (cmdEnv.getSyncTime() != 0) {
+					resultsMap.put(RpcFunctionMapKey.SYNCTIME, String.valueOf(cmdEnv.getSyncTime()));
+				}
 			}
 		}
 

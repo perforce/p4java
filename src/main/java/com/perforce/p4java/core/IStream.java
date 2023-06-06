@@ -24,13 +24,17 @@ public interface IStream extends IStreamSummary {
 	 * Defines an "extraTag*" field
 	 */
 	public interface IExtraTag {
+
 		String getName();
+
 		void setName(String name);
-		
+
 		String getType();
+
 		void setType(String type);
-		
+
 		String getValue();
+
 		void setValue(String value);
 	};
 
@@ -38,7 +42,7 @@ public interface IStream extends IStreamSummary {
 	 * Return the view map associated with this stream. One or more mappings
 	 * that define file paths in the stream view. Each line is of the form:
 	 * path_type view_path [depot_path]
-	 * 
+	 *
 	 * @return non-null list of IStreamViewMapping mappings for this stream.
 	 */
 	ViewMap<IStreamViewMapping> getStreamView();
@@ -47,9 +51,8 @@ public interface IStream extends IStreamSummary {
 	 * Set the view map associated with this stream spec. This will not
 	 * change the associated stream spec on the Perforce server unless you
 	 * arrange for the update to server.
-	 * 
-	 * @param streamView
-	 *            new view mappings for the stream.
+	 *
+	 * @param streamView new view mappings for the stream.
 	 */
 	void setStreamView(ViewMap<IStreamViewMapping> streamView);
 
@@ -58,9 +61,9 @@ public interface IStream extends IStreamSummary {
 	 * Return the remapped view map associated with this stream. Optional; one
 	 * or more mappings that define how stream view paths are to be remapped in
 	 * client views. Each line is of the form: view_path_1 view_path_2
-	 * 
+	 *
 	 * @return possibly-null (optional) list of IStreamRemappedMapping mappings
-	 *         for this stream.
+	 * for this stream.
 	 */
 	ViewMap<IStreamRemappedMapping> getRemappedView();
 
@@ -68,9 +71,8 @@ public interface IStream extends IStreamSummary {
 	 * Set the remapped view map associated with this stream spec. This will
 	 * not change the associated stream spec on the Perforce server unless you
 	 * arrange for the update to server.
-	 * 
-	 * @param remappedView
-	 *            new remapped view mappings for the stream.
+	 *
+	 * @param remappedView new remapped view mappings for the stream.
 	 */
 	void setRemappedView(ViewMap<IStreamRemappedMapping> remappedView);
 
@@ -79,9 +81,9 @@ public interface IStream extends IStreamSummary {
 	 * of file or directory names to be ignored in client views. mappings in the
 	 * "Ignored" field may appear in any order. Ignored names are inherited by
 	 * child stream client views.
-	 * 
+	 *
 	 * @return possibly-null (optional) list of IStreamIgnoredMapping mappings
-	 *         to be ignored for this stream.
+	 * to be ignored for this stream.
 	 */
 	ViewMap<IStreamIgnoredMapping> getIgnoredView();
 
@@ -96,9 +98,9 @@ public interface IStream extends IStreamSummary {
 	/**
 	 * Return the automatically generated client view map associated with this
 	 * stream. Maps files in the depot to files in your client workspace.
-	 * 
+	 *
 	 * @return possibly-null list of automatically generated IClientViewMapping
-	 *         mappings associated with this stream.
+	 * mappings associated with this stream.
 	 */
 	ViewMap<IClientViewMapping> getClientView();
 
@@ -112,11 +114,11 @@ public interface IStream extends IStreamSummary {
 
 	/**
 	 * Return a list of extra tags associated with this stream.
-	 * 
+	 *
 	 * @return possibly-null list of extra tags associated with this stream.
 	 */
 	List<IExtraTag> getExtraTags();
-	
+
 	/**
 	 * Set the extra tags associated with this stream. This will not change
 	 * the associated stream spec on the Perforce server unless you arrange for
@@ -124,10 +126,17 @@ public interface IStream extends IStreamSummary {
 	 * @param extraTags extra tags
 	 */
 	void setExtraTags(List<IExtraTag> extraTags);
-	
+
 	/**
 	 * Set the server to type of IOptionsServer, overriding the default IServer.
 	 * @param server server
 	 */
 	void setServer(IOptionsServer server);
+
+	ViewMap<IStreamComponentMapping> getComponents();
+
+	/**
+	 * @param components A stream Components
+	 */
+	void setComponents(ViewMap<IStreamComponentMapping> components);
 }

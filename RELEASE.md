@@ -1,7 +1,7 @@
                             Release Notes for
                        P4Java, the Perforce Java API
 
-                              Version 2022.1
+                              Version 2022.2
 
 Introduction
 
@@ -120,6 +120,29 @@ Known Limitations
 
 	  <java-home>/lib/security/local_policy.jar
 	  <java-home>/lib/security/US_export_policy.jar
+	  
+-------------------------------------------
+Updates in 2022.2 (2022.2/2444480) (2023/05/23)
+
+	#2435337 (Job #114238)
+        Enhanced functionality of p4 print command with the addition of
+        --offset and --size options.
+
+	#2426294 (Job #114313)
+        Added support for 'MaxMemory' in the group spec.
+
+	#2439567, #2443196 (Job #114313)
+        Added support for 'Components' in the stream spec.	  
+
+-------------------------------------------
+Updates in 2022.1 Patch 2 (2023/03/27)
+
+	#2421117 (Job #112706)
+        Fixed a bug where P4Java failed to update the sync time in db.have
+        during a sync operation
+
+	#2409816 (Job #113999)
+        Fixed a bug in decoding UTF-16 encoded files, which leads to file corruption
 
 -------------------------------------------
 Updates in 2022.1 Patch 1 (2023/01/12)
@@ -140,26 +163,26 @@ Updates in 2022.1 (2022/09/29)
         Added support to uncompress the compressed files received from server
 
 	#2325394 (Job #111560)
-		Added functionality to remove file revision attributes
+        Added functionality to remove file revision attributes
 	
 	#2322763 (Job #110629)
-		Added support for special characters (@, %, # and *) in the file spec 
-		builder by adding  ‘makeFileSpecListSpecialChars’ method
+        Added support for special characters (@, %, # and *) in the file spec 
+        builder by adding  ‘makeFileSpecListSpecialChars’ method
 
 	#2328997, #2330279 (Job #110207)
-		Fixed a bug where sync of unicode files with bad charset was causing 
-		corrupt files on the workspace without throwing an error
+        Fixed a bug where sync of unicode files with bad charset was causing 
+        corrupt files on the workspace without throwing an error
 
 	#2346483 (Job #109218)
-		Fixed a bug where moves with an overlap between source and target 
-		file/directory names raised an error.
+        Fixed a bug where moves with an overlap between source and target 
+        file/directory names raised an error.
 
 	#2333818 (Job #112005)
-		Fixed a bug where unending sync operation was being caused when the 
-		client compression option was set
+        Fixed a bug where unending sync operation was being caused when the 
+        client compression option was set
 
-		With this release we have migrated P4Java build from from Maven to 
-		Gradle using Gradle wrapper 7.5
+        With this release we have migrated P4Java build from from Maven to 
+        Gradle using Gradle wrapper 7.5
 
 -------------------------------------------
 Updates in 2021.2 Patch 5

@@ -826,4 +826,8 @@ public interface IFileSpec extends IFileOperationResult {
 	List<String> getResolveTypes();
 
 	void setResolveTypes(List<String> types);
+
+	long getSyncTime();
+
+	void setSyncTime(long syncTime);
 }

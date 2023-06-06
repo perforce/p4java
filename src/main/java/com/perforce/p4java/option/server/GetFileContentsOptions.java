@@ -3,6 +3,7 @@
  */
 package com.perforce.p4java.option.server;
 
+import com.perforce.p4java.exception.ConnectionException;
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
@@ -17,9 +18,14 @@ import java.util.List;
 public class GetFileContentsOptions extends Options {
 
 	/**
-	 * Options: -a, -q
+	 * Options: -a, -q, --offset, --size
 	 */
 	public static final String OPTIONS_SPECS = "b:a b:q";
+
+	/**
+	 * Options: --offset, --size
+	 */
+	public static final String OPTION_SPEC_NEW = "l:-offset l:-size";
 
 	/**
 	 * If true, get the contents of all revisions within the specific range, rather
@@ -38,12 +44,21 @@ public class GetFileContentsOptions extends Options {
 	 * (Parameters.processParameters(...)). By default the filespecs passed to
 	 * IOptionsServer.getFileContents() would get revisions appended to them
 	 * during parameter processing.<p>
-	 *
 	 * Note that this is not a standard option for this command. It is merely a
 	 * convenience flag to tell the parameter processor not to include revisions
 	 * with the filespecs.
 	 */
 	protected boolean dontAnnotateFiles = false;
+
+	/**
+	 * Skip the specified number of bytes and only print what follows.
+	 */
+	protected long offset = 0L;
+
+	/**
+	 * Print the specified number of bytes from the offset.
+	 */
+	protected long size = 0L;
 
 	/**
 	 * Default constructor -- sets all fields to false.
@@ -91,7 +106,20 @@ public class GetFileContentsOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.isAllrevs(), this.isNoHeaderLine());
+		int serverVersion = 0;
+		try {
+			serverVersion = server.getServerVersion();
+		} catch (ConnectionException e) {
+			throw new OptionsException("Can not connect to server.", e);
+		}
+		if (serverVersion >= 20221) {
+			this.optionList = this.processFields(OPTIONS_SPECS + " " + OPTION_SPEC_NEW,
+					this.isAllrevs(), this.isNoHeaderLine(),
+					this.offset, this.size);
+
+		} else {
+			this.optionList = this.processFields(OPTIONS_SPECS, this.isAllrevs(), this.isNoHeaderLine());
+		}
 		return this.optionList;
 	}
 
@@ -120,5 +148,21 @@ public class GetFileContentsOptions extends Options {
 	public GetFileContentsOptions setDontAnnotateFiles(boolean dontAnnotateFiles) {
 		this.dontAnnotateFiles = dontAnnotateFiles;
 		return this;
+	}
+
+	public long getOffset() {
+		return offset;
+	}
+
+	public void setOffset(long offset) {
+		this.offset = offset;
+	}
+
+	public long getSize() {
+		return size;
+	}
+
+	public void setSize(long size) {
+		this.size = size;
 	}
 }

@@ -213,4 +213,20 @@ public interface IUserGroup extends IServerResource {
 	 * @param users users
 	 */
 	void setUsers(List<String> users);
+
+	/**
+	 * Get Maximum amount of megabytes of random-access memory that a command can use when
+	 * run by any member of the group.
+	 *
+	 * @return amount of memory in MB
+	 */
+	int getMaxMemory();
+
+	/**
+	 * Set Maximum amount of megabytes of random-access memory that a command can use when
+	 * run by any member of the group.
+	 *
+	 * @param maxMemory - in MB
+	 */
+	void setMaxMemory(int maxMemory);
 }

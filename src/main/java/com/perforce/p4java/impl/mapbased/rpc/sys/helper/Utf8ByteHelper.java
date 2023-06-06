@@ -46,7 +46,7 @@ public enum Utf8ByteHelper {
 	}
 
 	public static int findBufferLimit(ByteBuffer buffer) throws FileDecoderException {
-		// find start of multi byte
+		// find start of multibyte
 		int r = buffer.remaining();
 		for (int i = 1; i <= 4; i++) {
 			int pos = r - i;
@@ -54,6 +54,11 @@ public enum Utf8ByteHelper {
 			Utf8ByteHelper t = Utf8ByteHelper.parse(b);
 			switch (t) {
 				case START:
+					int bytesInCharacter = Utf8ByteHelper.length(b) + 1;
+					// If multibyte character can be accommodated in the same buffer, add it.
+					if (pos + bytesInCharacter <= r) {
+						return pos + bytesInCharacter;
+					}
 					return pos;
 				case SINGLE:
 					throw new FileDecoderException("Corrupt UTF8; single byte in multi byte sequence.");

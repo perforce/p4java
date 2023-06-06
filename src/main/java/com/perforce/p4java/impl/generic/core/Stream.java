@@ -6,6 +6,7 @@ package com.perforce.p4java.impl.generic.core;
 import com.perforce.p4java.Log;
 import com.perforce.p4java.client.IClientViewMapping;
 import com.perforce.p4java.core.IStream;
+import com.perforce.p4java.core.IStreamComponentMapping;
 import com.perforce.p4java.core.IStreamIgnoredMapping;
 import com.perforce.p4java.core.IStreamRemappedMapping;
 import com.perforce.p4java.core.IStreamSummary;
@@ -29,6 +30,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import static com.perforce.p4java.impl.mapbased.MapKeys.SPACE;
+
 /**
  * Simple default implementation class for the IStream interface.
  */
@@ -39,6 +42,8 @@ public class Stream extends StreamSummary implements IStream {
 	protected ViewMap<IStreamRemappedMapping> remappedView = null;
 	protected ViewMap<IStreamIgnoredMapping> ignoredView = null;
 	protected ViewMap<IClientViewMapping> clientView = null;
+
+	protected ViewMap<IStreamComponentMapping> components = null;
 	protected List<IExtraTag> extraTags = null;
 
 	/**
@@ -149,9 +154,9 @@ public class Stream extends StreamSummary implements IStream {
 								   String description, String options, String[] viewPaths,
 								   String[] remappedPaths, String[] ignoredPaths) {
 
-		return newStream(server, streamPath, type, parentStreamPath, name,
+		return getStream(server, streamPath, type, parentStreamPath, name,
 				description, options, viewPaths, remappedPaths, ignoredPaths,
-				null);
+				null, null);
 	}
 
 	/**
@@ -195,6 +200,61 @@ public class Stream extends StreamSummary implements IStream {
 								   String description, String options, String[] viewPaths,
 								   String[] remappedPaths, String[] ignoredPaths,
 								   String[] clientViewPaths) {
+		return getStream(server, streamPath, type, parentStreamPath, name, description, options, viewPaths, remappedPaths,
+				ignoredPaths, clientViewPaths, null);
+	}
+
+	/**
+	 * Simple factory / convenience method for creating a new local Stream
+	 * object with defult values.
+	 *
+	 * @param server           non-null server to be associated with the new stream spec.
+	 * @param streamPath       non-null stream's path in a stream depot, of the form
+	 *                         //depotname/streamname.
+	 * @param type             non-null stream type of 'mainline', 'development', or
+	 *                         'release'.
+	 * @param parentStreamPath parent of this stream. Can be null if the stream type is
+	 *                         'mainline', otherwise must be set to an existing stream.
+	 * @param name             an alternate name of the stream, for use in display outputs.
+	 *                         Defaults to the 'streamname' portion of the stream path. Can
+	 *                         be changed.
+	 * @param description      if not null, used as the new stream spec's description field;
+	 *                         if null, uses the Stream.DEFAULT_DESCRIPTION field.
+	 * @param options          flags to configure stream behavior: allsubmit/ownersubmit
+	 *                         [un]locked [no]toparent [no]fromparent mergedown/mergeany.
+	 * @param viewPaths        one or more lines that define file paths in the stream view.
+	 *                         Each line is of the form: path_type view_path depot_path
+	 * @param remappedPaths    optional; one or more lines that define how stream view paths
+	 *                         are to be remapped in client views. Each line is of the form:
+	 *                         view_path_1 view_path_2
+	 * @param ignoredPaths     optional; a list of file or directory names to be ignored in
+	 *                         client views. For example:
+	 *                         /tmp      # ignores files named 'tmp'
+	 *                         /tmp/...  # ignores dirs named 'tmp'
+	 *                         .tmp      # ignores file names ending in '.tmp'
+	 * @param clientViewPaths  automatically generated; maps files in the depot to files in
+	 *                         your client workspace. For example:
+	 *                         //p4java_stream/dev/... ...
+	 *                         //p4java_stream/dev/readonly/sync/p4cmd/%%1 readonly/sync/p4cmd/%%1
+	 *                         -//p4java_stream/.../temp/... .../temp/...
+	 *                         -//p4java_stream/....class ....class
+	 * @param components       Add stream components.
+	 *                         Syntax: component_type component_folder component_stream[@[change | automatic_label]]
+	 *                         eg: readonly dirB //streams/B
+	 * @return new local Stream object.
+	 */
+	public static Stream newStream(IOptionsServer server, String streamPath,
+								   String type, String parentStreamPath, String name,
+								   String description, String options, String[] viewPaths,
+								   String[] remappedPaths, String[] ignoredPaths,
+								   String[] clientViewPaths, String[] components) {
+		return getStream(server, streamPath, type, parentStreamPath, name, description, options, viewPaths, remappedPaths,
+				ignoredPaths, clientViewPaths, components);
+	}
+
+	private static Stream getStream(IOptionsServer server, String streamPath, String type, String parentStreamPath,
+									String name, String description, String options, String[] viewPaths, String[] remappedPaths,
+									String[] ignoredPaths, String[] clientViewPaths, String[] components) {
 		if (server == null) {
 			throw new NullPointerError("null server in Stream.newStream()");
 		}
@@ -258,6 +318,19 @@ public class Stream extends StreamSummary implements IStream {
 			}
 		}
 
+		ViewMap<IStreamComponentMapping> streamComponents = null;
+		if (components != null) {
+			streamComponents = new ViewMap<>();
+			int i = 0;
+			for (String mapping : components) {
+				if (mapping == null) {
+					throw new NullPointerError("null client view mapping string passed to Stream.newStream");
+				}
+				streamComponents.addEntry(new StreamComponentMapping(i, mapping));
+				i++;
+			}
+		}
+
 		IOptions streamOptions = new Options();
 		if (options != null) {
 			streamOptions = new Options(options);
@@ -286,7 +359,9 @@ public class Stream extends StreamSummary implements IStream {
 				streamOptions,
 				streamView,
 				remappedView,
-				ignoredView);
+				ignoredView,
+				null,
+				streamComponents);
 	}
 
 	/**
@@ -505,6 +580,62 @@ public class Stream extends StreamSummary implements IStream {
 		}
 	}
 
+	public static class StreamComponentMapping extends MapEntry implements IStreamComponentMapping {
+		Type type = null;
+
+		public StreamComponentMapping(int order, Type type, String folder, String stream) {
+			super(order, folder, stream);
+			this.type = type;
+		}
+
+		public StreamComponentMapping(int order, String rawComponentString) {
+			String[] s = rawComponentString.split(SPACE);
+			if (s.length == 3) {
+				this.order = order;
+				this.type = Type.fromString(s[0]);
+				this.left = s[1];
+				this.right = s[2];
+			} else {
+				Log.error("Bad stream components mapping. " + rawComponentString);
+			}
+		}
+
+		@Override
+		public Type getComponentType() {
+			return type;
+		}
+
+		@Override
+		public void setComponentType(Type type) {
+			this.type = type;
+		}
+
+		@Override
+		public String getDirectory() {
+			return left;
+		}
+
+		@Override
+		public void setDirectory(String directory) {
+			this.left = directory;
+		}
+
+		@Override
+		public String getStream() {
+			return right;
+		}
+
+		@Override
+		public void setStream(String stream) {
+			this.right = stream;
+		}
+
+		@Override
+		public String toString() {
+			return type.getText() + SPACE + left + SPACE + right;
+		}
+	}
+
 	/**
 	 * Default constructor. All fields set to null or false.
 	 */
@@ -535,7 +666,7 @@ public class Stream extends StreamSummary implements IStream {
 				  ViewMap<IStreamIgnoredMapping> ignoredView) {
 
 		this(stream, type, parent, accessed, updated, name, description,
-				ownerName, options, streamView, remappedView, ignoredView, null);
+				ownerName, options, streamView, remappedView, ignoredView, null, null);
 	}
 
 	/**
@@ -559,8 +690,35 @@ public class Stream extends StreamSummary implements IStream {
 				  Date updated, String name, String description, String ownerName,
 				  IOptions options, ViewMap<IStreamViewMapping> streamView,
 				  ViewMap<IStreamRemappedMapping> remappedView,
+				  ViewMap<IStreamIgnoredMapping> ignoredView, ViewMap<IClientViewMapping> clientView) {
+		this(stream, type, parent, accessed, updated, name, description,ownerName, options, streamView, remappedView,
+				ignoredView, clientView, null);
+	}
+
+	/**
+	 * Construct a new Stream from explicit field values.
+	 *
+	 * @param stream       stream
+	 * @param type         type
+	 * @param parent       parent
+	 * @param accessed     accessed
+	 * @param updated      updated
+	 * @param name         name
+	 * @param description  description
+	 * @param ownerName    ownerName
+	 * @param options      options
+	 * @param streamView   streamView
+	 * @param remappedView remappedView
+	 * @param ignoredView  ignoredView
+	 * @param clientView   clientView
+	 * @param components   components
+	 */
+	public Stream(String stream, Type type, String parent, Date accessed,
+				  Date updated, String name, String description, String ownerName,
+				  IOptions options, ViewMap<IStreamViewMapping> streamView,
+				  ViewMap<IStreamRemappedMapping> remappedView,
 				  ViewMap<IStreamIgnoredMapping> ignoredView,
-				  ViewMap<IClientViewMapping> clientView) {
+				  ViewMap<IClientViewMapping> clientView, ViewMap<IStreamComponentMapping> components) {
 		setStream(stream);
 		setType(type);
 		setParent(parent);
@@ -575,6 +733,7 @@ public class Stream extends StreamSummary implements IStream {
 		this.remappedView = remappedView;
 		this.ignoredView = ignoredView;
 		this.clientView = clientView;
+		this.components = components;
 	}
 
 	/**
@@ -593,6 +752,7 @@ public class Stream extends StreamSummary implements IStream {
 		this.ignoredView = new ViewMap<>();
 		this.clientView = new ViewMap<>();
 		this.extraTags = new ArrayList<>();
+		this.components = new ViewMap<>();
 
 		if (map != null) {
 			String key = MapKeys.PATHS_KEY;
@@ -735,6 +895,24 @@ public class Stream extends StreamSummary implements IStream {
 					}
 				}
 			}
+
+			key = MapKeys.COMPONENTS_KEY;
+			for (int i = 0; ; i++) {
+				if (!map.containsKey(key + i)) {
+					break;
+				} else if (map.get(key + i) != null) {
+					try {
+						String components = (String) map.get(key + i);
+						this.components.getEntryList().add(new StreamComponentMapping(i, components));
+
+					} catch (Throwable thr) {
+						Log.error("Unexpected exception in Stream map-based constructor: "
+								+ thr.getLocalizedMessage());
+						Log.exception(thr);
+					}
+				}
+			}
+
 		}
 	}
 
@@ -896,5 +1074,15 @@ public class Stream extends StreamSummary implements IStream {
 	 */
 	public void setExtraTags(List<IExtraTag> extraTags) {
 		this.extraTags = extraTags;
+	}
+
+	@Override
+	public ViewMap<IStreamComponentMapping> getComponents() {
+		return components;
+	}
+
+	@Override
+	public void setComponents(ViewMap<IStreamComponentMapping> components) {
+		this.components = components;
 	}
 }

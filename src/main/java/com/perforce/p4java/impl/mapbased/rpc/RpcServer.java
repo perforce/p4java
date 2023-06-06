@@ -773,6 +773,9 @@ public abstract class RpcServer extends Server {
 
 	@Override
 	public String getAuthTicket(final String userName, final String serverId) {
+		if (isBlank(userName) || authTickets.isEmpty()) {
+			return null;
+		}
 		// Must downcase the username to find or save a ticket when
 		// connected to a case insensitive server.
 		String lowerCaseableUserName = userName;
@@ -782,6 +785,11 @@ public abstract class RpcServer extends Server {
 		String serverAddress = serverId;
 		if (isBlank(serverAddress)) {
 			serverAddress = firstNonBlank(getServerId(), getServerAddress());
+
+			if (!authTickets.containsKey(composeAuthTicketEntryKey(lowerCaseableUserName, serverAddress))) {
+				serverAddress = getServerAddress();
+			}
+
 			// Handling 'serverCluster'
 			if (isClusterMember()) {
 				serverAddress = serverInfo.getServerCluster();

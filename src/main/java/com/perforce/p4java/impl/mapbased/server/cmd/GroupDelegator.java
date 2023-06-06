@@ -74,8 +74,9 @@ public class GroupDelegator extends BaseDelegator implements IGroupDelegator {
 	public String updateUserGroup(@Nonnull final IUserGroup group, @Nullable final UpdateUserGroupOptions opts) throws P4JavaException {
 
 		Validate.notNull(group);
-
-		List<Map<String, Object>> resultMaps = execMapCmdList(GROUP, Parameters.processParameters(opts, null, "-i", server), InputMapper.map(group));
+		List<Map<String, Object>> resultMaps = execMapCmdList(GROUP,
+				Parameters.processParameters(opts, null, "-i", server),
+				InputMapper.map(group, server));
 
 		return ResultMapParser.parseCommandResultMapAsString(resultMaps);
 	}
