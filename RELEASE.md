@@ -1,7 +1,7 @@
                             Release Notes for
                        P4Java, the Perforce Java API
 
-                              Version 2022.2
+                              Version 2023.1
 
 Introduction
 
@@ -121,6 +121,15 @@ Known Limitations
 	  <java-home>/lib/security/local_policy.jar
 	  <java-home>/lib/security/US_export_policy.jar
 	  
+	* P4Java would not support file operations on altsync enabled clients.
+	
+-------------------------------------------
+Updates in 2023.1 (2023.1/2512805) (2023/11/01)
+
+	#2497593, #2509668, #2502386 (Job #116934)
+        Added support for the updated client spec in the 2023.1 Helix Core
+		server release.
+
 -------------------------------------------
 Updates in 2022.2 (2022.2/2444480) (2023/05/23)
 
@@ -135,15 +144,18 @@ Updates in 2022.2 (2022.2/2444480) (2023/05/23)
         Added support for 'Components' in the stream spec.	  
 
 -------------------------------------------
-Updates in 2022.1 Patch 2 (2023/03/27)
+Updates in 2022.1 Patch 2 (2022.1/2423241) (2023/03/28)
 
 	#2421117 (Job #112706)
         Fixed a bug where P4Java failed to update the sync time in db.have
         during a sync operation
 
 	#2409816 (Job #113999)
-        Fixed a bug in decoding UTF-16 encoded files, which leads to file corruption
-
+		Fixed a bug in decoding UTF-16 encoded files, which leads to file corruption
+	
+	#2369664 (Job #115104)
+		Fixed a bug where using Metadata class for version information did not return a result.
+	
 -------------------------------------------
 Updates in 2022.1 Patch 1 (2023/01/12)
 

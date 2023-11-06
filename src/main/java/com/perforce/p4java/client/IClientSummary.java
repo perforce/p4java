@@ -62,6 +62,10 @@ public interface IClientSummary extends IServerResource {
 		boolean isRmdir();
 
 		void setRmdir(boolean rmdir);
+
+		boolean isaltSync();
+
+		void setAltsync(boolean altsync);
 	}
 
 	;
