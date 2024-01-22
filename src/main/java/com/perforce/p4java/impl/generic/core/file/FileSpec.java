@@ -61,6 +61,7 @@ import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.FROM_
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.HAVEREV;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.HOW;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.LOCAL_FILE;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.IS_ORPHANED;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.OTHERLOCK;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.OTHER_ACTION;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.OURLOCK;
@@ -144,7 +145,7 @@ public class FileSpec extends ServerResource implements IFileSpec {
 	private int workRev = NO_FILE_REVISION;
 	private String howResolved = null;
 	private FileAction otherAction = null;
-
+	private boolean orphaned = false;
 	private boolean locked = false;
 
 	private String diffStatus = null;
@@ -394,6 +395,10 @@ public class FileSpec extends ServerResource implements IFileSpec {
 					Log.error("Error parsing the '%S' in the FileSpec constructor: %s", TIME, nfe.getLocalizedMessage());
 					Log.exception(nfe);
 				}
+			}
+
+			if(map.containsKey(IS_ORPHANED)) {
+				setOrphaned(true);
 			}
 
 			setLocked(nonNull(map.get(OURLOCK)) || nonNull(map.get(OTHERLOCK)));
@@ -692,6 +697,11 @@ public class FileSpec extends ServerResource implements IFileSpec {
 	}
 
 	@Override
+	public boolean isOrphaned() {
+		return orphaned;
+	}
+
+	@Override
 	public boolean isLocked() {
 		return locked;
 	}
@@ -882,6 +892,11 @@ public class FileSpec extends ServerResource implements IFileSpec {
 	@Override
 	public void setOtherAction(FileAction otherAction) {
 		this.otherAction = otherAction;
+	}
+
+	@Override
+	public void setOrphaned(boolean isOrphaned) {
+		this.orphaned = isOrphaned;
 	}
 
 	@Override

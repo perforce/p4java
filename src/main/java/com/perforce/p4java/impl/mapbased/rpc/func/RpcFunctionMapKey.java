@@ -115,6 +115,7 @@ public class RpcFunctionMapKey {
 	public static final String IPADDR = "ipaddr";
 	public static final String IS_GROUP = "isgroup";
 	public static final String ISMAPPED = "isMapped";
+	public static final String IS_ORPHANED = "isOrphaned";
 	public static final String KEY = "key";
 	public static final String LABEL_REC_DELETED = "labelRecDeleted";
 	public static final String LABEL = "label";

@@ -302,6 +302,17 @@ public interface IFileSpec extends IFileOperationResult {
 	void setDate(Date date);
 
 	/**
+	 * @return true if the associated file is orphaned.
+	 */
+	boolean isOrphaned();
+
+	/** Set whether this file is orphaned
+	 *
+	 * @param isOrphaned is this file orphaned
+	 */
+	public void setOrphaned(boolean isOrphaned);
+
+	/**
 	 * @return true if the associated file has been locked.
 	 */
 	boolean isLocked();
