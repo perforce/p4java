@@ -204,6 +204,10 @@ public class InputMapper {
 						+ (opts.isLocked() ? "locked " : "unlocked ")
 						+ (opts.isModtime() ? "modtime " : "nomodtime ")
 						+ (opts.isRmdir() ? "rmdir" : "normdir");
+
+				if(opts.toString().split(" ").length > 6)
+					optStr = optStr + (opts.isaltSync() ? " altsync" : " noaltsync");
+
 				clientMap.put("Options", optStr);
 			}
 

@@ -91,10 +91,15 @@ publishing {
     repositories {
         def mavenUser = project.hasProperty('mavenUser') ? project.ext.mavenUser : ''
         def mavenPassword = project.hasProperty('mavenPassword') ? project.ext.mavenPassword : ''
+        def artifactoryUser = project.hasProperty('artifactoryUser') ? project.ext.artifactoryUser : ''
+        def artifactoryPassword = project.hasProperty('artifactoryPassword') ? project.ext.artifactoryPassword : ''
+        def mavenStagingUrl = project.hasProperty('mavenStagingUrl') ? project.ext.mavenStagingUrl : ''
+        def artifactorySnapshotUrl = project.hasProperty('artifactorySnapshotUrl') ? project.ext.artifactorySnapshotUrl : ''
+        def artifactoryReleaseUrl = project.hasProperty('artifactoryReleaseUrl') ? project.ext.artifactoryReleaseUrl : ''
 
         maven {
             name = 'p4mavencentral-staging'
-            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            url = mavenStagingUrl
             credentials {
                 username = mavenUser
                 password = mavenPassword
@@ -102,18 +107,18 @@ publishing {
         }
         maven {
             name = 'artifactory-snapshots'
-            url = 'https://artifactory.bnr.perforce.com/artifactory/snapshots/'
+            url = artifactorySnapshotUrl
             credentials {
-                username = mavenUser
-                password = mavenPassword
+                username = artifactoryUser
+                password = artifactoryPassword
             }
         }
         maven {
             name = 'artifactory-release'
-            url = 'https://artifactory.bnr.perforce.com/artifactory/releases/'
+            url = artifactoryReleaseUrl
             credentials {
-                username = mavenUser
-                password = mavenPassword
+                username = artifactoryUser
+                password = artifactoryPassword
             }
         }
     }
