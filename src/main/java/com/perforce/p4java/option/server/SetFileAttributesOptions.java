@@ -17,9 +17,9 @@ import java.util.List;
 public class SetFileAttributesOptions extends Options {
 
 	/**
-	 * Options: -e, -f, -p
+	 * Options: -e, -f, -p, -T0 | -T1
 	 */
-	public static final String OPTIONS_SPECS = "b:e b:f b:p";
+	public static final String OPTIONS_SPECS = "b:e b:f b:p b:T0 b:T1";
 
 	/**
 	 * If true, indicates values are in hex format.
@@ -39,6 +39,18 @@ public class SetFileAttributesOptions extends Options {
 	 * Corresponds to -p.
 	 */
 	protected boolean propagateAttributes = false;
+
+	/**
+	 * If true, saves the mentioned attribute's to db.traits
+	 * Corresponds to -T0
+	 * */
+	protected boolean storageDbTraits = false;
+
+	/**
+	 * If true, saves the mentioned attribute's to traits depot
+	 * Corresponds to -T1
+	 * */
+	protected boolean storageTraitsDepot = false;
 
 	/**
 	 * Default constructor.
@@ -88,7 +100,7 @@ public class SetFileAttributesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.isHexValue(), this.isSetOnSubmittedFiles(), this.isPropagateAttributes());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isHexValue(), this.isSetOnSubmittedFiles(), this.isPropagateAttributes(), this.isStorageDbTraits(), this.isStorageTraitsDepot());
 
 		return this.optionList;
 	}
@@ -117,6 +129,24 @@ public class SetFileAttributesOptions extends Options {
 
 	public SetFileAttributesOptions setPropagateAttributes(boolean propagateAttributes) {
 		this.propagateAttributes = propagateAttributes;
+		return this;
+	}
+
+	public boolean isStorageDbTraits() {
+		return storageDbTraits;
+	}
+
+	public SetFileAttributesOptions setStorageDbTraits(boolean storageDbTraits) {
+		this.storageDbTraits = storageDbTraits;
+		return this;
+	}
+
+	public boolean isStorageTraitsDepot() {
+		return storageTraitsDepot;
+	}
+
+	public SetFileAttributesOptions setStorageTraitsDepot(boolean storageTraitsDepot) {
+		this.storageTraitsDepot = storageTraitsDepot;
 		return this;
 	}
 }

@@ -17,9 +17,9 @@ import java.util.List;
 public class GetStreamsOptions extends Options {
 
 	/**
-	 * Options: -U -F["filter"], -T["fields"], -m[max]
+	 * Options: -U, -F["filter"], -T["fields"], -m[max], --viewmatch
 	 */
-	public static final String OPTIONS_SPECS = "b:U s:F s:T i:m:gtz";
+	public static final String OPTIONS_SPECS = "b:U s:F s:T i:m:gtz b:-viewmatch";
 
 	/**
 	 * If true, lists unloaded task streams (see 'p4 help unload').
@@ -51,6 +51,13 @@ public class GetStreamsOptions extends Options {
 	 * number of branches. Corresponds to -m flag.
 	 */
 	protected int maxResults = 0;
+
+	/**
+	 *  If true, Returns the stream name, depot path, and stream view path of the streams that
+	 *  have views containing the given depot files.
+	 *  Corresponds to --viewmatch flag.
+	 */
+	protected boolean viewmatch = false;
 
 	/**
 	 * Default constructor.
@@ -100,7 +107,7 @@ public class GetStreamsOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.isUnloaded(), this.getFilter(), this.getFields(), this.getMaxResults());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isUnloaded(), this.getFilter(), this.getFields(), this.getMaxResults(), this.isViewmatch());
 		return this.optionList;
 	}
 
@@ -137,6 +144,15 @@ public class GetStreamsOptions extends Options {
 
 	public GetStreamsOptions setMaxResults(int maxResults) {
 		this.maxResults = maxResults;
+		return this;
+	}
+
+	public boolean isViewmatch() {
+		return viewmatch;
+	}
+
+	public GetStreamsOptions setViewmatch(boolean viewmatch) {
+		this.viewmatch = viewmatch;
 		return this;
 	}
 }

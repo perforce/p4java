@@ -5,6 +5,8 @@ import com.perforce.p4java.core.file.IExtendedFileSpec;
 import com.perforce.p4java.core.file.IFileSpec;
 import com.perforce.p4java.exception.AccessException;
 import com.perforce.p4java.exception.ConnectionException;
+import com.perforce.p4java.exception.LowResourceException;
+import com.perforce.p4java.exception.PauseTimeException;
 import com.perforce.p4java.exception.RequestException;
 import com.perforce.p4java.impl.generic.core.file.ExtendedFileSpec;
 import com.perforce.p4java.impl.generic.core.file.FileSpec;
@@ -80,6 +82,14 @@ public abstract class ResultMapParser {
 	 * Array of access error messages.
 	 */
 	private static final String[] ACCESS_ERR_MSGS = {CORE_AUTH_FAIL_STRING_1, CORE_AUTH_FAIL_STRING_2, CORE_AUTH_FAIL_STRING_3, CORE_AUTH_FAIL_STRING_4, AUTH_FAIL_STRING_1, AUTH_FAIL_STRING_2};
+	/**
+	 * Server low on resources error
+	 */
+	private static final String SERVER_LOW_ON_RESOURCES = "Server low on resources";
+	/**
+	 * Resources waited too long
+	 */
+	private static final String WAITED_TOO_LONG = "Waited too long";
 
 	/**
 	 * Parses the command result map to return a String of info messages. The
@@ -142,6 +152,10 @@ public abstract class ResultMapParser {
 		if (isNotBlank(errStr)) {
 			if (isAuthFail(errStr)) {
 				throw new AccessException(errStr);
+			} else if (errStr.contains(SERVER_LOW_ON_RESOURCES)) {
+				throw new LowResourceException(errStr, parseCode0ErrorString(map));
+			} else if (errStr.contains(WAITED_TOO_LONG)) {
+				throw new PauseTimeException(errStr, parseCode0ErrorString(map));
 			} else {
 				throw new RequestException(errStr, parseCode0ErrorString(map));
 			}
@@ -350,6 +364,10 @@ public abstract class ResultMapParser {
 		if (isNotBlank(errStr)) {
 			if (isAuthFail(errStr)) {
 				throw new AccessException(errStr);
+			} else if (errStr.contains(SERVER_LOW_ON_RESOURCES)) {
+				throw new LowResourceException(errStr, parseCode0ErrorString(map));
+			} else if (errStr.contains(WAITED_TOO_LONG)) {
+				throw new PauseTimeException(errStr, parseCode0ErrorString(map));
 			} else {
 				throw new RequestException(errStr, parseCode0ErrorString(map));
 			}

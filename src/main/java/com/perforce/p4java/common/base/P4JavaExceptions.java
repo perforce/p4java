@@ -4,11 +4,13 @@ import com.perforce.p4java.common.function.Function;
 import com.perforce.p4java.common.function.FunctionWithException;
 import com.perforce.p4java.exception.AccessException;
 import com.perforce.p4java.exception.ConnectionException;
+import com.perforce.p4java.exception.LowResourceException;
 import com.perforce.p4java.exception.MessageGenericCode;
 import com.perforce.p4java.exception.MessageSeverityCode;
 import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.exception.P4JavaError;
 import com.perforce.p4java.exception.P4JavaException;
+import com.perforce.p4java.exception.PauseTimeException;
 import com.perforce.p4java.exception.ProtocolError;
 import com.perforce.p4java.exception.RequestException;
 
@@ -212,7 +214,12 @@ public final class P4JavaExceptions {
 				try {
 					return function.apply(t);
 				} catch (P4JavaException e) {
-					throw new RequestException(e);
+                    if(e instanceof LowResourceException) {
+						throw new LowResourceException(e);
+					} else if(e instanceof PauseTimeException) {
+						throw new PauseTimeException(e);
+					} else
+						throw new RequestException(e);
 				}
 			}
 		};

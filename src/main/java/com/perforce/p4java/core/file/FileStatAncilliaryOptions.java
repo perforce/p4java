@@ -23,6 +23,7 @@ public class FileStatAncilliaryOptions {
 	private boolean excludeLocalPath = false;        // -Os
 	private boolean showAttributes = false;            // -Oa
 	private boolean showHexAttributes = false;        // -Oae
+	private boolean showStorageLocation = false;      // -On
 
 	public FileStatAncilliaryOptions() {
 	}
@@ -62,6 +63,9 @@ public class FileStatAncilliaryOptions {
 			retVal.add("-Oae");
 		} else if (this.isShowAttributes()) {
 			retVal.add("-Oa");
+		}
+		if(this.isShowStorageLocation()) {
+			retVal.add("-On");
 		}
 
 		return retVal;
@@ -138,4 +142,8 @@ public class FileStatAncilliaryOptions {
 	public void setShowHexAttributes(boolean showHexAttributes) {
 		this.showHexAttributes = showHexAttributes;
 	}
+
+	public boolean isShowStorageLocation() { return showStorageLocation; }
+
+	public void setShowStorageLocation(boolean showStorageLocation) { this.showStorageLocation = showStorageLocation; }
 }
