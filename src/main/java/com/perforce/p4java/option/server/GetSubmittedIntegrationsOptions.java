@@ -18,7 +18,7 @@ public class GetSubmittedIntegrationsOptions extends Options {
 	/**
 	 * Options: -b[branch], -r
 	 */
-	public static final String OPTIONS_SPECS = "s:b b:r";
+	public static final String OPTIONS_SPECS = "s:b b:r i:m:gtz";
 
 	/**
 	 * If not null, only files integrated from the
@@ -33,6 +33,13 @@ public class GetSubmittedIntegrationsOptions extends Options {
 	 * Corresponds to -r.
 	 */
 	protected boolean reverseMappings = false;
+
+	/**
+	 * Lists only the max most recent integrations. The output is sorted by descending change number.
+	 * This option cannot be used with -s option.
+	 * Corresponds to -m
+	 */
+	protected int maxFiles = 0;
 
 	/**
 	 * Default constructor.
@@ -80,7 +87,7 @@ public class GetSubmittedIntegrationsOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.getBranchSpec(), this.isReverseMappings());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.getBranchSpec(), this.isReverseMappings(), this.getMaxFiles());
 
 		return this.optionList;
 	}
@@ -101,5 +108,13 @@ public class GetSubmittedIntegrationsOptions extends Options {
 	public GetSubmittedIntegrationsOptions setReverseMappings(boolean reverseMappings) {
 		this.reverseMappings = reverseMappings;
 		return this;
+	}
+
+	public int getMaxFiles() {
+		return maxFiles;
+	}
+
+	public void setMaxFiles(int maxFiles) {
+		this.maxFiles = maxFiles;
 	}
 }

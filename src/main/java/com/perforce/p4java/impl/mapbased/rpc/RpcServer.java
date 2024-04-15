@@ -222,6 +222,8 @@ public abstract class RpcServer extends Server {
 	 */
 	public static final String RPC_TMP_OUTFILE_STREAM_KEY = "";
 
+    public static final String RPC_BYTE_BUFFER_OUTPUT_KEY = "";
+
 	/**
 	 * Use to key converter to use out of state map
 	 */

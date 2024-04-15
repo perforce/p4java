@@ -30,6 +30,7 @@ import com.perforce.p4java.impl.mapbased.rpc.handles.ClientFile;
 import com.perforce.p4java.impl.mapbased.rpc.msg.RpcMessage;
 import com.perforce.p4java.impl.mapbased.rpc.packet.RpcPacket;
 import com.perforce.p4java.impl.mapbased.rpc.packet.RpcPacketDispatcher.RpcPacketDispatcherResult;
+import com.perforce.p4java.impl.mapbased.rpc.sys.RpcByteBufferOutput;
 import com.perforce.p4java.impl.mapbased.rpc.sys.RpcOutputStream;
 import com.perforce.p4java.impl.mapbased.rpc.sys.RpcPerforceDigestType;
 import com.perforce.p4java.impl.mapbased.rpc.sys.RpcPerforceFile;
@@ -585,7 +586,52 @@ public class ClientSystemFileCommands {
 		}
 	}
 
+	private void writeToStream(byte[] sourceBytes, int start, int length, RpcByteBufferOutput stream) throws IOException {
+		int remainingBytes = stream.getCapacity() - stream.getPosition();
+		if( remainingBytes < length ) {
+			length = remainingBytes;
+		}
+		if (ClientLineEnding.CONVERT_TEXT) {
+			for (int i = start; i < length; i++) {
+				if (sourceBytes[i] == ClientLineEnding.FST_L_LF_BYTES[0]) {
+					stream.write(ClientLineEnding.FST_L_LOCAL_BYTES);
+				} else {
+					stream.write(sourceBytes[i]);
+				}
+			}
+		} else {
+			stream.write(sourceBytes, start, length);
+		}
+	}
+
 	private void translate(byte[] sourceBytes, CharsetConverter converter, int length, OutputStream stream) throws IOException, FileDecoderException, FileEncoderException {
+		int start = 0;
+
+		if (ClientLineEnding.CONVERT_TEXT) {
+			ByteArrayOutputStream converted = new ByteArrayOutputStream();
+			writeToStream(sourceBytes, start, length, converted);
+			sourceBytes = converted.toByteArray();
+			start = 0;
+			length = sourceBytes.length;
+		}
+
+		ByteBuffer from = ByteBuffer.wrap(sourceBytes);
+		if (length > 0) {
+			ByteBuffer converted = converter.convert(from);
+			if (converted != null) {
+				// Update byte array for converted buffer values
+				sourceBytes = converted.array();
+				start = converted.position();
+				length = converted.limit();
+			}
+		}
+
+		if (length > 0) {
+			stream.write(sourceBytes, start, length);
+		}
+	}
+
+	private void translate(byte[] sourceBytes, CharsetConverter converter, int length, RpcByteBufferOutput stream) throws IOException, FileDecoderException, FileEncoderException {
 		int start = 0;
 
 		if (ClientLineEnding.CONVERT_TEXT) {
@@ -661,44 +707,48 @@ public class ClientSystemFileCommands {
 
 		Map<String, Object> stateMap = cmdEnv.getStateMap();
 
-		RpcOutputStream outStream = getTempOutputStream(cmdEnv);
-
-		if (outStream == null) {
-			throw new NullPointerError("Null output stream in writeText state map");
-		}
-
 		try {
-			if ((outStream.getFD() != null) && outStream.getFD().valid()) {
-				byte[] sourceBytes = (byte[]) resultsMap.get(RpcFunctionMapKey.DATA);
-				int len = sourceBytes.length;
-				int start = 0;
+			byte[] sourceBytes = (byte[]) resultsMap.get(RpcFunctionMapKey.DATA);
+			int len = sourceBytes.length;
+			int start = 0;
 
-				// Check for trans being null here as it was already checked to
-				// be either null or 'no' so null here signifies it is not 'no'.
-				if (trans == null) {
-					CharsetConverter converter = (CharsetConverter) stateMap.get(RpcServer.RPC_TMP_CONVERTER_KEY);
-					if (converter == null) {
-						Charset charset = rpcConnection.getClientCharset();
+			CharsetConverter converter = null;
+			// Check for trans being null here as it was already checked to
+			// be either null or 'no' so null here signifies it is not 'no'.
+			if (trans == null) {
+				converter = (CharsetConverter) stateMap.get(RpcServer.RPC_TMP_CONVERTER_KEY);
+				if (converter == null) {
+					Charset charset = rpcConnection.getClientCharset();
 
-						// Look inside results map vector to see if file is
-						// utf-16 since the previous fstat into message will
-						// set it if necessary
-						for (Map<String, Object> map : cmdEnv.getResultMaps()) {
-							if (map.containsKey(MapKeys.TYPE_LC_KEY)) {
-								String type = map.get(MapKeys.TYPE_LC_KEY).toString();
-								if (MapKeys.UTF16_LC_KEY.equals(type)) {
-									charset = CharsetDefs.UTF16;
-									break;
-								}
+					// Look inside results map vector to see if file is
+					// utf-16 since the previous fstat into message will
+					// set it if necessary
+					for (Map<String, Object> map : cmdEnv.getResultMaps()) {
+						if (map.containsKey(MapKeys.TYPE_LC_KEY)) {
+							String type = map.get(MapKeys.TYPE_LC_KEY).toString();
+							if (MapKeys.UTF16_LC_KEY.equals(type)) {
+								charset = CharsetDefs.UTF16;
+								break;
 							}
 						}
-
-						// Convert if client charset is not UTF-8
-						if (charset != CharsetDefs.UTF8) {
-							converter = new CharsetConverter(CharsetDefs.UTF8, charset);
-							stateMap.put(RpcServer.RPC_TMP_CONVERTER_KEY, converter);
-						}
 					}
+
+					// Convert if client charset is not UTF-8
+					if (charset != CharsetDefs.UTF8) {
+						converter = new CharsetConverter(CharsetDefs.UTF8, charset);
+						stateMap.put(RpcServer.RPC_TMP_CONVERTER_KEY, converter);
+					}
+				}
+			}
+
+			if(cmdEnv.isBufferOutput()) {
+				RpcByteBufferOutput outStream = getBufferOutputStream(cmdEnv);
+
+				if (outStream == null) {
+					throw new NullPointerError("Null byte buffer output stream in writeText state map");
+				}
+
+				if (trans == null) {
 					if (converter != null) {
 						translate(sourceBytes, converter, len, outStream);
 					} else {
@@ -707,19 +757,32 @@ public class ClientSystemFileCommands {
 				} else if (len > 0) {
 					writeToStream(sourceBytes, start, len, outStream);
 				}
-			} else {
-				Log.error("output stream unexpectedly closed in writeText");
-				handler.setError(true);
 			}
-		} catch (IOException ioexc) {
+			else {
+				RpcOutputStream outStream = getTempOutputStream(cmdEnv);
+
+				if (outStream == null) {
+					throw new NullPointerError("Null output stream in writeText state map");
+				}
+
+				if ((outStream.getFD() != null) && outStream.getFD().valid()) {
+					if (trans == null) {
+						if (converter != null) {
+							translate(sourceBytes, converter, len, outStream);
+						} else {
+							writeToStream(sourceBytes, start, len, outStream);
+						}
+					} else if (len > 0) {
+						writeToStream(sourceBytes, start, len, outStream);
+					}
+				} else {
+					Log.error("output stream unexpectedly closed in writeText");
+					handler.setError(true);
+				}
+			}
+		} catch (IOException | FileDecoderException | FileEncoderException ioexc) {
 			handler.setError(true);
 			cmdEnv.getResultMaps().add(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", ioexc.getLocalizedMessage()}).toMap());
-		} catch (FileDecoderException e) {
-			handler.setError(true);
-			cmdEnv.getResultMaps().add(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", e.getLocalizedMessage()}).toMap());
-		} catch (FileEncoderException e) {
-			handler.setError(true);
-			cmdEnv.getResultMaps().add(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", e.getLocalizedMessage()}).toMap());
 		}
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
@@ -766,28 +829,32 @@ public class ClientSystemFileCommands {
 		@SuppressWarnings("unused") // used for debugging
 		Map<String, Object> stateMap = cmdEnv.getStateMap();
 
-		RpcOutputStream outStream = getTempOutputStream(cmdEnv);
-
-		if (outStream == null) {
-			throw new NullPointerError("Null output stream in writeText state map");
-		}
-
 		try {
-			if ((outStream.getFD() != null) && outStream.getFD().valid()) {
-				outStream.write(resultsMap);
+			if (cmdEnv.isBufferOutput()) {
+				RpcByteBufferOutput outBuffer = getBufferOutputStream(cmdEnv);
+
+				if (outBuffer == null) {
+					throw new NullPointerError("Null byte buffer output stream in writeText state map");
+				}
+
+				outBuffer.write(resultsMap);
 			} else {
-				Log.error("output stream unexpectedly closed in writeBinary");
-				handler.setError(true);
+				RpcOutputStream outStream = getTempOutputStream(cmdEnv);
+
+				if (outStream == null) {
+					throw new NullPointerError("Null output stream in writeText state map");
+				}
+
+				if ((outStream.getFD() != null) && outStream.getFD().valid()) {
+					outStream.write(resultsMap);
+				} else {
+					Log.error("output stream unexpectedly closed in writeBinary");
+					handler.setError(true);
+				}
 			}
-		} catch (IOException ioexc) {
+		} catch (IOException | FileDecoderException | FileEncoderException ioexc) {
 			handler.setError(true);
 			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", ioexc.getLocalizedMessage()}).toMap());
-		} catch (FileDecoderException e) {
-			handler.setError(true);
-			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", e.getLocalizedMessage()}).toMap());
-		} catch (FileEncoderException e) {
-			handler.setError(true);
-			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_WRITE_ERROR, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"tmp file", e.getLocalizedMessage()}).toMap());
 		}
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
@@ -1807,6 +1874,45 @@ public class ClientSystemFileCommands {
 					Log.error("tmp file creation error: " + ioexc.getLocalizedMessage());
 					Log.exception(ioexc);
 					throw new ConnectionException("Unable to create temporary file for Perforce file retrieval; " + "reason: " + ioexc.getLocalizedMessage(), ioexc);
+				}
+			}
+		}
+
+		return outStream;
+	}
+
+	/**
+	 * Return the temp RPC Byte Buffer output. If it doesn't exist, try to create a
+	 * new one only if the command is run from a "streamCmd" method or tracking
+	 * is enabled.
+	 *
+	 * @param cmdEnv cmdEnv
+	 * @return RpcByteBufferOutput
+	 * @throws ConnectionException on error
+	 */
+	public RpcByteBufferOutput getBufferOutputStream(CommandEnv cmdEnv) throws ConnectionException {
+		if (cmdEnv == null) {
+			throw new NullPointerError("Null command env in ClientSystemFileCommands.getBufferOutputStream()");
+		}
+		if (cmdEnv.getStateMap() == null) {
+			throw new NullPointerError("Null command env state map in ClientSystemFileCommands.getBufferOutputStream()");
+		}
+		if (cmdEnv.getProtocolSpecs() == null) {
+			throw new NullPointerError("Null command env protocol specs in ClientSystemFileCommands.getBufferOutputStream()");
+		}
+
+		RpcByteBufferOutput outStream = (RpcByteBufferOutput) cmdEnv.getStateMap().get(RpcServer.RPC_BYTE_BUFFER_OUTPUT_KEY);
+
+		if (outStream == null) {
+			if (cmdEnv.isStreamCmd() || cmdEnv.getProtocolSpecs().isEnableTracking()) {
+				try {
+					outStream = RpcByteBufferOutput.getBufferOutputStream(cmdEnv.getCmdSpec().getCmdArgs());
+					// Set the new temp RPC byte buffer output stream to the command env state map
+					cmdEnv.getStateMap().put(RpcServer.RPC_BYTE_BUFFER_OUTPUT_KEY, outStream);
+				} catch (IOException ioexc) {
+					Log.error("byte buffer creation error: " + ioexc.getLocalizedMessage());
+					Log.exception(ioexc);
+					throw new ConnectionException("Unable to create Byte Buffer; " + " reason: " + ioexc.getLocalizedMessage(), ioexc);
 				}
 			}
 		}

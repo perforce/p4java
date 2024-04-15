@@ -8,6 +8,7 @@ import com.perforce.p4java.exception.RequestException;
 import com.perforce.p4java.option.server.GetFileContentsOptions;
 
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 /**
@@ -50,4 +51,26 @@ public interface IPrintDelegator {
 	InputStream getFileContents(
 			List<IFileSpec> fileSpecs,
 			GetFileContentsOptions opts) throws P4JavaException;
+
+	/**
+	 * Saves the value of a ByteBuffer onto the contents of one or more Perforce depot
+	 * file contents.
+	 * <p>
+	 * If file is specified as a Perforce client workspace file name, the client view is used to find
+	 * the corresponding depot file.
+	 * <p>
+	 * Note that unlike the corresponding command-line command, which keeps going in the face of
+	 * errors by moving on to the next file (or whatever), any errors encountered in this method will
+	 * cause an exception from this method at the first error, so plan accordingly....
+	 *
+	 * @param byteBufferContent Fills with content of the fileSpecs into a ByteBuffer
+	 * @param fileSpecs non-null list of depot or client file specs defining files to be streamed
+	 * @param opts      GetFileContentsOptions object describing optional parameters; if null, no
+	 *                  options are set.
+	 * @throws P4JavaException if any error occurs in the processing of this method.
+	 */
+	void getFileContents(
+			ByteBuffer byteBufferContent,
+			List<IFileSpec> fileSpecs,
+			GetFileContentsOptions opts) throws Exception;
 }

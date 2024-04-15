@@ -18,6 +18,7 @@ import com.perforce.p4java.option.server.SwitchClientViewOptions;
 import com.perforce.p4java.option.server.UpdateClientOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IClientDelegator;
+import org.apache.commons.lang3.RegExUtils;
 import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
@@ -343,7 +344,7 @@ public class ClientDelegator extends BaseDelegator implements IClientDelegator {
 		final String TABS = "\t";
 		String name = newClient.getName();
 		if (containsAny(name, SPACE, TABS)) {
-			String newClientName = replacePattern(name, "\\s", "_");
+			String newClientName = RegExUtils.replacePattern(name, "\\s", "_");
 			newClient.setName(newClientName);
 		}
 	}

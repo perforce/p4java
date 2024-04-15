@@ -23,9 +23,9 @@ import java.util.List;
 public class OpenedFilesOptions extends Options {
 
 	/**
-	 * Options: -a, -c[changelist], -C[client], -u[user], -m[max], -s
+	 * Options: -a, -c[changelist], -C[client], -u[user], -m[max], -s, -x, -g
 	 */
-	public static final String OPTIONS_SPECS = "b:a i:c:cl s:C s:u i:m:gtz b:s";
+	public static final String OPTIONS_SPECS = "b:a i:c:cl s:C s:u i:m:gtz b:s b:x b:g";
 
 	/**
 	 * If true, list opened files in all clients.
@@ -61,6 +61,19 @@ public class OpenedFilesOptions extends Options {
 	 * '-a' can take a long time when compared to '-a -s' options.
 	 */
 	protected boolean shortOutput = false;
+
+	/**
+	 * In multi-server environments, list all open files that have the +l filetype (exclusive open) over all servers.
+	 * This option implies the -a option. Similar to -x option
+	 */
+	protected boolean exclusiveOpened = false;
+
+	/**
+	 * List files that are opened on the commit server in a multi-server installation.
+	 * This allows a user on an edge server to track files that might be locked globally on the commit server.
+	 * Similar to -g option
+	 */
+	protected boolean openedOnCommitServer = false;
 
 	/**
 	 * Default constructor.
@@ -114,7 +127,8 @@ public class OpenedFilesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.allClients, this.changelistId, this.clientName, this.userName, this.maxFiles, this.shortOutput);
+		this.optionList = this.processFields(OPTIONS_SPECS, this.allClients, this.changelistId, this.clientName,
+				this.userName, this.maxFiles, this.shortOutput, this.isExclusiveOpened(),this.isOpenedOnCommitServer());
 		return this.optionList;
 	}
 
@@ -169,6 +183,24 @@ public class OpenedFilesOptions extends Options {
 
 	public OpenedFilesOptions setShortOutput(boolean shortOutput) {
 		this.shortOutput = shortOutput;
+		return this;
+	}
+
+	public boolean isExclusiveOpened() {
+		return exclusiveOpened;
+	}
+
+	public OpenedFilesOptions setExclusiveOpened(boolean exclusiveOpened) {
+		this.exclusiveOpened = exclusiveOpened;
+		return this;
+	}
+
+	public boolean isOpenedOnCommitServer() {
+		return openedOnCommitServer;
+	}
+
+	public OpenedFilesOptions setOpenedOnCommitServer(boolean openedOnCommitServer) {
+		this.openedOnCommitServer = openedOnCommitServer;
 		return this;
 	}
 }

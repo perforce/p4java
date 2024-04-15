@@ -122,7 +122,29 @@ Known Limitations
 	  <java-home>/lib/security/US_export_policy.jar
 	  
 	* P4Java would not support file operations on altsync enabled clients.
-	
+
+
+-------------------------------------------
+Updates in 2023.2 Patch 1 (2023.2/2581742) (2024/04/05)
+
+	#2578705 (Job #113772)
+	    Added support for "p4 renameclient" command.
+
+	#2578400 (Job #113890)
+	    Added support for "p4 opened -x" and "p4 opened -g" options.
+
+	#2551449, #2549979 (Job #118024)
+	    Added support for "p4 license -L" option.
+
+	#2577562 (Job #115953)
+	    Added support for "p4 sizes -c" option.
+
+	#2576245 (Job #115954)
+	    Added support for "p4 integrated -m" option.
+
+	#2558625 (Job #117352)
+	    Enhanced p4 print to return data in a byte buffer instead of creating a temp file.
+
 -------------------------------------------
 Updates in 2023.2 (2023.2/2542382) (2024/01/16)
 

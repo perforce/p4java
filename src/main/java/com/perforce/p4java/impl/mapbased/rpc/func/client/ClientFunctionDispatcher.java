@@ -17,6 +17,7 @@ import com.perforce.p4java.impl.mapbased.rpc.msg.RpcMessage;
 import com.perforce.p4java.impl.mapbased.rpc.packet.RpcPacketDispatcher;
 import com.perforce.p4java.impl.mapbased.rpc.packet.RpcPacketDispatcher.RpcPacketDispatcherMode;
 import com.perforce.p4java.impl.mapbased.rpc.packet.RpcPacketDispatcher.RpcPacketDispatcherResult;
+import com.perforce.p4java.impl.mapbased.rpc.sys.RpcByteBufferOutput;
 import com.perforce.p4java.impl.mapbased.rpc.sys.RpcOutputStream;
 import com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser;
 import com.perforce.p4java.server.CmdSpec;
@@ -136,18 +137,36 @@ public class ClientFunctionDispatcher {
 					}
 				} else if (cmdEnv.getCmdSpec().getCmdName().equalsIgnoreCase(CmdSpec.DIFF2.toString()) || cmdEnv.getCmdSpec().getCmdName().equalsIgnoreCase(CmdSpec.DESCRIBE.toString()) || cmdEnv.getCmdSpec().getCmdName().equalsIgnoreCase(CmdSpec.PRINT.toString())) {
 					String infoMsg = ResultMapParser.getErrorOrInfoStr(resultsMap);
-					if (infoMsg != null) {
-						RpcOutputStream outStream = this.fileCommands.getTempOutputStream(cmdEnv);
-						if (outStream != null) {
-							String charsetName = (rpcConnection.getClientCharset() == null ? CharsetDefs.DEFAULT_NAME : rpcConnection.getClientCharset().name());
-							try {
-								infoMsg += CommandEnv.LINE_SEPARATOR;
-								if (cmdEnv.getCmdSpec().getCmdName().equalsIgnoreCase(CmdSpec.DESCRIBE.toString())) {
-									outStream.write("... ".getBytes(charsetName));
+
+					if(infoMsg != null) {
+						if (cmdEnv.isBufferOutput()) {
+							RpcByteBufferOutput outStream = this.fileCommands.getBufferOutputStream(cmdEnv);
+							if (outStream != null && outStream.getByteBuffer() != null) {
+								String charsetName = (rpcConnection.getClientCharset() == null ? CharsetDefs.DEFAULT_NAME : rpcConnection.getClientCharset().name());
+								try {
+									infoMsg += CommandEnv.LINE_SEPARATOR;
+									if (cmdEnv.getCmdSpec().getCmdName().equalsIgnoreCase(CmdSpec.DESCRIBE.toString())) {
+										outStream.write("... ".getBytes(charsetName));
+									}
+									outStream.write(infoMsg.getBytes(charsetName));
+								} catch (IOException ioexc) {
+									Log.warn("Unexpected exception in client function dispatch: " + ioexc.getLocalizedMessage());
 								}
-								outStream.write(infoMsg.getBytes(charsetName));
-							} catch (IOException ioexc) {
-								Log.warn("Unexpected exception in client function dispatch: " + ioexc.getLocalizedMessage());
+							}
+						}
+						else {
+							RpcOutputStream outStream = this.fileCommands.getTempOutputStream(cmdEnv);
+							if (outStream != null) {
+								String charsetName = (rpcConnection.getClientCharset() == null ? CharsetDefs.DEFAULT_NAME : rpcConnection.getClientCharset().name());
+								try {
+									infoMsg += CommandEnv.LINE_SEPARATOR;
+									if (cmdEnv.getCmdSpec().getCmdName().equalsIgnoreCase(CmdSpec.DESCRIBE.toString())) {
+										outStream.write("... ".getBytes(charsetName));
+									}
+									outStream.write(infoMsg.getBytes(charsetName));
+								} catch (IOException ioexc) {
+									Log.warn("Unexpected exception in client function dispatch: " + ioexc.getLocalizedMessage());
+								}
 							}
 						}
 					}

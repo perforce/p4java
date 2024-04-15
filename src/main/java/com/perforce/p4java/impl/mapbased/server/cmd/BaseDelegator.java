@@ -17,6 +17,7 @@ import org.apache.commons.lang3.Validate;
 
 import javax.annotation.Nonnull;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
@@ -106,6 +107,20 @@ public abstract class BaseDelegator {
 	InputStream execStreamCmd(final CmdSpec cmdSpec, String[] cmdArgs) throws ConnectionException, RequestException, AccessException {
 		Validate.notNull(cmdSpec);
 		return server.execStreamCmd(cmdSpec.toString(), cmdArgs);
+	}
+
+	/**
+	 * Run the given streaming command against the real server method.
+	 *
+	 * @param cmdSpec The command being run; e.g. VERIFY
+	 * @param cmdArgs The parameters transformed into an array of arguments
+	 * @return the byte buffer returned by the server command
+	 * @throws ConnectionException When there is a problem connecting to the server
+	 * @throws AccessException     When privileges are insufficient to run the command
+	 */
+	ByteBuffer execStreamCmdForBuffer(final CmdSpec cmdSpec, String[] cmdArgs) throws ConnectionException, RequestException, AccessException {
+		Validate.notNull(cmdSpec);
+		return server.execStreamCmdForBuffer(cmdSpec.toString(), cmdArgs);
 	}
 
 	void checkMinSupportedPerforceVersion(final String userName, final int maxLimit, final String queryString, final String clientOrLabel) throws RequestException, ConnectionException {

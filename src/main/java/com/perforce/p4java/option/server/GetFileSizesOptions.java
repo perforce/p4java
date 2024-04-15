@@ -24,7 +24,7 @@ public class GetFileSizesOptions extends Options {
 	 * 		-U
 	 * </pre>
 	 */
-	public static final String OPTIONS_SPECS = "b:a b:S b:A b:U b:s b:z l:b:gtz i:m:gtz";
+	public static final String OPTIONS_SPECS = "b:a b:S b:A b:U b:s b:z l:b:gtz i:m:gtz b:C";
 
 	/**
 	 * If true, lists all revisions within the specific range, rather than just
@@ -75,6 +75,8 @@ public class GetFileSizesOptions extends Options {
 	 */
 	protected int maxFiles = 0;
 
+	protected boolean clientExpectedSize;
+
 	/**
 	 * Default constructor.
 	 */
@@ -108,7 +110,7 @@ public class GetFileSizesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.isAllRevisions(), this.isShelvedFiles(), this.isArchivedFiles(), this.isUnloadedFiles(), this.isSumFileSizes(), this.isOmitLazyCopies(), this.getBlockSize(), this.getMaxFiles());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isAllRevisions(), this.isShelvedFiles(), this.isArchivedFiles(), this.isUnloadedFiles(), this.isSumFileSizes(), this.isOmitLazyCopies(), this.getBlockSize(), this.getMaxFiles(), this.isClientExpectedSize());
 		return this.optionList;
 	}
 
@@ -182,5 +184,13 @@ public class GetFileSizesOptions extends Options {
 	public GetFileSizesOptions setMaxFiles(int maxFiles) {
 		this.maxFiles = maxFiles;
 		return this;
+	}
+
+	public boolean isClientExpectedSize() {
+		return clientExpectedSize;
+	}
+
+	public void setClientExpectedSize(boolean clientExpectedSize) {
+		this.clientExpectedSize = clientExpectedSize;
 	}
 }

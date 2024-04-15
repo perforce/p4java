@@ -152,6 +152,7 @@ public class RpcFunction {
 
 			// ---------- UNSORTED
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_RENAMEUSER, RpcFunctionType.USER, "user-renameuser"),
+			new RpcFunctionMetadata(RpcFunctionSpec.USER_RENAMECLIENT, RpcFunctionType.USER, "user-renameclient"),
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_SPECIFIED, RpcFunctionType.USER, "user-specified"),
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_LOGIN, RpcFunctionType.USER, "user-login"),
 			new RpcFunctionMetadata(RpcFunctionSpec.USER_LOGIN2, RpcFunctionType.USER, "user-login2"),

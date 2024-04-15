@@ -23,6 +23,7 @@ import com.perforce.p4java.impl.mapbased.rpc.packet.RpcPacketDispatcher;
 import com.perforce.p4java.impl.mapbased.rpc.stream.RpcSocketPool;
 import com.perforce.p4java.impl.mapbased.rpc.stream.RpcSocketPool.ShutdownHandler;
 import com.perforce.p4java.impl.mapbased.rpc.stream.RpcStreamConnection;
+import com.perforce.p4java.impl.mapbased.rpc.sys.RpcByteBufferOutput;
 import com.perforce.p4java.impl.mapbased.rpc.sys.RpcOutputStream;
 import com.perforce.p4java.impl.mapbased.server.ServerAddressBuilder;
 import com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser;
@@ -39,6 +40,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.nio.BufferOverflowException;
+import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -386,6 +388,11 @@ public class OneShotServerImpl extends RpcServer {
 		return this.execStreamCmd(cmdName, cmdArgs, null, null, false);
 	}
 
+	@Override
+	public ByteBuffer execStreamCmdForBuffer(String cmdName, String[] cmdArgs) throws ConnectionException, RequestException, AccessException {
+		return this.execStreamCmdForBuffer(cmdName, cmdArgs, null, null, false);
+	}
+
 	/**
 	 * @see com.perforce.p4java.impl.mapbased.server.Server#execStreamCmd(String, String[], Map)
 	 */
@@ -480,6 +487,86 @@ public class OneShotServerImpl extends RpcServer {
 			Log.error("RPC I/O error: " + ioexc.getLocalizedMessage());
 			Log.exception(ioexc);
 			throw new RequestException("I/O error encountered in stream command: " + ioexc.getLocalizedMessage(), ioexc);
+		} finally {
+			if (rpcConnection != null) {
+				rpcConnection.disconnect(dispatcher);
+			}
+		}
+	}
+
+	/**
+	 * Note that this method does the access / request exception processing here rather
+	 * than passing things up the stack; we may introduce an extended version of this
+	 * method to take the map array as an output parameter in later releases.
+	 *
+	 * @param cmdName         cmdName
+	 * @param cmdArgs         cmdArgs
+	 * @param inMap           inMap
+	 * @param inString        inString
+	 * @param ignoreCallbacks ignoreCallbacks
+	 * @return bytebuffer
+	 * @throws ConnectionException on error
+	 * @throws RequestException    on error
+	 * @throws AccessException     on error
+	 */
+	protected ByteBuffer execStreamCmdForBuffer(String cmdName, String[] cmdArgs, Map<String, Object> inMap, String inString, boolean ignoreCallbacks) throws ConnectionException, RequestException, AccessException {
+	  	RpcPacketDispatcher dispatcher = null;
+		RpcConnection rpcConnection = null;
+		if (cmdName == null) {
+			throw new NullPointerError("Null command name passed to execStreamCmdForBuffer");
+		}
+
+		if (!this.connected) {
+			throw new ConnectionNotConnectedException("Not currently connected to a Perforce server");
+		}
+
+		try {
+			int cmdCallBackKey = this.nextCmdCallBackKey.incrementAndGet();
+			long startTime = System.currentTimeMillis();
+			dispatcher = new RpcPacketDispatcher(props, this);
+			rpcConnection = new RpcStreamConnection(serverHost, serverPort, props, this.serverStats, this.p4Charset, null, this.socketPool, this.secure, this.rsh);
+			ProtocolCommand protocolSpecs = new ProtocolCommand();
+			if (inMap != null && ClientLineEnding.CONVERT_TEXT) {
+				ClientLineEnding.convertMap(inMap);
+			}
+			ExternalEnv env = setupCmd(dispatcher, rpcConnection, protocolSpecs, cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, inMap, ignoreCallbacks, cmdCallBackKey, true);
+			CommandEnv cmdEnv = new CommandEnv(this, new RpcCmdSpec(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, getAuthTicket(), inMap, inString, env), rpcConnection, protocolSpecs, this.serverProtocolMap, this.progressCallback, cmdCallBackKey, writeInPlace(cmdName), this.isNonCheckedSyncs());
+			cmdEnv.setDontWriteTicket(isDontWriteTicket(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs));
+			cmdEnv.setFieldRule(getRpcPacketFieldRule(inMap, CmdSpec.getValidP4JCmdSpec(cmdName)));
+			cmdEnv.setStreamCmd(true);
+			cmdEnv.setBufferOutput(true);
+
+			List<Map<String, Object>> retMapList = dispatcher.dispatch(cmdEnv);
+
+			long endTime = System.currentTimeMillis();
+
+			if (!ignoreCallbacks && (this.commandCallback != null)) {
+				this.processCmdCallbacks(cmdCallBackKey, endTime - startTime, retMapList);
+			}
+
+			if ((retMapList != null) && (retMapList.size() != 0)) {
+				for (Map<String, Object> map : retMapList) {
+					ResultMapParser.handleErrorStr(map);
+					ResultMapParser.handleWarningStr(map);
+				}
+			}
+
+			RpcByteBufferOutput outStream = (RpcByteBufferOutput) cmdEnv.getStateMap().get(RpcServer.RPC_BYTE_BUFFER_OUTPUT_KEY);
+
+			if (outStream != null) {
+				return outStream.getByteBuffer();
+			}
+
+			return null;
+
+		} catch (BufferOverflowException exc) {
+			Log.error("RPC Byte Buffer overflow: " + exc.getLocalizedMessage());
+			Log.exception(exc);
+			throw new P4JavaError("RPC Byte Buffer overflow: " + exc.getLocalizedMessage());
+		} catch (ConnectionNotConnectedException cnce) {
+			this.connected = false;
+			this.status = ServerStatus.ERROR;
+			throw cnce;
 		} finally {
 			if (rpcConnection != null) {
 				rpcConnection.disconnect(dispatcher);

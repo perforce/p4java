@@ -8,6 +8,7 @@ import com.perforce.p4java.server.callback.IFilterCallback;
 
 import javax.annotation.Nonnull;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.Map;
 
@@ -138,6 +139,26 @@ public interface IHelixCommandExecutor {
 	 * @throws AccessException     if the Perforce server denies access to the caller
 	 */
 	InputStream execStreamCmd(String cmdName, String[] cmdArgs) throws ConnectionException, RequestException, AccessException;
+
+	/**
+	 * Issue an arbitrary P4Java command to the Perforce server and get the
+	 * results as a byte buffer.
+	 *
+	 * @param cmdName the command to be issued; must be non-null, and correspond to
+	 *                a Perforce command recognized by P4Java and defined in
+	 *                CmdSpec.
+	 * @param cmdArgs the array of command arguments (options and file arguments,
+	 *                etc.) to be sent to the Perforce server. These must be in the
+	 *                form used by the corresponding p4 command line interpreter.
+	 *                Ignored if null.
+	 * @return an ByteBuffer on the command output. This will never be null,
+	 * but it may be empty.
+	 * @throws ConnectionException if the Perforce server is unreachable or is not connected.
+	 * @throws RequestException    if the Perforce server encounters an error during its
+	 *                             processing of the request
+	 * @throws AccessException     if the Perforce server denies access to the caller
+	 */
+    ByteBuffer execStreamCmdForBuffer(String cmdName, String[] cmdArgs) throws ConnectionException, RequestException, AccessException;
 
 	/**
 	 * @param map Perforce command results map

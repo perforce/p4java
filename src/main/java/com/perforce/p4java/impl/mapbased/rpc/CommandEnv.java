@@ -176,6 +176,7 @@ public class CommandEnv {
 
 	private long syncTime = 0;
 	private boolean nullSync = false;
+	private boolean bufferOutput = false;
 
 	/**
 	 * The Perforce RPC connection in use for this command.
@@ -477,5 +478,13 @@ public class CommandEnv {
 
 	public void setNullSync(boolean nullSync) {
 		this.nullSync = nullSync;
+	}
+
+	public boolean isBufferOutput() {
+		return bufferOutput;
+	}
+
+	public void setBufferOutput(boolean bufferOutput) {
+		this.bufferOutput = bufferOutput;
 	}
 }

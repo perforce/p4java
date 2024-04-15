@@ -114,7 +114,8 @@ public enum CmdSpec {
     LICENSE,
 	EXTENSION,
 	TOPOLOGY,
-	STREAMLOG;
+	STREAMLOG,
+	RENAMECLIENT;
 
 	/**
 	 * Return true iff the passed-in string can be decoded as a valid

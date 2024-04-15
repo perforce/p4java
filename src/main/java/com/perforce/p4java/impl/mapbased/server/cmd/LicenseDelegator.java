@@ -2,14 +2,17 @@ package com.perforce.p4java.impl.mapbased.server.cmd;
 
 import com.perforce.p4java.core.ILicense;
 import com.perforce.p4java.core.ILicenseLimits;
+import com.perforce.p4java.core.IServerIPMACAddress;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.impl.generic.core.InputMapper;
 import com.perforce.p4java.impl.generic.core.License;
 import com.perforce.p4java.impl.generic.core.LicenseLimits;
+import com.perforce.p4java.impl.generic.core.ServerIPMACAddress;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.ILicenseDelegator;
 import org.apache.commons.lang3.Validate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -84,5 +87,28 @@ public class LicenseDelegator extends BaseDelegator implements ILicenseDelegator
                 InputMapper.map(license));
 
         return parseCommandResultMapAsString(resultMaps);
+    }
+
+    @Override
+    public List<IServerIPMACAddress> getValidServerIPMACAddress() throws P4JavaException {
+
+        List<Map<String, Object>> resultMaps = execMapCmdList(
+                LICENSE,
+                new String[]{"-L"},
+                null);
+
+        List<IServerIPMACAddress> resultList = new ArrayList<>();
+
+        if (nonNull(resultMaps)) {
+            for (Map<String, Object> map : resultMaps) {
+                handleErrorStr(map);
+
+                if (!isInfoMessage(map) && !map.isEmpty()) {
+                    resultList.add(new ServerIPMACAddress(map));
+                }
+            }
+        }
+
+      return resultList;
     }
 }

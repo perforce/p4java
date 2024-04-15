@@ -33,6 +33,7 @@ import com.perforce.p4java.core.ILicense;
 import com.perforce.p4java.core.ILicenseLimits;
 import com.perforce.p4java.core.IRepo;
 import com.perforce.p4java.core.IReviewChangelist;
+import com.perforce.p4java.core.IServerIPMACAddress;
 import com.perforce.p4java.core.IServerProcess;
 import com.perforce.p4java.core.IStream;
 import com.perforce.p4java.core.IStreamIntegrationStatus;
@@ -128,6 +129,7 @@ import com.perforce.p4java.impl.mapbased.server.cmd.ProtectDelegator;
 import com.perforce.p4java.impl.mapbased.server.cmd.ProtectsDelegator;
 import com.perforce.p4java.impl.mapbased.server.cmd.ReloadDelegator;
 import com.perforce.p4java.impl.mapbased.server.cmd.RenameUserDelegator;
+import com.perforce.p4java.impl.mapbased.server.cmd.RenameClientDelegator;
 import com.perforce.p4java.impl.mapbased.server.cmd.ReposDelegator;
 import com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder;
 import com.perforce.p4java.impl.mapbased.server.cmd.ReviewDelegator;
@@ -287,6 +289,7 @@ import com.perforce.p4java.server.delegator.IProtectDelegator;
 import com.perforce.p4java.server.delegator.IProtectsDelegator;
 import com.perforce.p4java.server.delegator.IReloadDelegator;
 import com.perforce.p4java.server.delegator.IRenameUserDelegator;
+import com.perforce.p4java.server.delegator.IRenameClientDelegator;
 import com.perforce.p4java.server.delegator.IReposDelegator;
 import com.perforce.p4java.server.delegator.IReviewDelegator;
 import com.perforce.p4java.server.delegator.IReviewsDelegator;
@@ -308,12 +311,13 @@ import org.apache.commons.lang3.ObjectUtils;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.nio.charset.UnsupportedCharsetException;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 import java.util.Random;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static com.perforce.p4java.PropertyDefs.AUTO_CONNECT_KEY;
@@ -437,7 +441,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	 * Storage for user auth tickets. What's returned from p4 login -p command,
 	 * and what we can add to each command when non-null to authenticate it
 	 */
-	protected Map<String, String> authTickets = new HashMap<>();
+	protected Map<String, String> authTickets = new ConcurrentHashMap<>();
 
 	protected IClient client = null;
 	protected String clientName = null;
@@ -572,6 +576,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 	private ILicenseDelegator licenseDelegator;
 	private IExtensionDelegator extensionDelegator;
 	private IStreamlogDelegator streamlogDelegator;
+	private IRenameClientDelegator renameClientDelegator;
 
 	/**
 	 * Useful source of random integers, etc.
@@ -1133,6 +1138,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 		licenseDelegator = new LicenseDelegator(this);
 		extensionDelegator = new ExtensionDelegator(this);
 		streamlogDelegator = new StreamlogDelegator(this);
+		renameClientDelegator = new RenameClientDelegator(this);
 		return status; // Which is UNKNOWN at this point...
 	}
 
@@ -2335,6 +2341,12 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 		return printDelegator.getFileContents(fileSpecs, opts);
 	}
+	
+	@Override
+	public void getFileContents(ByteBuffer byteBufferContent, final List<IFileSpec> fileSpecs, final GetFileContentsOptions opts) throws Exception {
+
+		printDelegator.getFileContents(byteBufferContent, fileSpecs, opts);
+	}
 
 	@Override
 	public InputStream getFileContents(final List<IFileSpec> fileSpecs, final boolean allrevs, final boolean noHeaderLine) throws ConnectionException, RequestException, AccessException {
@@ -2563,6 +2575,12 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 		return verifyDelegator.verifyFiles(fileSpecs, opts);
 	}
 
+	@Override
+	public String renameClient(final String oldUserName, final String newUserName) throws P4JavaException {
+
+		return renameClientDelegator.renameClient(oldUserName, newUserName);
+	}
+
 	/**
 	 * Usage: ls-tree {tree-sha}
 	 *
@@ -2638,6 +2656,11 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 		return specDelegator.updateSpecString(type, spec);
 	}
 
+	@Override
+	public List<IServerIPMACAddress> getValidServerIPMACAddress() throws P4JavaException {
+
+		return licenseDelegator.getValidServerIPMACAddress();
+	}
 
 	@Override
 	public ILicenseLimits getLimits() throws P4JavaException {

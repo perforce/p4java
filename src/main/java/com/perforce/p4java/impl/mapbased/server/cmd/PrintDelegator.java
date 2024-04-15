@@ -10,6 +10,7 @@ import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IPrintDelegator;
 
 import java.io.InputStream;
+import java.nio.ByteBuffer;
 import java.util.List;
 
 import static com.perforce.p4java.impl.mapbased.server.Parameters.processParameters;
@@ -60,5 +61,37 @@ public class PrintDelegator extends BaseDelegator implements IPrintDelegator {
                         null,
                         annotateFiles,
                         server));
+    }
+
+    @Override
+    public void getFileContents(
+            ByteBuffer byteBufferContent,
+            final List<IFileSpec> fileSpecs,
+            final GetFileContentsOptions opts) throws Exception {
+
+        boolean annotateFiles = isNull(opts) || !opts.isDontAnnotateFiles();
+
+        if(opts.isAllrevs()) {
+            opts.setAllrevs(false); // no support given for all revisions of a file (-a)
+        }
+
+        if (opts.getOptions() != null) {
+            opts.setOptions(null); // no support given for printing the contents into a file (-o filename)
+        }
+
+        if (opts.getSize() >= byteBufferContent.capacity()) {
+            opts.setSize(byteBufferContent.capacity());
+        }
+
+        byteBufferContent.put( execStreamCmdForBuffer(PRINT,
+                processParameters(
+                    opts,
+                    fileSpecs,
+                    null,
+                    annotateFiles,
+                    server )
+                ));
+
+        byteBufferContent.flip();
     }
 }
