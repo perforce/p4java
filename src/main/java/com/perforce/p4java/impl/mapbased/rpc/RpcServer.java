@@ -133,7 +133,7 @@ public abstract class RpcServer extends Server {
 	 * default for most commands; some commands dynamically bump up the level
 	 * for the command's duration.
 	 */
-	public static final int DEFAULT_CLIENT_API_LEVEL = 92; // 2022.1
+	public static final int DEFAULT_CLIENT_API_LEVEL = 96; // 2024.1
 
 	// p4/msgs/p4tagl.cc
 	// p4/client/client.cc

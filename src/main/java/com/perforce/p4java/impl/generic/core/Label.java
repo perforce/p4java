@@ -234,17 +234,18 @@ public class Label extends LabelSummary implements ILabel {
 
 			// Note: only the left (depot) side is given for label views
 
-			this.viewMapping = new ViewMap<ILabelMapping>();
+			this.viewMapping = new ViewMap<>();
 
 			for (int i = 0; ; i++) {
-				String mappingStr = (String) map.get(MapKeys.VIEW_KEY
-						+ i);
-
-				if (mappingStr == null) {
+				String mappingStr = (String) map.get(MapKeys.VIEW_KEY + i);
+				String commentStr = (String) map.get(MapKeys.VIEW_COMMENT_KEY + i);
+				if (mappingStr == null && commentStr == null) {
 					break;
 				} else {
 					String[] parts = MapEntry.parseViewMappingString(mappingStr);
-					this.viewMapping.getEntryList().add(new LabelMapping(i, parts[0]));
+					LabelMapping mapping = new LabelMapping(i, parts[0]);
+					mapping.setComment(MapEntry.parseComments(commentStr));
+					this.viewMapping.getEntryList().add(mapping);
 				}
 			}
 

@@ -183,7 +183,7 @@ public class InputMapper {
 			}
 			IClientOptions opts = client.getOptions();
 			IClientSubmitOptions subOpts = client.getSubmitOptions();
-			ClientView view = client.getClientView();
+
 
 			ArrayList<String> changeView = client.getChangeView();
 			if (changeView != null && !changeView.isEmpty()) {
@@ -205,7 +205,7 @@ public class InputMapper {
 						+ (opts.isModtime() ? "modtime " : "nomodtime ")
 						+ (opts.isRmdir() ? "rmdir" : "normdir");
 
-				if(opts.toString().split(" ").length > 6)
+				if (opts.toString().split(" ").length > 6)
 					optStr = optStr + (opts.isaltSync() ? " altsync" : " noaltsync");
 
 				clientMap.put("Options", optStr);
@@ -229,9 +229,9 @@ public class InputMapper {
 				clientMap.put("SubmitOptions", subOptsStr);
 			}
 
+			ClientView view = client.getClientView();
 			if ((view != null) && (view.getEntryList() != null)) {
 				List<IClientViewMapping> viewList = view.getEntryList();
-
 				for (IClientViewMapping mapping : viewList) {
 					clientMap.put(MapKeys.VIEW_KEY + mapping.getOrder(), mapping.toString(" ", true));
 				}

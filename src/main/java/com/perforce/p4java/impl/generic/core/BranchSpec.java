@@ -188,19 +188,21 @@ public class BranchSpec extends BranchSpecSummary implements IBranchSpec {
 		super(map, false);
 
 		this.server = server;
-		this.branchView = new ViewMap<IBranchMapping>();
+		this.branchView = new ViewMap<>();
 
 		if (map != null) {
 			String key = MapKeys.VIEW_KEY;
+			String commentKey = MapKeys.VIEW_COMMENT_KEY;
 			for (int i = 0; ; i++) {
-				if (!map.containsKey(key + i)) {
+				if (!map.containsKey(key + i) && !map.containsKey(commentKey + i)) {
 					break;
-				} else if (map.get(key + i) != null) {
+				} else if (map.get(key + i) != null || map.get(commentKey + i) != null) {
 					try {
 						String[] matchStrs = MapEntry.parseViewMappingString((String) map.get(key + i));
-
-						this.branchView.getEntryList().add(new BranchViewMapping(i, matchStrs[0], matchStrs[1]));
-
+						String comment = MapEntry.parseComments((String) map.get(commentKey + i));
+						BranchViewMapping mapping = new BranchViewMapping(i, matchStrs[0], matchStrs[1]);
+						mapping.setComment(comment);
+						this.branchView.getEntryList().add(mapping);
 					} catch (Throwable thr) {
 						Log.error("Unexpected exception in BranchSpec map-based constructor: "
 								+ thr.getLocalizedMessage());

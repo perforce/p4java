@@ -24,6 +24,7 @@ import com.perforce.p4java.impl.generic.client.ClientView;
 import com.perforce.p4java.impl.generic.core.InputMapper;
 import com.perforce.p4java.impl.generic.core.ListData;
 import com.perforce.p4java.impl.generic.core.MapEntry;
+import com.perforce.p4java.impl.mapbased.MapKeys;
 import com.perforce.p4java.impl.mapbased.client.cmd.WhereDelegator;
 import com.perforce.p4java.impl.mapbased.rpc.func.client.ClientHelper;
 import com.perforce.p4java.impl.mapbased.server.Parameters;
@@ -59,6 +60,7 @@ import com.perforce.p4java.server.CmdSpec;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.IServer;
 import com.perforce.p4java.server.callback.IStreamingCallback;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -180,7 +182,7 @@ public class Client extends ClientSummary implements IClient {
 		ClientView clientView = new ClientView();
 
 		clientView.setClient(client);
-		List<IClientViewMapping> viewMappings = new ArrayList<IClientViewMapping>();
+		List<IClientViewMapping> viewMappings = new ArrayList<>();
 		int i = 0;
 		for (String mapping : paths) {
 			if (mapping == null) {
@@ -309,7 +311,7 @@ public class Client extends ClientSummary implements IClient {
 		// the brute-force duplication of the original ClientSummary map parsing below.
 
 		if (map != null) {
-			this.name = (String) map.get("Client");
+			this.name = (String) map.get(MapKeys.CLIENT_KEY);
 
 			// Try to retrieve the view map; it comes to us as a series of
 			// map entries starting with "View" and followed by a number, e.g. "View9".
@@ -321,24 +323,27 @@ public class Client extends ClientSummary implements IClient {
 			ArrayList<IClientViewMapping> mappingList = new ArrayList<IClientViewMapping>();
 			viewImpl.setEntryList(mappingList);
 			this.clientView = viewImpl;
-			String pfx = "View";
+			String pfx = MapKeys.VIEW_KEY;
+			String commentPfx = MapKeys.VIEW_COMMENT_KEY;
 
-			for (int i = 0; map.containsKey(pfx + i); i++) {
+			for (int i = 0; map.containsKey(pfx + i) || map.containsKey(commentPfx + i); i++) {
 				String key = pfx + i;
-
+				String commentKey = commentPfx + i;
 				String[] parts = MapEntry.parseViewMappingString((String) map.get(key));
 
-				if (parts.length < 2) {
-					throw new P4JavaError("bad client view mapping string in Client constructor: " + (String) map.get(key));
+				String comment = MapEntry.parseComments((String) map.get(commentKey));
+				if (parts.length < 2 && StringUtils.isEmpty(comment)) {
+					throw new P4JavaError("bad client view mapping string in Client constructor: " + map.get(key));
 				}
-
-				mappingList.add(new ClientView.ClientViewMapping(i, parts[0], parts[1]));
+				ClientView.ClientViewMapping mapping = new ClientView.ClientViewMapping(i, parts[0], parts[1]);
+				mapping.setComment(comment);
+				mappingList.add(mapping);
 			}
 
 			// Add change view entries to list if found.
 
 			ArrayList<String> changeViewImpl = new ArrayList<>();
-			pfx = "ChangeView";
+			pfx = MapKeys.CHANGE_VIEW_KEY;
 
 			for (int i = 0; map.containsKey(pfx + i); i++) {
 				String key = pfx + i;
@@ -359,22 +364,22 @@ public class Client extends ClientSummary implements IClient {
 			// says that descriptions can't start or end with whitespace -- so we kludge up
 			// the following to get rid of just the trailing newline if it's there -- HR.
 
-			this.description = (String) map.get("Description");
+			this.description = (String) map.get(MapKeys.DESCRIPTION_KEY);
 			if ((this.description != null) && (this.description.length() > 1) && this.description.endsWith("\n")) {
 				this.description = this.description.substring(0, this.description.length() - 1);
 			}
 			try {
 				// Different format here to what's in ClientSummary.
-				if (map.get("Access") != null) {
-					this.accessed = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse((String) map.get("Access"));
+				if (map.get(MapKeys.ACCESS_KEY) != null) {
+					this.accessed = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse((String) map.get(MapKeys.ACCESS_KEY));
 				}
 			} catch (Exception exc) {
 				Log.error("Access date parse error in Client constructor " + exc.getLocalizedMessage());
 				Log.exception(exc);
 			}
 			try {
-				if (map.get("Update") != null) {
-					this.updated = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse((String) map.get("Update"));
+				if (map.get(MapKeys.UPDATE_KEY) != null) {
+					this.updated = new SimpleDateFormat("yyyy/MM/dd HH:mm:ss").parse((String) map.get(MapKeys.UPDATE_KEY));
 				}
 			} catch (Exception exc) {
 				Log.error("Update date parse error in Client constructor " + exc.getLocalizedMessage());
@@ -605,7 +610,7 @@ public class Client extends ClientSummary implements IClient {
 	 */
 	@Override
 	public List<IFileSpec> sync(List<IFileSpec> fileSpecs, SyncOptions syncOpts) throws P4JavaException {
-		List<IFileSpec> specList = new ArrayList<IFileSpec>();
+		List<IFileSpec> specList = new ArrayList<>();
 
 		if ((this.serverImpl.getCurrentClient() == null) || !this.serverImpl.getCurrentClient().getName().equalsIgnoreCase(this.getName())) {
 			throw new RequestException("Attempted to sync a client that is not the server's current client");
@@ -627,7 +632,7 @@ public class Client extends ClientSummary implements IClient {
 	 */
 	@Override
 	public List<IFileSpec> syncParallel(List<IFileSpec> fileSpecs, SyncOptions syncOpts, ParallelSyncOptions pSyncOpts) throws P4JavaException {
-		List<IFileSpec> specList = new ArrayList<IFileSpec>();
+		List<IFileSpec> specList = new ArrayList<>();
 
 		if ((this.serverImpl.getCurrentClient() == null) || !this.serverImpl.getCurrentClient().getName().equalsIgnoreCase(this.getName())) {
 			throw new RequestException("Attempted to sync a client that is not the server's current client");

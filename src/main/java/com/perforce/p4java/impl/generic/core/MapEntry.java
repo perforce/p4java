@@ -5,7 +5,9 @@ package com.perforce.p4java.impl.generic.core;
 
 import com.perforce.p4java.Log;
 import com.perforce.p4java.core.IMapEntry;
+import org.apache.commons.lang3.StringUtils;
 
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -220,39 +222,54 @@ public class MapEntry implements IMapEntry {
 	 */
 	public String toString(String sepString, boolean quoteBlanks) {
 		StringBuilder retVal = new StringBuilder();
-		boolean quoteLeft = false;
-		boolean quoteRight = false;
-
-		if (quoteBlanks) {
-			if (this.left != null && this.left.contains(" ")) {
-				quoteLeft = true;
-			}
-			if (this.right != null && this.right.contains(" ")) {
-				quoteRight = true;
-			}
-		}
-		if (quoteLeft) retVal.append("\"");
-		if (this.type != null && this.type != EntryType.INCLUDE) {
-			retVal.append(type);
-		}
-		if (this.left != null) {
-			retVal.append(left);
-		}
-		if (quoteLeft) retVal.append("\"");
-
-		if ((sepString != null) && (this.right != null)) {
+		formatLeft(quoteBlanks, retVal);
+		if (StringUtils.isNotEmpty(sepString) && (this.right != null)) {
 			retVal.append(sepString);
 		}
-		if (this.right != null) {
-			if (quoteRight) retVal.append("\"");
-			retVal.append(this.right);
-			if (quoteRight) retVal.append("\"");
-		}
+		formatRight(quoteBlanks, retVal);
 		if (this.comment != null) {
 			retVal.append(" ## ");
 			retVal.append(this.comment);
 		}
 		return retVal.toString();
+	}
+
+	private void formatRight(boolean quoteBlanks, StringBuilder retVal) {
+		if (!Objects.isNull(this.right)) {
+			boolean shouldQuoteBlank = quoteBlanks && this.right.contains(" ") && !this.right.startsWith("\"");
+			if (shouldQuoteBlank) {
+				retVal.append("\"");
+			}
+			retVal.append(this.right);
+			if (shouldQuoteBlank) {
+				retVal.append("\"");
+			}
+		}
+	}
+
+	private void formatLeft(boolean quoteBlanks, StringBuilder retVal) {
+		if (Objects.nonNull(this.left)) {
+			boolean shouldQuote = quoteBlanks && this.left.contains(" ") && !this.left.startsWith("\"");
+			if (shouldQuote) {
+				retVal.append("\"");
+			}
+			boolean shouldAppendType = this.type != null && this.type != EntryType.INCLUDE;
+			if (shouldAppendType) {
+				if (this.left.startsWith("\"")) {
+					retVal.append(this.left);
+					String startWith1 = "\"" + this.type;
+					retVal.replace(0, 1, startWith1);
+				} else {
+					retVal.append(type);
+					retVal.append(this.left);
+				}
+			} else {
+				retVal.append(this.left);
+			}
+			if (shouldQuote) {
+				retVal.append("\"");
+			}
+		}
 	}
 
 	/**
@@ -320,7 +337,7 @@ public class MapEntry implements IMapEntry {
 	 * Attempt to parse a string to get left and right view mapping
 	 * elements out of it along with the optional EntryType spec
 	 * on any left view strings.<p>
-	 *
+	 * <p>
 	 * The incoming string format is described semi-formally as follows:
 	 * <pre>
 	 * [whitespace] leftentry [whitespace rightentry] [whitespace]
@@ -331,7 +348,7 @@ public class MapEntry implements IMapEntry {
 	 * it should be quoted with a double quote character; any left-entry entry
 	 * type character must be <i>within</i> the quotes if they exist. The quotes
 	 * are always stripped from the associated element before being returned.<p>
-	 *
+	 * <p>
 	 * The left string is returned as the first element of the returned
 	 * array; the right (if it exists) is the second. Either or both can
 	 * be null, but the array itself will never be null. The left string
@@ -340,11 +357,11 @@ public class MapEntry implements IMapEntry {
 	 * the entry type character).
 	 *
 	 * @param rawStr if not null, string to be parsed; if null, this method returns
-	 * 			an empty (but not null) array
+	 *               an empty (but not null) array
 	 * @return non-null two-element string array; element 0 contains the left
-	 * 			element, element 1 contains the right. Either or both can be null,
-	 * 			but except in pathological cases, it's unusual for the left to be
-	 * 			null and the right to be non-null.
+	 * element, element 1 contains the right. Either or both can be null,
+	 * but except in pathological cases, it's unusual for the left to be
+	 * null and the right to be non-null.
 	 */
 	public static String[] parseViewMappingString(String rawStr) {
 		String[] retVal = new String[]{null, null};

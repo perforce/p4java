@@ -130,6 +130,7 @@ public class MapKeys {
 	public static final String UTF16_LC_KEY = "utf16";
 	public static final String VALUE_KEY = "Value";
 	public static final String VIEW_KEY = "View";
+	public static final String VIEW_COMMENT_KEY = "ViewComment";
 	public static final String PARENT_VIEW_KEY = "ParentView";
 
 	public static final String REPO_KEY = "Repo";

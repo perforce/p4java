@@ -1,7 +1,7 @@
                             Release Notes for
                        P4Java, the Perforce Java API
 
-                              Version 2023.2
+                              Version 2024.1
 
 Introduction
 
@@ -22,7 +22,7 @@ Requirements
 
 	* Perforce server at Release 2015.1 or higher.
 
-	* Java: full standard JDK 8 or later.  Implementation as
+	* Java: full standard JDK 11 or later.  Implementation as
 	  discussed in "Known Limitations" below.
 
 	* SSL: unlimited strength JCE (Java Cryptography Extension) package for
@@ -123,6 +123,22 @@ Known Limitations
 	  
 	* P4Java would not support file operations on altsync enabled clients.
 
+
+-------------------------------------------
+Updates in 2024.1 (2024.1/2612262) (2024/06/12)
+
+	#2608430 (Job #120559)
+	    Added support for comments in the view mapping of Client, Branch, and Label Spec.
+
+	#2604468 (Job #120573)
+	    Upgraded P4Java to use Java 11.
+
+	#2597460 (Job #119320)
+	    Fixed a bug where the "Server.getExtendedFile(..)" throws NumberFormatException
+	    when headRev is #none
+
+	#2597531 (Job #112324)
+	    Fixed inconsistent handling of quotes in ViewMap for Label.
 
 -------------------------------------------
 Updates in 2023.2 Patch 1 (2023.2/2581742) (2024/04/05)

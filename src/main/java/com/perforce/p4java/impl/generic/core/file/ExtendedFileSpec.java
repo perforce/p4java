@@ -10,6 +10,7 @@ import com.perforce.p4java.core.file.FileSpecOpStatus;
 import com.perforce.p4java.core.file.IExtendedFileSpec;
 import com.perforce.p4java.core.file.IResolveRecord;
 import com.perforce.p4java.server.IServer;
+import org.apache.commons.lang3.math.NumberUtils;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -550,7 +551,7 @@ public class ExtendedFileSpec extends FileSpec implements IExtendedFileSpec {
 				setFileSize(value == null ? 0 : Long.parseLong(value));
 				break;
 			case HEADREV:
-				setHeadRev(value == null ? 0 : Integer.parseInt(value));
+				setHeadRev(NumberUtils.isParsable(value) ? Integer.parseInt(value) : 0);
 				break;
 			case HEADTYPE:
 				setHeadType(value);
