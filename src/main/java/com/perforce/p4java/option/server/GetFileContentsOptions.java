@@ -18,9 +18,9 @@ import java.util.List;
 public class GetFileContentsOptions extends Options {
 
 	/**
-	 * Options: -a, -q, --offset, --size
+	 * Options: -a, -q, -T, --offset, --size
 	 */
-	public static final String OPTIONS_SPECS = "b:a b:q";
+	public static final String OPTIONS_SPECS = "b:a b:q s:T";
 
 	/**
 	 * Options: --offset, --size
@@ -49,6 +49,12 @@ public class GetFileContentsOptions extends Options {
 	 * with the filespecs.
 	 */
 	protected boolean dontAnnotateFiles = false;
+
+	/**
+	 * The -T option prints the value of the specified non-encoded attribute
+	 * of the specified file.
+	 */
+	protected String fileAttributeName = "";
 
 	/**
 	 * Skip the specified number of bytes and only print what follows.
@@ -114,11 +120,11 @@ public class GetFileContentsOptions extends Options {
 		}
 		if (serverVersion >= 20221) {
 			this.optionList = this.processFields(OPTIONS_SPECS + " " + OPTION_SPEC_NEW,
-					this.isAllrevs(), this.isNoHeaderLine(),
+					this.isAllrevs(), this.isNoHeaderLine(), this.getFileAttributeName(),
 					this.offset, this.size);
 
 		} else {
-			this.optionList = this.processFields(OPTIONS_SPECS, this.isAllrevs(), this.isNoHeaderLine());
+			this.optionList = this.processFields(OPTIONS_SPECS, this.isAllrevs(), this.isNoHeaderLine(), this.getFileAttributeName());
 		}
 		return this.optionList;
 	}
@@ -147,6 +153,13 @@ public class GetFileContentsOptions extends Options {
 
 	public GetFileContentsOptions setDontAnnotateFiles(boolean dontAnnotateFiles) {
 		this.dontAnnotateFiles = dontAnnotateFiles;
+		return this;
+	}
+
+	public String getFileAttributeName() { return fileAttributeName; }
+
+	public GetFileContentsOptions setFileAttributeName(String fileAttributeName) {
+		this.fileAttributeName = fileAttributeName;
 		return this;
 	}
 

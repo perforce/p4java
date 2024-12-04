@@ -867,7 +867,7 @@ public abstract class RpcServer extends Server {
 
 			authFileLockWait = getPropertyAsLong(properties, new String[]{AUTH_FILE_LOCK_WAIT_KEY_SHORT_FORM, AUTH_FILE_LOCK_WAIT_KEY}, AbstractAuthHelper.DEFAULT_LOCK_WAIT);
 		} catch (UnknownHostException uhe) {
-			throw new ConfigException("Unable to determine client host name: %s" + uhe.getLocalizedMessage());
+			throw new ConfigException("Unable to determine client host name: " + uhe.getLocalizedMessage());
 		}
 
 		// Initialize client trust

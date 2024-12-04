@@ -125,6 +125,21 @@ Known Limitations
 
 
 -------------------------------------------
+Updates in 2024.1 Patch 1 (2024.1/2674354) (2024/10/29)
+
+	#2672847 (Job #121791)
+	    Added support for "p4 attribute -I" and "p4 print -T" options.
+
+	#2672817 (Job #123136)
+	    Upgraded commons-io:commons-io to 2.17.0
+
+	#2669925 (Job #122392)
+	    Fixed an output bug with "Unable to determine client host name".
+
+	#2662969 (Job #122607)
+	    Added support to delete  client and all of its shelves via a single command.
+
+-------------------------------------------
 Updates in 2024.1 (2024.1/2612262) (2024/06/12)
 
 	#2608430 (Job #120559)

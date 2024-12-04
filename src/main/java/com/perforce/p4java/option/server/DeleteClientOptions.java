@@ -17,14 +17,20 @@ import java.util.List;
 public class DeleteClientOptions extends Options {
 
 	/**
-	 * Options: -f
+	 * Options: -f -Fd
 	 */
-	public static final String OPTIONS_SPECS = "b:f";
+	public static final String OPTIONS_SPECS = "b:f b:Fd";
 
 	/** If true, tell the server to attempt to force the delete regardless of
 	 * 	the consequences; corresponds to the -f flag.
 	 */
 	protected boolean force = false;
+
+	/** If true, allows the deletion with -d of a client even when that client contains shelved changes.
+	 *  The client and the shelved changes are both deleted. (You must use the -f option with the -Fd option.)
+	 *  Corresponds to the -Fd flag
+ 	 */
+	protected boolean deleteShelvedChanges = false;
 
 	/**
 	 * Default constructor.
@@ -70,7 +76,7 @@ public class DeleteClientOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.isForce());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isForce(), this.isDeleteShelvedChanges());
 		return this.optionList;
 	}
 
@@ -78,8 +84,16 @@ public class DeleteClientOptions extends Options {
 		return force;
 	}
 
+	public boolean isDeleteShelvedChanges() { return deleteShelvedChanges; }
+
 	public DeleteClientOptions setForce(boolean force) {
 		this.force = force;
+		return this;
+	}
+
+	public DeleteClientOptions setDeleteShelvedChanges(boolean deleteShelvedChanges) {
+		this.deleteShelvedChanges = deleteShelvedChanges;
+		this.force = true;
 		return this;
 	}
 }

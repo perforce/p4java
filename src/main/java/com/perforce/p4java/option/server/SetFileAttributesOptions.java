@@ -17,9 +17,9 @@ import java.util.List;
 public class SetFileAttributesOptions extends Options {
 
 	/**
-	 * Options: -e, -f, -p, -T0 | -T1
+	 * Options: -e, -f, -p, -T0 | -T1, I
 	 */
-	public static final String OPTIONS_SPECS = "b:e b:f b:p b:T0 b:T1";
+	public static final String OPTIONS_SPECS = "b:e b:f b:p b:T0 b:T1 s:I";
 
 	/**
 	 * If true, indicates values are in hex format.
@@ -51,6 +51,12 @@ public class SetFileAttributesOptions extends Options {
 	 * Corresponds to -T1
 	 * */
 	protected boolean storageTraitsDepot = false;
+
+	/**
+	 * If true, the attribute value is read from a file rather than stdin
+	 * This option can't be used with the -e option
+	 * */
+	protected String readAttributeValueFromFile = null;
 
 	/**
 	 * Default constructor.
@@ -100,8 +106,7 @@ public class SetFileAttributesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.isHexValue(), this.isSetOnSubmittedFiles(), this.isPropagateAttributes(), this.isStorageDbTraits(), this.isStorageTraitsDepot());
-
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isHexValue(), this.isSetOnSubmittedFiles(), this.isPropagateAttributes(), this.isStorageDbTraits(), this.isStorageTraitsDepot(), this.getAttributeValueFileName());
 		return this.optionList;
 	}
 
@@ -147,6 +152,14 @@ public class SetFileAttributesOptions extends Options {
 
 	public SetFileAttributesOptions setStorageTraitsDepot(boolean storageTraitsDepot) {
 		this.storageTraitsDepot = storageTraitsDepot;
+		return this;
+	}
+
+	public String getAttributeValueFileName() { return readAttributeValueFromFile; }
+
+	public SetFileAttributesOptions setAttributeValueFileName(String readAttributeValueFromFile) {
+		this.readAttributeValueFromFile = readAttributeValueFromFile;
+		this.hexValue = false;
 		return this;
 	}
 }
