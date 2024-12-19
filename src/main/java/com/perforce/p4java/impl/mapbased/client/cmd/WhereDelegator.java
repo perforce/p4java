@@ -79,6 +79,10 @@ public class WhereDelegator implements IWhereDelegator {
 					if (mt.translate(mt.get(i), MapTableT.RHS, s) != null) {
 						String depotPath = mt.translate(mt.get(i), MapTableT.RHS, s);
 						spec.setDepotPath(depotPath);
+						//Last view mapping should override all
+						if (spec.getDepotPath() != null) {
+							break;
+						}
 					}
 				}
 				resultList.add(spec);
@@ -88,6 +92,9 @@ public class WhereDelegator implements IWhereDelegator {
 					if (mt.translate(mt.get(i), MapTableT.LHS, s) != null) {
 						String clientPath = mt.translate(mt.get(i), MapTableT.LHS, s);
 						spec.setClientPath(clientPath);
+						if (spec.getClientPath() != null) {
+							break;
+						}
 					}
 				}
 				spec = clientPathToLocalPath(spec, client);
@@ -98,6 +105,10 @@ public class WhereDelegator implements IWhereDelegator {
 					if (mt.translate(mt.get(i), MapTableT.RHS, s) != null) {
 						String depotPath = mt.translate(mt.get(i), MapTableT.RHS, s);
 						spec.setDepotPath(depotPath);
+						//Last view mapping should override all
+						if (spec.getDepotPath() != null) {
+							break;
+						}
 					}
 				}
 				spec = clientPathToLocalPath(spec, client);

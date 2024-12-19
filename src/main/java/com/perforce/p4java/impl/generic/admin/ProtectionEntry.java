@@ -13,6 +13,7 @@ import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.DEPOT
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.HOST;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.IS_GROUP;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.PERM;
+import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.PERM_MAX;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.UNMAP;
 import static com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey.USER;
 import static java.util.Objects.nonNull;
@@ -66,6 +67,11 @@ public class ProtectionEntry extends MapEntry implements IProtectionEntry {
 	 * A Perforce group or user name; can include wildcards.
 	 */
 	private String name = null;
+
+	/**
+	* If -m flag is true, a single word summary of the maximum access level is reported.
+	*/
+	private String permMax = null;
 
 	/**
 	 * Default constructor -- sets all fields to null, zero, or false.
@@ -134,6 +140,7 @@ public class ProtectionEntry extends MapEntry implements IProtectionEntry {
 			if (map.containsKey(UNMAP)) {
 				type = EntryType.EXCLUDE;
 			}
+			permMax = parseString(map, PERM_MAX);
 		}
 	}
 
@@ -214,6 +221,12 @@ public class ProtectionEntry extends MapEntry implements IProtectionEntry {
 		if (pathExcluded) {
 			type = EntryType.EXCLUDE;
 		}
+	}
+
+	@Override
+
+	public String getPermMax() {
+		return permMax;
 	}
 
 	/**

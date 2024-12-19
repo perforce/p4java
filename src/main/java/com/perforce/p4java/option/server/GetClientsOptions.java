@@ -17,17 +17,23 @@ import java.util.List;
 public class GetClientsOptions extends Options {
 
 	/**
-	 * Options: -m[max], -u[user], -e[nameFilter], -E[nameFilter], -t, -S[stream]
+	 * Options: -m[max], -u[user[--user-case-insensitive]], -e[nameFilter], -E[nameFilter], -t, -S[stream]
 	 * <p>
 	 * Options: -U
 	 */
-	public static final String OPTIONS_SPECS = "i:m:gtz s:u s:e s:E b:t s:S b:U";
+	public static final String OPTIONS_SPECS = "i:m:gtz s:u b:-user-case-insensitive s:e s:E b:t s:S b:U";
 
 	/**
 	 * If non-null, limit qualifying clients to those owned by the named user.
 	 * Corresponds to -uname flag.
 	 */
 	protected String userName = null;
+
+	/**
+	 * If positive, flag indicates that the user
+	 * value is a case-insensitive search pattern
+	 */
+	protected boolean userCaseInsensitive = false;
 
 	/**
 	 * If non-null, limits output to clients whose name matches
@@ -163,7 +169,7 @@ public class GetClientsOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.getMaxResults(), this.getUserName(), this.getNameFilter(), this.getCaseInsensitiveNameFilter(), this.isShowTime(), this.getStream(), this.isUnloaded());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.getMaxResults(), this.getUserName(),  this.isUserCaseInsensitive(), this.getNameFilter(), this.getCaseInsensitiveNameFilter(), this.isShowTime(), this.getStream(), this.isUnloaded());
 		return this.optionList;
 	}
 
@@ -182,6 +188,13 @@ public class GetClientsOptions extends Options {
 
 	public GetClientsOptions setUserName(String userName) {
 		this.userName = userName;
+		return this;
+	}
+
+	public boolean isUserCaseInsensitive() { return this.userCaseInsensitive; }
+
+	public GetClientsOptions setUserCaseInsensitiveSubOption(boolean userCaseInsensitive) {
+		this.userCaseInsensitive = userCaseInsensitive;
 		return this;
 	}
 

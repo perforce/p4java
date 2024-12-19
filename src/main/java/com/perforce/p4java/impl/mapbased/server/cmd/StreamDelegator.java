@@ -4,6 +4,7 @@ import static com.perforce.p4java.impl.mapbased.server.Parameters.processParamet
 import static com.perforce.p4java.impl.mapbased.server.cmd.ResultListBuilder.buildNullableObjectFromNonInfoMessageCommandResultMaps;
 import static com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser.parseCommandResultMapIfIsInfoMessageAsString;
 import static com.perforce.p4java.server.CmdSpec.STREAM;
+import static java.util.Objects.nonNull;
 
 import java.util.List;
 import java.util.Map;
@@ -16,6 +17,7 @@ import com.perforce.p4java.impl.generic.core.InputMapper;
 import com.perforce.p4java.impl.generic.core.Stream;
 import com.perforce.p4java.option.server.GetStreamOptions;
 import com.perforce.p4java.option.server.StreamOptions;
+import com.perforce.p4java.option.server.ConvertSparseOptions;
 import com.perforce.p4java.server.IOptionsServer;
 import com.perforce.p4java.server.delegator.IStreamDelegator;
 import org.apache.commons.lang3.Validate;
@@ -92,6 +94,28 @@ public class StreamDelegator extends BaseDelegator implements IStreamDelegator {
         List<Map<String, Object>> resultMaps = execMapCmdList(
                 STREAM,
                 processParameters(opts, null, new String[]{"-d", streamPath}, server),
+                null);
+
+        return parseCommandResultMapIfIsInfoMessageAsString(resultMaps);
+    }
+
+    @Override
+    public String convertSparseStream(
+            @Nonnull final ConvertSparseOptions opts) throws P4JavaException {
+        if (nonNull(opts.getOptions())) {
+            opts.getOptions().add(0, "convertsparse");
+        }
+        else {
+            opts.setOptions("convertsparse");
+        }
+
+        if(opts.isConvertsparseSuppressMessage()) {
+            opts.getOptions().add("-q");
+        }
+
+        List<Map<String, Object>> resultMaps = execMapCmdList(
+                STREAM,
+                processParameters(opts, server),
                 null);
 
         return parseCommandResultMapIfIsInfoMessageAsString(resultMaps);

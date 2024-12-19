@@ -108,4 +108,11 @@ public interface IProtectionEntry extends IMapEntry {
 	 *            the path excluded indicator (true/false)
 	 */
 	void setPathExcluded(boolean pathExcluded);
+
+	/**
+	 * Returns the single word summary
+	 *
+	 * @return permMax
+	 */
+	String getPermMax();
 }

@@ -150,6 +150,54 @@ public class Parameters {
 			} else {
 				args.addAll(opts.processOptions(server));
 			}
+			splitSubOptions(args);
+		}
+	}
+
+	private static void splitSubOptions(@Nullable List<String> args) {
+		if (args == null) return;
+
+		boolean clientFlag = false;
+		boolean userFlag = false;
+
+		List<String> modifiedList = new ArrayList<>();
+
+		for (String argItem : args) {
+			if(argItem == null) break;
+
+			String[] param = argItem.split(" ");
+
+			if (param[0].equalsIgnoreCase("--client-case-insensitive")) {
+				clientFlag = true;
+			}
+			else if (param[0].equalsIgnoreCase("--user-case-insensitive")) {
+				userFlag = true;
+			}
+			else if (param[0].startsWith("-c") && param.length>1 && (param[1].equals("-E") || param[1].equalsIgnoreCase("--client-case-insensitive"))) {
+				clientFlag = true;
+				modifiedList.add(param[0]);
+			}
+			else if (param[0].startsWith("-u") && param.length>1 && (param[1].equals("-E") || param[1].equalsIgnoreCase("--user-case-insensitive"))) {
+				userFlag = true;
+				modifiedList.add(param[0]);
+			}
+			else {
+				modifiedList.add(param[0]);
+			}
+		}
+
+		if (userFlag) {
+			modifiedList.add("--user-case-insensitive");
+			// Replace the original options with the modified list
+			args.clear();
+			args.addAll(modifiedList);
+		}
+
+		if (clientFlag) {
+			modifiedList.add("--client-case-insensitive");
+			// Replace the original options with the modified list
+			args.clear();
+			args.addAll(modifiedList);
 		}
 	}
 

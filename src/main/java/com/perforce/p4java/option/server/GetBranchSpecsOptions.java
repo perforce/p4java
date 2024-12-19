@@ -19,13 +19,19 @@ public class GetBranchSpecsOptions extends Options {
 	/**
 	 * Options: -u[user], -e[nameFilter], -E[nameFilter], -m[max], -t
 	 */
-	public static final String OPTIONS_SPECS = "s:u s:e s:E i:m:gtz b:t";
+	public static final String OPTIONS_SPECS = "s:u b:-user-case-insensitive s:e s:E i:m:gtz b:t";
 
 	/**
 	 * If non-null, limit qualifying branches to those owned by the named user.
 	 * Corresponds to -uname flag.
 	 */
 	protected String userName = null;
+
+	/**
+	 * If positive, flag indicates that the user
+	 * value is a case-insensitive search pattern
+	 */
+	protected boolean userCaseInsensitive = false;
 
 	/**
 	 * If non-null, limits output to branches whose name matches
@@ -130,7 +136,7 @@ public class GetBranchSpecsOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.getUserName(), this.getNameFilter(), this.getCaseInsensitiveNameFilter(), this.getMaxResults(), this.isShowTime());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.getUserName(), this.isUserCaseInsensitive(), this.getNameFilter(), this.getCaseInsensitiveNameFilter(), this.getMaxResults(), this.isShowTime());
 		return this.optionList;
 	}
 
@@ -140,6 +146,13 @@ public class GetBranchSpecsOptions extends Options {
 
 	public GetBranchSpecsOptions setUserName(String userName) {
 		this.userName = userName;
+		return this;
+	}
+
+	public boolean isUserCaseInsensitive() { return this.userCaseInsensitive; }
+
+	public GetBranchSpecsOptions setUserCaseInsensitiveSubOption(boolean userCaseInsensitive) {
+		this.userCaseInsensitive = userCaseInsensitive;
 		return this;
 	}
 

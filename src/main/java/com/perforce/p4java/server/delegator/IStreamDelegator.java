@@ -6,6 +6,7 @@ import com.perforce.p4java.core.IStream;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.option.server.GetStreamOptions;
 import com.perforce.p4java.option.server.StreamOptions;
+import com.perforce.p4java.option.server.ConvertSparseOptions;
 
 /**
  * Interface to handle the Stream command.
@@ -88,5 +89,19 @@ public interface IStreamDelegator {
      * @since 2011.2
      */
     String deleteStream(String streamPath, StreamOptions opts)
+            throws P4JavaException;
+
+    /**
+     * Convert Sparse stream to development and release stream from the Perforce server.
+     *
+     * @param opts       ConvertsparseOptions object describing optional parameters; if null,
+     *                   no options are set.
+     * @return non-null result message string from the Perforce server; this may
+     * include form trigger output pre-pended and / or appended to the
+     * "normal" message
+     * @throws P4JavaException if any error occurs in the processing of this method.
+     * @since 2024.2
+     */
+    String convertSparseStream(ConvertSparseOptions opts)
             throws P4JavaException;
 }

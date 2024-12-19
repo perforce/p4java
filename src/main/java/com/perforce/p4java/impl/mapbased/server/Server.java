@@ -149,6 +149,7 @@ import com.perforce.p4java.impl.mapbased.server.cmd.UsersDelegator;
 import com.perforce.p4java.impl.mapbased.server.cmd.VerifyDelegator;
 import com.perforce.p4java.option.UsageOptions;
 import com.perforce.p4java.option.server.ChangelistOptions;
+import com.perforce.p4java.option.server.ConvertSparseOptions;
 import com.perforce.p4java.option.server.CounterOptions;
 import com.perforce.p4java.option.server.DeleteBranchSpecOptions;
 import com.perforce.p4java.option.server.DeleteClientOptions;
@@ -2469,6 +2470,13 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 		return streamDelegator.deleteStream(streamPath, opts);
 	}
+
+	@Override
+	public String convertSparseStream(final ConvertSparseOptions opts) throws P4JavaException {
+
+		return streamDelegator.convertSparseStream(opts);
+	}
+
 
 	@Override
 	public List<IStreamSummary> getStreams(final List<String> streamPaths, final GetStreamsOptions opts) throws P4JavaException {

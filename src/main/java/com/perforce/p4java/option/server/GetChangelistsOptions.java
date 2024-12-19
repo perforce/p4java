@@ -8,6 +8,7 @@ import com.perforce.p4java.exception.OptionsException;
 import com.perforce.p4java.option.Options;
 import com.perforce.p4java.server.IServer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -18,9 +19,9 @@ import java.util.List;
 public class GetChangelistsOptions extends Options {
 
 	/**
-	 * Options: -i, -l, -c[client], -m[max], -s[status], -u[user], -f, -L
+	 * Options: -i, -l, -c[client [-E | --client-case-insensitive]], -m[max], -s[status], -u[user [-E | --user-case-insensitive]], -f, -L
 	 */
-	public static final String OPTIONS_SPECS = "b:i b:l s:c i:m:gtz s:s s:u b:f b:L";
+	public static final String OPTIONS_SPECS = "b:i b:l s:c b:-client-case-insensitive i:m:gtz s:s s:u b:-user-case-insensitive b:f b:L";
 
 	/**
 	 * If positive, restrict the list to the maxMostRecent most recent changelists.
@@ -35,10 +36,22 @@ public class GetChangelistsOptions extends Options {
 	protected String clientName = null;
 
 	/**
+	 * If positive, flag indicates that the client
+	 * value is a case-insensitive search pattern
+	 */
+	protected boolean clientCaseInsensitive = false;
+
+	/**
 	 * If non-null, restrict the results to changelists associated
 	 * with the given user name. Corresponds to -uuser flag.
 	 */
 	protected String userName = null;
+
+	/**
+	 * If positive, flag indicates that the user
+	 * value is a case-insensitive search pattern
+	 */
+	protected boolean userCaseInsensitive = false;
 
 	/**
 	 * If true, also include any changelists integrated into the
@@ -173,7 +186,12 @@ public class GetChangelistsOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.includeIntegrated, this.isLongDesc(), this.getClientName(), this.getMaxMostRecent(), (this.getType() == null ? null : this.getType().toString()), this.getUserName(), this.isViewRestricted(), this.isTruncateDescriptions());
+		if (this.optionList == null) {
+			this.optionList = this.processFields(OPTIONS_SPECS, this.includeIntegrated, this.isLongDesc(), this.getClientName(), this.isClientCaseInsensitive(), this.getMaxMostRecent(), (this.getType() == null ? null : this.getType().toString()), this.getUserName(), this.isUserCaseInsensitive(), this.isViewRestricted(), this.isTruncateDescriptions());
+		} else {
+			this.optionList.addAll(this.processFields(OPTIONS_SPECS, this.includeIntegrated, this.isLongDesc(), this.getClientName(), this.isClientCaseInsensitive(), this.getMaxMostRecent(), (this.getType() == null ? null : this.getType().toString()), this.getUserName(), this.isUserCaseInsensitive(), this.isViewRestricted(), this.isTruncateDescriptions()));
+		}
+
 		return this.optionList;
 	}
 
@@ -195,12 +213,26 @@ public class GetChangelistsOptions extends Options {
 		return this;
 	}
 
+	public boolean isClientCaseInsensitive() { return this.clientCaseInsensitive; }
+
+	public GetChangelistsOptions setClientCaseInsensitiveSubOption(boolean clientCaseInsensitive) {
+		this.clientCaseInsensitive = clientCaseInsensitive;
+		return this;
+	}
+
 	public String getUserName() {
 		return userName;
 	}
 
 	public GetChangelistsOptions setUserName(String userName) {
 		this.userName = userName;
+		return this;
+	}
+
+	public boolean isUserCaseInsensitive() { return this.userCaseInsensitive; }
+
+	public GetChangelistsOptions setUserCaseInsensitiveSubOption(boolean userCaseInsensitive) {
+		this.userCaseInsensitive = userCaseInsensitive;
 		return this;
 	}
 
@@ -255,6 +287,30 @@ public class GetChangelistsOptions extends Options {
 	 */
 	public GetChangelistsOptions setTruncateDescriptions(boolean truncateDescriptions) {
 		this.truncateDescriptions = truncateDescriptions;
+		return this;
+	}
+
+	public GetChangelistsOptions setMultipleClientNames(String... multipleClientNames) {
+		if (this.optionList == null) {
+			this.optionList = new ArrayList<>();
+		}
+
+		for (String str : multipleClientNames) {
+			this.optionList.add("-c"+str);
+		}
+
+		return this;
+	}
+
+	public GetChangelistsOptions setMultipleUserNames(String... multipleUserNames) {
+		if (this.optionList == null) {
+			this.optionList = new ArrayList<>();
+		}
+
+		for (String str : multipleUserNames) {
+			this.optionList.add("-u"+str);
+		}
+
 		return this;
 	}
 }

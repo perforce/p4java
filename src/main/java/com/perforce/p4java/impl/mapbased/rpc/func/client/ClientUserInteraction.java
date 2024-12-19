@@ -624,6 +624,9 @@ public class ClientUserInteraction {
 		boolean proxy = props.containsKey(RpcFunctionMapKey.IPADDR) && props.containsKey(RpcFunctionMapKey.SVRNAME) && props.containsKey(RpcFunctionMapKey.PORT);
 
 		String svcUser = props.getProperty(RpcFunctionMapKey.SVRNAME);
+		String svrId = props.getProperty(RpcFunctionMapKey.SVRID);
+		String svrType = props.getProperty(RpcFunctionMapKey.SVRTYPE);
+		String svrVersion = props.getProperty(RpcFunctionMapKey.SVRVERSION);
 
 		try {
 			// Use the auth ticket associated with specified server address
@@ -695,11 +698,10 @@ public class ClientUserInteraction {
 				respMap.put(RpcFunctionMapKey.TOKEN2, resp);
 			}
 
-			if (proxy) {
+			if (proxy && daddr0 != null) {
 				respMap.put(RpcFunctionMapKey.CADDR, props.getProperty(RpcFunctionMapKey.IPADDR));
-			}
+				respMap.put(RpcFunctionMapKey.LADDR, props.getProperty(RpcFunctionMapKey.PORT));
 
-			if (daddr0 != null) {
 				digester.reset();
 				digester.update(svcUser.getBytes());
 				if (svcTicketStr != null) {
@@ -712,6 +714,16 @@ public class ClientUserInteraction {
 				respMap.put("svrname0", svcUser);
 				respMap.put(RpcFunctionMapKey.DADDR + "0", daddr0);
 				respMap.put("dhash0", resp);
+
+				if(svrType != null) {
+					respMap.put(RpcFunctionMapKey.SERVERTYPE + "0", svrType);
+				}
+				if(svrId != null) {
+					respMap.put(RpcFunctionMapKey.SERVERID + "0", svrId);
+				}
+				if(svrVersion != null) {
+					respMap.put(RpcFunctionMapKey.SERVERVERSION + "0", svrVersion);
+				}
 			}
 
 			RpcPacket respPacket = RpcPacket.constructRpcPacket(confirm, respMap, null);

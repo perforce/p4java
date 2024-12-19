@@ -21,7 +21,7 @@ public interface IStreamSummary extends IServerResource {
 
 	/**
 	 * Types of streams include 'mainline', 'release', 'development', 'virtual'
-	 * and 'task'. The default is 'development'.
+	 * 'task', 'sparsedev' and 'sparserel'. The default is 'development'.
 	 * <p>
 	 * Defines the role of a stream: A 'mainline' may not have a parent. A
 	 * 'virtual' stream is not a stream but an alternate view of its parent
@@ -29,10 +29,12 @@ public interface IStreamSummary extends IServerResource {
 	 * be changed. A 'task' stream is a lightweight short-lived stream that only
 	 * promotes modified content to the repository, branched data is stored in
 	 * shadow tables that are removed when the task stream is deleted or
-	 * unloaded.
+	 * unloaded. A 'sparsedev' stream is for development with the same flow
+	 * control as a stream of type development and a 'sparserel' stream is for
+	 * release with the same flow control as a stream of type release
 	 */
 	public enum Type {
-		MAINLINE, RELEASE, DEVELOPMENT, VIRTUAL, TASK, UNKNOWN;
+		MAINLINE, RELEASE, DEVELOPMENT, VIRTUAL, TASK, UNKNOWN, SPARSEDEV, SPARSEREL;
 
 		/**
 		 * Return a suitable Stream type as inferred from the passed-in

@@ -17,9 +17,9 @@ import java.util.List;
 public class GetProtectionEntriesOptions extends Options {
 
 	/**
-	 * Options: -a, -g[group], -u[user], -h[host]
+	 * Options: -a, -g[group], -u[user], -h[host], -m
 	 */
-	public static final String OPTIONS_SPECS = "b:a s:g s:u s:h";
+	public static final String OPTIONS_SPECS = "b:a s:g s:u s:h b:m";
 
 	/** If true,protection lines for all users are displayed; corresponds to the -a flag. */
 	protected boolean allUsers = false;
@@ -33,6 +33,9 @@ public class GetProtectionEntriesOptions extends Options {
 
 	/** If not null, protection lines for the named group are displayed; -g flag */
 	protected String groupName = null;
+
+	/**  If not null, a single word summary of the maximum access level is reported; -m flag  */
+	protected boolean singleWordSummary = false;
 
 	/**
 	 * Default constructor.
@@ -84,7 +87,7 @@ public class GetProtectionEntriesOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.isAllUsers(), this.getGroupName(), this.getUserName(), this.getHostName());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isAllUsers(), this.getGroupName(), this.getUserName(), this.getHostName(), this.isSingleWordSummary());
 		return this.optionList;
 	}
 
@@ -121,6 +124,13 @@ public class GetProtectionEntriesOptions extends Options {
 
 	public GetProtectionEntriesOptions setGroupName(String groupName) {
 		this.groupName = groupName;
+		return this;
+	}
+
+	public boolean isSingleWordSummary() { return singleWordSummary; }
+
+	public GetProtectionEntriesOptions setSingleWordSummary(boolean singleWordSummary) {
+		this.singleWordSummary = singleWordSummary;
 		return this;
 	}
 }

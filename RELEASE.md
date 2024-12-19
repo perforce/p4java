@@ -1,7 +1,7 @@
                             Release Notes for
                        P4Java, the Perforce Java API
 
-                              Version 2024.1
+                              Version 2024.2
 
 Introduction
 
@@ -20,7 +20,7 @@ Introduction
 
 Requirements
 
-	* Perforce server at Release 2015.1 or higher.
+	* Perforce server at Release 2021.1 or higher.
 
 	* Java: full standard JDK 11 or later.  Implementation as
 	  discussed in "Known Limitations" below.
@@ -30,7 +30,7 @@ Requirements
 
 SSL and Trust
 
-	Perforce server 2015.1 or higher supports 256-bit SSL connections
+	Perforce server 2021.1 or higher supports 256-bit SSL connections
 	and trust establishment via accepting the fingerprint of the SSL
 	certificate's public key. The standard JDK comes with 128-bit
 	encryption level ciphers. In order to use P4Java to connect to
@@ -108,7 +108,7 @@ Known Limitations
 	  mean either true shift-jis or CP932 by the Perforce server and
 	  many Windows tools. There is currently no workaround known.
 
-	* The Perforce server (2015.1 or higher) only support 256-bit
+	* The Perforce server (2021.1 or higher) only support 256-bit
 	  encryption.  Due to current US export control restrictions
 	  for some countries, the standard JDK package only comes with
 	  128-bit encryption level ciphers.  In order to use P4Java to
@@ -123,6 +123,42 @@ Known Limitations
 	  
 	* P4Java would not support file operations on altsync enabled clients.
 
+-------------------------------------------
+Updates in 2024.2 (2024.2/2695691) (2024/12/13)
+
+	#2693987 (Job #123372)
+	    Fixed a bug where localWhere should include path of the sparse stream instead 
+	    of the mainline from which the sparse stream is created
+
+	#2692452 (Job #123888)
+	    Added 'long' value support for 'TicketExpiration' field while login
+
+	#2693212, #2693848 (Job #123268)
+	    Added support of P4IGNORE from env variable working for absolute path
+	    Added support for all patterns in ignore file
+
+	#2687877, #2686707 (Job #122068)
+	    Added support of -m flag for "p4 protects" command
+
+	#2684594 (Job #123229)
+	    Added support for user case insensitive suboption for "p4 labels" command
+
+	#2684552 (Job #122974)
+	    Added support for user case insensitive suboption for "p4 clients" command
+
+	#2684551 (Job #122978)
+	    Added support for user case insensitive suboption for "p4 branches" command
+
+	#2684163, #2685729 (Job #123231)
+	    Added support for multiple client and user option with a generic case-insensitive
+	    sub option for "p4 changes" command
+
+	#2684163, #2681088 (Job #122972)
+	    Added support for client and user case insensitive option for 
+	    "p4 changes -c and -u"
+
+	#2684152, #2688244 (Job #121727)
+	    Added support for Sparse Streams
 
 -------------------------------------------
 Updates in 2024.1 Patch 1 (2024.1/2674354) (2024/10/29)

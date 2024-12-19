@@ -78,7 +78,8 @@ public class ClientIgnoreChecker {
 	}
 
 	/**
-	 * Check all ignore files up to the client root directory.
+	 * Check for the ignore file as an absolute path
+	 * or check the ignore file up to the client root directory.
 	 * 
 	 * @param file
 	 *            the file
@@ -88,23 +89,62 @@ public class ClientIgnoreChecker {
 	 */
 	private boolean checkIgnoreFiles(File file) throws IOException {
 		if (file != null) {
-			// Signal for inverse match
+			// when ignoreFileName is in the form of absolute path
+			File ignoreFile = new File(ignoreFileName);
+			if (ignoreFile.exists() && !ignoreFileName.startsWith(".")) {
+				if (checkIgnorePatternInSubDirectories(ignoreFile, file)) {
+					return true;
+				}
+			}
+			// when ignoreFileName is in the form of a relative path of client root
+			else {
+				File clientRootDir = new File(clientRoot);
+				File fileDir = file;
+				do {
+					fileDir = fileDir.getParentFile();
+					if (fileDir != null) {
+						ignoreFile = new File(fileDir, ignoreFileName);
+						if (ignoreFile.exists()) {
+							if (checkIgnorePatternInSubDirectories(ignoreFile, file)) {
+								return true;
+							}
+						}
+					}
+				} while (fileDir != null && !fileDir.getAbsoluteFile().equals(clientRootDir));
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Checks for the ignore file patterns in all the directories and sub-directories
+	 *
+	 * @param ignoreFile
+	 *            the ignore file
+	 * @param file
+	 *            the file
+	 * @return true, if successful
+	 * @throws IOException
+	 *             Signals that an I/O exception has occurred.
+	 */
+	private boolean checkIgnorePatternInSubDirectories(File ignoreFile, File file) throws IOException {
+		if (file != null && ignoreFile.exists()) {
+			// Signal for inverse match (if negation is used in ignore rules)
 			Negate negate = this.new Negate();
 	
 			File clientRootDir = new File(clientRoot);
 			File fileDir = file;
+
 			do {
 				fileDir = fileDir.getParentFile();
 				if (fileDir != null) {
-					File ignoreFile = new File(fileDir, ignoreFileName);
-					if (ignoreFile.exists()) {
-						if (checkIgnoreFile(ignoreFile, fileDir, file, negate)) {
-							// Inverse match
-							if (negate.isMatch()) {
-								return false;
-							}
-							return true;
+					if (traverseIgnoreFileForPattern(ignoreFile, fileDir, file, negate)) {
+						// Inverse match
+						if (negate.isMatch()) {
+							return false;
 						}
+						return true;
 					}
 				}
 			} while (fileDir != null && !fileDir.getAbsoluteFile().equals(clientRootDir));
@@ -128,7 +168,7 @@ public class ClientIgnoreChecker {
 	 * @throws IOException
 	 *             Signals that an I/O exception has occurred.
 	 */
-	private boolean checkIgnoreFile(File ignoreFile, File currentDir, File file, Negate negate)
+	private boolean traverseIgnoreFileForPattern(File ignoreFile, File currentDir, File file, Negate negate)
 			throws IOException {
 
 		BufferedReader br = null;

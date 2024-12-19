@@ -118,6 +118,7 @@ public class RpcFunctionMapKey {
 	public static final String KEY = "key";
 	public static final String LABEL_REC_DELETED = "labelRecDeleted";
 	public static final String LABEL = "label";
+	public static final String LADDR = "listenAddr";
 	public static final String LINEEND = "LineEnd";
 	public static final String LOCAL_FILE = "localFile";
 	public static final String LOWER = "lower";
@@ -214,6 +215,7 @@ public class RpcFunctionMapKey {
 	public static final String SERVERID = "serverID";
 	public static final String SERVERLICENSE = "serverLicense";
 	public static final String SERVERROOT = "serverRoot";
+	public static final String SERVERTYPE = "serverType";
 	public static final String SERVERUPTIME = "serverUptime";
 	public static final String SERVERVERSION = "serverVersion";
 	public static final String SET = "set";
@@ -230,7 +232,10 @@ public class RpcFunctionMapKey {
 	public static final String STATUS = "status";
 	public static final String SUBMITOPTIONS = "SubmitOptions";
 	public static final String SUMMARY = "summary";
+	public static final String SVRID = "svrid";
 	public static final String SVRNAME = "svrname";
+	public static final String SVRTYPE = "svrtype";
+	public static final String SVRVERSION = "svrversion";
 	public static final String SYNCTIME = "syncTime";
 	public static final String TAG = "tag";
 	public static final String THEIRNAME = "theirName";
@@ -295,6 +300,8 @@ public class RpcFunctionMapKey {
 	public static final String ID = "id";
 
 	public static final String URL = "url";
+
+	public static final String PERM_MAX = "permMax";
 
 	/**
 	 * RPC keys map

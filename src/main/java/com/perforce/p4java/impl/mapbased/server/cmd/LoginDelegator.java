@@ -55,9 +55,9 @@ public class LoginDelegator extends BaseDelegator implements ILoginDelegator {
 				// therefore we must convert it here.
 				if (firstResultMap.containsKey("TicketExpiration")) {
 					String user = (String) firstResultMap.get("User");
-					int secondsRemaining = Integer.parseInt(String.valueOf(firstResultMap.get("TicketExpiration")));
-					int hoursRemaining = secondsRemaining / 3600;
-					int minutesRemaining = (secondsRemaining % 3600) / 60;
+					long secondsRemaining = Long.parseLong(String.valueOf(firstResultMap.get("TicketExpiration")));
+					long hoursRemaining = secondsRemaining / 3600;
+					long minutesRemaining = (secondsRemaining % 3600) / 60;
 					statusStr = "User " + user + " ticket expires in " + hoursRemaining + " hours " + minutesRemaining + " minutes.";
 				} else {
 					// it's probably an error message:
