@@ -22,7 +22,7 @@ Requirements
 
 	* Perforce server at Release 2021.1 or higher.
 
-	* Java: full standard JDK 11 or later.  Implementation as
+	* Java: full standard JDK 8 or later.  Implementation as
 	  discussed in "Known Limitations" below.
 
 	* SSL: unlimited strength JCE (Java Cryptography Extension) package for

@@ -7,8 +7,8 @@ plugins {
 group = 'com.perforce'
 version = project.hasProperty('ver') ? project.ext.ver : 'PREP-TEST_ONLY'
 
-sourceCompatibility = 11
-targetCompatibility = 11
+sourceCompatibility = JavaVersion.VERSION_1_8
+targetCompatibility = JavaVersion.VERSION_1_8
 
 repositories {
     maven { url "https://repo.maven.apache.org/maven2" }
