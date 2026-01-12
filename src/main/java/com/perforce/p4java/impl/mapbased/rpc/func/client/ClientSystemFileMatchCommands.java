@@ -5,6 +5,7 @@ package com.perforce.p4java.impl.mapbased.rpc.func.client;
 
 import com.perforce.p4java.Log;
 import com.perforce.p4java.PropertyDefs;
+import com.perforce.p4java.client.ClientProgressReport;
 import com.perforce.p4java.diff.DiffAnalyze;
 import com.perforce.p4java.diff.DiffFlags;
 import com.perforce.p4java.diff.DigestTree;
@@ -37,6 +38,8 @@ import com.perforce.p4java.mapapi.MapFlag;
 import com.perforce.p4java.mapapi.MapTable;
 import com.perforce.p4java.mapapi.MapTableT;
 import com.perforce.p4java.mapapi.MapWrap;
+import com.perforce.p4java.server.callback.progress.IProgress;
+import com.perforce.p4java.server.callback.progress.ProgressType;
 
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -52,7 +55,9 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -165,12 +170,23 @@ public class ClientSystemFileMatchCommands {
 		String fromFilePath = cfile.getMatchDict().get(RpcFunctionMapKey.FROM_FILE);
 		String type = cfile.getMatchDict().get(RpcFunctionMapKey.TYPE);
 		String matchlines = cfile.getMatchDict().get(RpcFunctionMapKey.MATCHLINES);
+		String count = cfile.getMatchDict().get(RpcFunctionMapKey.COUNT);
 		int threads = Integer.parseInt(cfile.getMatchDict().get(RpcFunctionMapKey.THREADS));
 
 		int maxThreads = 32;
 		threads = Math.min(Math.max(threads, 1), maxThreads);
 
 		ReconcileHandle recHandle = getReconcileHandle(cmdEnv);
+		IProgress clientProgressCallback = cmdEnv.getClientProgressCallback();
+		if(clientProgressCallback !=null){
+			recHandle.beginStage("Matching content",clientProgressCallback, ProgressType.FILES);
+		}
+		if(count !=null && clientProgressCallback !=null){
+			ClientProgressReport progressReport = recHandle.getProgressReport();
+			progressReport.total(Integer.parseInt(count));
+		}
+
+
 		DigestTree fileSet = recHandle.getDigestTree();
 		ExecutorService executor = Executors.newFixedThreadPool(threads);
 		List<Future<Map.Entry<Integer, Integer>>> futures = new ArrayList<>();
@@ -246,7 +262,7 @@ public class ClientSystemFileMatchCommands {
 			String clientHandle = (String) resultsMap.get(RpcFunctionMapKey.HANDLE);
 			RpcHandler handler = cmdEnv.getHandler(clientHandle);
 			Path pathParent = Path.of(cfile.getFile().getParent());
-			if( handler.isTmpDirCreated() && Files.list(pathParent).count() == 0 ) {
+			if (handler.isTmpDirCreated() && Files.list(pathParent).count() == 0) {
 				Files.delete(pathParent); // tmp directory delete
 			}
 		} catch (Exception e) {
@@ -343,8 +359,18 @@ public class ClientSystemFileMatchCommands {
 		String clientType = (String) resultsMap.get(RpcFunctionMapKey.TYPE);
 		String digest = (String) resultsMap.get(RpcFunctionMapKey.DIGEST);
 		String confirm = (String) resultsMap.get(RpcFunctionMapKey.CONFIRM);
+		String count = (String) resultsMap.get(RpcFunctionMapKey.COUNT);
 
 		ReconcileHandle recHandle = getReconcileHandle(cmdEnv);
+		IProgress clientProgress = cmdEnv.getClientProgressCallback();
+		if (clientProgress != null) {
+			recHandle.beginStage("Matching digest", null, ProgressType.FILES);
+		}
+
+		if (count != null && clientProgress != null) {
+			ClientProgressReport progressReport = recHandle.getProgressReport();
+			progressReport.total(Integer.parseInt(count));
+		}
 
 		if (confirm == null) {
 			throw new NullPointerError("No confirm value.");
@@ -430,8 +456,19 @@ public class ClientSystemFileMatchCommands {
 		String fileSize = (String) resultsMap.get(RpcFunctionMapKey.FILESIZE);
 		String submitTime = (String) resultsMap.get(RpcFunctionMapKey.TIME);
 		String clientPath = (String) resultsMap.get(RpcFunctionMapKey.PATH);
+		String count = (String) resultsMap.get(RpcFunctionMapKey.COUNT);
 
 		ReconcileHandle recHandle = getReconcileHandle(cmdEnv);
+		//Progress
+		IProgress progressCallback = cmdEnv.getClientProgressCallback();
+		if (progressCallback != null) {
+			recHandle.beginStage("Reconcile Edit", null, ProgressType.FILES);
+		}
+		ClientProgressReport progressReport = recHandle.getProgressReport();
+		if (count != null && progressReport != null) {
+			int countInt = Integer.parseInt(count);
+			progressReport.total(countInt);
+		}
 
 		long checkSize = 0;
 		long time = 0;
@@ -603,6 +640,11 @@ public class ClientSystemFileMatchCommands {
 		// status -s also needs the list of files opened for add appended
 		// to the list of depot files.
 
+		IProgress clientProgress = cmdEnv.getClientProgressCallback();
+		if(clientProgress !=null){
+			reconcileHandle.beginStage("Reconicle Add", clientProgress, ProgressType.DIRS);
+		}
+
 		if (isSummary) {
 			for (int j = 0; resultsMap.containsKey(RpcFunctionMapKey.DEPOT_FILES + j); j++) {
 				depotFiles.add((String) resultsMap.get(RpcFunctionMapKey.DEPOT_FILES + j));
@@ -627,9 +669,9 @@ public class ClientSystemFileMatchCommands {
 		if (isSummary) {
 			AtomicInteger idx = new AtomicInteger(0);
 			AtomicInteger ddx = new AtomicInteger(0);
-			traverseShort(resultsMap, new File(dir), new File(dir), isTraverse, isSkipIgnore, true, false, isSkipCurrent, map, files, dirs, idx, depotFiles, ddx, rpcConnection.isUnicodeServer(), rpcConnection.getClientCharset(), cmdEnv);
+			traverseShort(resultsMap, new File(dir), new File(dir), isTraverse, isSkipIgnore, true, false, isSkipCurrent, map, files, dirs, idx, depotFiles, ddx, rpcConnection.isUnicodeServer(), rpcConnection.getClientCharset(), cmdEnv, reconcileHandle.getProgressReport());
 		} else {
-			traverseDirs(new File(dir), isTraverse, isSkipIgnore, isSendDigest, isSendType, map, files, sizes, digests, types, hasIndex, reconcileHandle != null ? reconcileHandle.getSkipFiles() : null, rpcConnection.isUnicodeServer(), rpcConnection.getClientCharset(), cmdEnv);
+			traverseDirs(new File(dir), isTraverse, isSkipIgnore, isSendDigest, isSendType, map, files, sizes, digests, types, hasIndex, reconcileHandle != null ? reconcileHandle.getSkipFiles() : null, rpcConnection.isUnicodeServer(), rpcConnection.getClientCharset(), cmdEnv, reconcileHandle.getProgressReport());
 		}
 
 		// Compare list of files on client with list of files in the depot
@@ -772,23 +814,24 @@ public class ClientSystemFileMatchCommands {
 	 * <p>
 	 * Check MapApi; if no mapping, continue.
 	 *
-	 * @param file        file
-	 * @param traverse    traverse
-	 * @param skipIgnore  skipIgnore
-	 * @param sendDigest  sendDigest
-	 * @param sendType    sendType
-	 * @param map         map
-	 * @param addFilesMap addFilesMap
-	 * @param sizes       sizes
-	 * @param digests     digests
-	 * @param types       types
-	 * @param hasIndex    hasIndex
-	 * @param skipFiles   skipFiles
-	 * @param unicode     unicode
-	 * @param charset     charset
-	 * @param cmdEnv      cmdEnv
+	 * @param file           file
+	 * @param traverse       traverse
+	 * @param skipIgnore     skipIgnore
+	 * @param sendDigest     sendDigest
+	 * @param sendType       sendType
+	 * @param map            map
+	 * @param addFilesMap    addFilesMap
+	 * @param sizes          sizes
+	 * @param digests        digests
+	 * @param types          types
+	 * @param hasIndex       hasIndex
+	 * @param skipFiles      skipFiles
+	 * @param unicode        unicode
+	 * @param charset        charset
+	 * @param cmdEnv         cmdEnv
+	 * @param progressReport
 	 */
-	private void traverseDirs(File file, boolean traverse, boolean skipIgnore, boolean sendDigest, boolean sendType, MapTable map, List<String> addFilesMap, Map<String, Long> sizes, Map<String, String> digests, Map<String, String> types, int hasIndex, List<String> skipFiles, boolean unicode, Charset charset, CommandEnv cmdEnv) {
+	private void traverseDirs(File file, boolean traverse, boolean skipIgnore, boolean sendDigest, boolean sendType, MapTable map, List<String> addFilesMap, Map<String, Long> sizes, Map<String, String> digests, Map<String, String> types, int hasIndex, List<String> skipFiles, boolean unicode, Charset charset, CommandEnv cmdEnv, ClientProgressReport progressReport) {
 
 		if (addFilesMap == null) {
 			throw new IllegalArgumentException("Must pass in a non-null 'files' list as a parameter.");
@@ -803,6 +846,9 @@ public class ClientSystemFileMatchCommands {
 			return;
 		}
 
+		if (progressReport != null) {
+			progressReport.increment(1);
+		}
 		// If this is a file, not a directory, and not to be ignored,
 		// save the filename and return.
 
@@ -887,7 +933,7 @@ public class ClientSystemFileMatchCommands {
 					}
 				} else if (traverse) {
 					// Recursive call
-					traverseDirs(f, traverse, skipIgnore, sendDigest, sendType, map, addFilesMap, sizes, digests, types, hasIndex, skipFiles, unicode, charset, cmdEnv);
+					traverseDirs(f, traverse, skipIgnore, sendDigest, sendType, map, addFilesMap, sizes, digests, types, hasIndex, skipFiles, unicode, charset, cmdEnv, progressReport);
 				}
 			} else { // File
 				String from = fileName;
@@ -925,7 +971,7 @@ public class ClientSystemFileMatchCommands {
 		return digester.digestFileAs32ByteHex(pFile, charset);
 	}
 
-	private boolean traverseShort(Map<String, Object> resultsMap, File cwd, File file, boolean traverse, boolean skipIgnore, boolean initial, boolean skipCheck, boolean skipCurrent, MapTable map, List<String> addFilesMap, List<String> dirs, AtomicInteger idx, List<String> depotFiles, AtomicInteger ddx, boolean unicode, Charset charset, CommandEnv cmdEnv) {
+	private boolean traverseShort(Map<String, Object> resultsMap, File cwd, File file, boolean traverse, boolean skipIgnore, boolean initial, boolean skipCheck, boolean skipCurrent, MapTable map, List<String> addFilesMap, List<String> dirs, AtomicInteger idx, List<String> depotFiles, AtomicInteger ddx, boolean unicode, Charset charset, CommandEnv cmdEnv, ClientProgressReport progressReport) {
 
 		// Variant of traverseDirs that computes the files to be
 		// added during traversal of directories instead of at the end,
@@ -933,6 +979,10 @@ public class ClientSystemFileMatchCommands {
 		// This is used by 'status -s'.
 
 		// Scan the directory.
+
+		if (progressReport != null) {
+			progressReport.increment(1);
+		}
 
 		boolean found = false;
 
@@ -1074,7 +1124,7 @@ public class ClientSystemFileMatchCommands {
 						skipCheck = !foundOne;
 					}
 
-					found = traverseShort(resultsMap, cwd, f, traverse, skipIgnore, false, skipCheck, skipCurrent, map, addFilesMap, dirs, idx, depotFiles, ddx, unicode, charset, cmdEnv);
+					found = traverseShort(resultsMap, cwd, f, traverse, skipIgnore, false, skipCheck, skipCurrent, map, addFilesMap, dirs, idx, depotFiles, ddx, unicode, charset, cmdEnv, progressReport);
 
 					// Stop traversing directories when we have a file to
 					// to add, unless we are at the top and need to check

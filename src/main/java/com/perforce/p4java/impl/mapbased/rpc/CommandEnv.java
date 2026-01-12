@@ -4,6 +4,7 @@
 package com.perforce.p4java.impl.mapbased.rpc;
 
 import com.perforce.p4java.Log;
+import com.perforce.p4java.client.BaseProgressReport;
 import com.perforce.p4java.exception.P4JavaException;
 import com.perforce.p4java.impl.mapbased.rpc.connection.RpcConnection;
 import com.perforce.p4java.impl.mapbased.rpc.func.RpcFunctionMapKey;
@@ -13,6 +14,7 @@ import com.perforce.p4java.server.callback.IFilterCallback;
 import com.perforce.p4java.server.callback.IParallelCallback;
 import com.perforce.p4java.server.callback.IProgressCallback;
 import com.perforce.p4java.server.callback.IStreamingCallback;
+import com.perforce.p4java.server.callback.progress.IProgress;
 
 import java.io.File;
 import java.util.HashMap;
@@ -64,12 +66,21 @@ public class CommandEnv {
 		private File file = null;
 		private Map<String, Object> map = null;
     	private boolean tmpDirCreated = false;
+		private BaseProgressReport progress = null;
 
 		public RpcHandler(String name, boolean error, File file) {
 			this.name = name;
 			this.error = error;
 			this.file = file;
 			this.map = new HashMap<String, Object>();
+		}
+
+		public BaseProgressReport getProgress() {
+			return progress;
+		}
+
+		public void setProgress(BaseProgressReport progress) {
+			this.progress = progress;
 		}
 
 		public String getName() {
@@ -165,6 +176,7 @@ public class CommandEnv {
 	private Map<String, Object> serverProtocolSpecsMap = null;
 
 	private IProgressCallback progressCallback = null;
+	private IProgress clientProgressCallback = null;
 
 	private int cmdCallBackKey = 0;
 
@@ -467,6 +479,14 @@ public class CommandEnv {
 
 	public void setParallelCallback(IParallelCallback parallelCallback) {
 		this.parallelCallback = parallelCallback;
+	}
+
+	public IProgress getClientProgressCallback() {
+		return clientProgressCallback;
+	}
+
+	public void setClientProgressCallback(IProgress clientProgressCallback) {
+		this.clientProgressCallback = clientProgressCallback;
 	}
 
 	public RpcServer getServer() {

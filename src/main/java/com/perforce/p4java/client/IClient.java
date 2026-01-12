@@ -94,6 +94,21 @@ public interface IClient extends IClientSummary, IWhereDelegator {
 	void setChangeView(ArrayList<String> changeView);
 
 	/**
+	 * Get the Perforce limit view associated with this client, if any.
+	 *
+	 * @return the Perforce limit view associated with this client, if any;
+	 * null otherwise.
+	 * */
+	ArrayList<String> getLimitView();
+
+	/**
+	 * Set the Perforce limit view associated with this client.
+	 *
+	 * @param limitView new List of limit views for the client.
+	 */
+	void setLimitView(ArrayList<String> limitView);
+
+	/**
 	 * Return the IServer object representing the Perforce server associated with this
 	 * Perforce client.
 	 *

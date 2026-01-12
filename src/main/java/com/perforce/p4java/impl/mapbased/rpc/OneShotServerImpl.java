@@ -41,11 +41,13 @@ import java.io.InputStream;
 import java.net.Socket;
 import java.nio.BufferOverflowException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.TimeUnit;
 
 /**
  * A one-shot (connection-per-command) version of the RPC protocol
@@ -104,6 +106,11 @@ public class OneShotServerImpl extends RpcServer {
 	 * Socket pool for this server
 	 */
 	protected RpcSocketPool socketPool = null;
+
+	/**
+	 * Global Options for this server
+	 */
+	protected List<String> globalOptions = new ArrayList<>();
 
 	/**
 	 * Initialize the server. Basically defers to the superclass after setting
@@ -262,9 +269,6 @@ public class OneShotServerImpl extends RpcServer {
 	}
 
 	protected List<Map<String, Object>> execMapCmdList(String cmdName, String[] cmdArgs, Map<String, Object> inMap, String inString, boolean ignoreCallbacks, IStreamingCallback callback, int callbackKey, IFilterCallback filterCallback, IParallelCallback parallelCallback) throws ConnectionException, AccessException, RequestException {
-		RpcPacketDispatcher dispatcher = null;
-		RpcConnection rpcConnection = null;
-
 		if (cmdName == null) {
 			throw new NullPointerError("Null command name passed to execMapCmd");
 		}
@@ -273,81 +277,167 @@ public class OneShotServerImpl extends RpcServer {
 			throw new ConnectionNotConnectedException("Not currently connected to a Perforce server");
 		}
 
+		int attempt = 0;
+		int maxRetries = 0;
 		try {
-			int cmdCallBackKey = this.nextCmdCallBackKey.incrementAndGet();
-			long startTime = System.currentTimeMillis();
-			dispatcher = new RpcPacketDispatcher(props, this);
-			rpcConnection = new RpcStreamConnection(serverHost, serverPort, props, this.serverStats, this.p4Charset, null, this.socketPool, this.secure, this.rsh);
-			ProtocolCommand protocolSpecs = new ProtocolCommand();
+			maxRetries = getRetry();
+		} catch (Exception exc) {
+			Log.error("Failed to parse retry option: " + exc.getMessage());
+			throw exc;
+		}
 
-			if (inMap != null && ClientLineEnding.CONVERT_TEXT) {
-				ClientLineEnding.convertMap(inMap);
-			}
+		List<Map<String, Object>> retMapList = new ArrayList<>();
 
-			ExternalEnv env = setupCmd(dispatcher, rpcConnection, protocolSpecs, cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, inMap, ignoreCallbacks, cmdCallBackKey, false);
-			CommandEnv cmdEnv = new CommandEnv(this, new RpcCmdSpec(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, getAuthTicket(), inMap, inString, env), rpcConnection, protocolSpecs, this.serverProtocolMap, this.progressCallback, cmdCallBackKey, writeInPlace(cmdName), this.isNonCheckedSyncs());
-			cmdEnv.setDontWriteTicket(isDontWriteTicket(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs));
-			cmdEnv.setFieldRule(getRpcPacketFieldRule(inMap, CmdSpec.getValidP4JCmdSpec(cmdName)));
-			cmdEnv.setStreamingCallback(callback);
-			cmdEnv.setStreamingCallbackKey(callbackKey);
-			cmdEnv.setFilterCallback(filterCallback);
-			cmdEnv.setParallelCallback(parallelCallback);
-			if (callback != null) {
-				try {
-					callback.startResults(callbackKey);
-				} catch (P4JavaException exc) {
-					Log.error("streaming callback startResults method threw exception: " + exc.getLocalizedMessage());
-					Log.exception(exc);
+		while (attempt <= maxRetries) {
+			RpcPacketDispatcher dispatcher = null;
+			RpcConnection rpcConnection = null;
+
+			try {
+				attempt++;
+				int cmdCallBackKey = this.nextCmdCallBackKey.incrementAndGet();
+				long startTime = System.currentTimeMillis();
+				dispatcher = new RpcPacketDispatcher(props, this);
+				rpcConnection = new RpcStreamConnection(serverHost, serverPort, props, this.serverStats, this.p4Charset, null, this.socketPool, this.secure, this.rsh);
+				ProtocolCommand protocolSpecs = new ProtocolCommand();
+
+				if (inMap != null && ClientLineEnding.CONVERT_TEXT) {
+					ClientLineEnding.convertMap(inMap);
 				}
-			}
-			List<Map<String, Object>> retMapList = dispatcher.dispatch(cmdEnv);
-			long endTime = System.currentTimeMillis();
-			if (callback != null) {
-				try {
-					callback.endResults(callbackKey);
-				} catch (P4JavaException exc) {
-					Log.error("streaming callback endResults method threw exception: " + exc.getLocalizedMessage());
-					Log.exception(exc);
+
+				ExternalEnv env = setupCmd(dispatcher, rpcConnection, protocolSpecs, cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, inMap, ignoreCallbacks, cmdCallBackKey, false);
+				CommandEnv cmdEnv = new CommandEnv(this, new RpcCmdSpec(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, getAuthTicket(), inMap, inString, env), rpcConnection, protocolSpecs, this.serverProtocolMap, this.progressCallback, cmdCallBackKey, writeInPlace(cmdName), this.isNonCheckedSyncs());
+				cmdEnv.setDontWriteTicket(isDontWriteTicket(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs));
+				cmdEnv.setFieldRule(getRpcPacketFieldRule(inMap, CmdSpec.getValidP4JCmdSpec(cmdName)));
+				cmdEnv.setStreamingCallback(callback);
+				cmdEnv.setStreamingCallbackKey(callbackKey);
+				cmdEnv.setFilterCallback(filterCallback);
+				cmdEnv.setParallelCallback(parallelCallback);
+				cmdEnv.setClientProgressCallback(super.getClientProgressCallback());
+				if (callback != null) {
+					try {
+						callback.startResults(callbackKey);
+					} catch (P4JavaException exc) {
+						Log.error("streaming callback startResults method threw exception: " + exc.getLocalizedMessage());
+						Log.exception(exc);
+					}
 				}
+
+				retMapList = dispatcher.dispatch(cmdEnv); // may throw Throwable
+
+				long endTime = System.currentTimeMillis();
+				if (callback != null) {
+					try {
+						callback.endResults(callbackKey);
+					} catch (P4JavaException exc) {
+						Log.error("streaming callback endResults method threw exception: " + exc.getLocalizedMessage());
+						Log.exception(exc);
+					}
+				}
+
+				// Check if currently case sensitive so the map search for the no
+				// case key is only performed when necessary. Once a server is
+				// marked as case insensitive this check will never look at the
+				// server protocol specs map.
+				if (this.caseSensitive && cmdEnv.getServerProtocolSpecsMap().containsKey(RpcFunctionMapKey.NOCASE)) {
+					this.caseSensitive = false;
+				}
+
+				if (!ignoreCallbacks && (this.commandCallback != null)) {
+					this.processCmdCallbacks(cmdCallBackKey, endTime - startTime, retMapList);
+				}
+
+				// Close RPC output stream
+				RpcOutputStream outStream = (RpcOutputStream) cmdEnv.getStateMap().get(RpcServer.RPC_TMP_OUTFILE_STREAM_KEY);
+				if (outStream != null) {
+					outStream.close();
+				}
+
+				break;
+			} catch (BufferOverflowException exc) {
+				Log.error("RPC Buffer overflow: " + exc.getLocalizedMessage());
+				Log.exception(exc);
+				throw new P4JavaError("RPC Buffer overflow: " + exc.getLocalizedMessage());
+			} catch (ConnectionNotConnectedException cnce) {
+				this.connected = false;
+				this.status = ServerStatus.ERROR;
+				throw cnce;
+			} catch (IOException ioexc) {
+				Log.error("RPC I/O error: " + ioexc.getLocalizedMessage());
+				Log.exception(ioexc);
+				throw new RequestException("I/O error encountered in stream command: " + ioexc.getLocalizedMessage(), ioexc);
+			} catch (Exception exec){
+				if (attempt > maxRetries) {
+					Log.error("Max retries exceeded: " + maxRetries);
+					Log.error("Command failed on attempt " + attempt + " of " + maxRetries);
+					throw exec;
+				}
+				Log.error("Command failed on attempt " + attempt +
+						" of " + maxRetries + ": " + exec.getMessage());
+				Log.exception(exec);
+				// exponential backoff: 1s, 4s, 9s, ...
+				long backoffSeconds = (long) attempt * attempt;
+				try {
+					TimeUnit.SECONDS.sleep(backoffSeconds); // continue retry loop
+				} catch (InterruptedException ie) {
+					Thread.currentThread().interrupt();
+					Log.error("Backoff sleep interrupted; retry may stop early.");
+					break;  // optionally exit retry loop immediately
+				}
+				throw exec;
 			}
 
-			// Check if currently case sensitive so the map search for the no
-			// case key is only performed when necessary. Once a server is
-			// marked as case insensitive this check will never look at the
-			// server protocol specs map.
-			if (this.caseSensitive && cmdEnv.getServerProtocolSpecsMap().containsKey(RpcFunctionMapKey.NOCASE)) {
-				this.caseSensitive = false;
-			}
-
-			if (!ignoreCallbacks && (this.commandCallback != null)) {
-				this.processCmdCallbacks(cmdCallBackKey, endTime - startTime, retMapList);
-			}
-
-			// Close RPC output stream
-			RpcOutputStream outStream = (RpcOutputStream) cmdEnv.getStateMap().get(RpcServer.RPC_TMP_OUTFILE_STREAM_KEY);
-			if (outStream != null) {
-				outStream.close();
-			}
-
-			return retMapList;
-
-		} catch (BufferOverflowException exc) {
-			Log.error("RPC Buffer overflow: " + exc.getLocalizedMessage());
-			Log.exception(exc);
-			throw new P4JavaError("RPC Buffer overflow: " + exc.getLocalizedMessage());
-		} catch (ConnectionNotConnectedException cnce) {
-			this.connected = false;
-			this.status = ServerStatus.ERROR;
-			throw cnce;
-		} catch (IOException ioexc) {
-			Log.error("RPC I/O error: " + ioexc.getLocalizedMessage());
-			Log.exception(ioexc);
-			throw new RequestException("I/O error encountered in stream command: " + ioexc.getLocalizedMessage(), ioexc);
-		} finally {
-			if (rpcConnection != null) {
-				rpcConnection.disconnect(dispatcher);
+			finally {
+				if (rpcConnection != null) {
+					rpcConnection.disconnect(dispatcher);
+				}
 			}
 		}
+		return retMapList;
+	}
+
+	private int getRetry() throws IllegalArgumentException {
+		int maxRetries = 0;
+		if (globalOptions == null || globalOptions.isEmpty()) {
+			return maxRetries;
+		}
+
+		for (int i = 0; i < globalOptions.size(); i++) {
+			String opt = globalOptions.get(i).trim();
+			if (opt == null) continue;  // null-safety
+
+			// Case 1: "-r3" form
+			if (opt.startsWith("-r") && opt.length() > 2) {
+				try {
+					maxRetries = Integer.parseInt(opt.substring(2).trim());
+					if (maxRetries < 0) {
+						String msg = String.format(
+								"Perforce client error:%n\tp4 -h for usage.%n\t\tOption: -r needs a non-negative integer argument: %s",
+								opt
+						);
+						Log.error(msg);
+						throw new IllegalArgumentException(msg);
+					}
+				} catch (NumberFormatException nfe) {
+					String msg = String.format(
+							"Perforce client error:%n\tp4 -h for usage.%n\t\tOption: -r needs a non-negative integer argument: %s",
+							opt
+					);
+					Log.error(msg);
+					throw new NumberFormatException(msg);
+				}
+			}
+		}
+		return maxRetries;
+	}
+
+	@Override
+	public void setGlobalOptions(List<String> s) {
+		this.globalOptions = s;
+	}
+
+	@Override
+	public List<String> getGlobalOptions() {
+		return this.globalOptions;
 	}
 
 	/**
@@ -510,7 +600,7 @@ public class OneShotServerImpl extends RpcServer {
 	 * @throws AccessException     on error
 	 */
 	protected ByteBuffer execStreamCmdForBuffer(String cmdName, String[] cmdArgs, Map<String, Object> inMap, String inString, boolean ignoreCallbacks) throws ConnectionException, RequestException, AccessException {
-	  	RpcPacketDispatcher dispatcher = null;
+		RpcPacketDispatcher dispatcher = null;
 		RpcConnection rpcConnection = null;
 		if (cmdName == null) {
 			throw new NullPointerError("Null command name passed to execStreamCmdForBuffer");

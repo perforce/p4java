@@ -85,4 +85,23 @@ public class KeyDelegator extends BaseDelegator implements IKeyDelegator {
 
         return EMPTY;
     }
+
+	@Override
+	public String setMultipleKeyValuePair(String[] pairs)
+			throws P4JavaException {
+		Validate.notEmpty(pairs, "Key Value pairs shouldn't null or empty");
+		List<Map<String, Object>> resultMaps = execMapCmdList(
+				KEY,
+				processParameters(
+						new KeyOptions().setMultiplePair(true),
+						null,
+						pairs,
+						server),
+				null);
+
+		return parseValueFromResultMaps(
+				resultMaps,
+				rethrowFunction(map -> handleErrorStr(map))
+		);
+	}
 }

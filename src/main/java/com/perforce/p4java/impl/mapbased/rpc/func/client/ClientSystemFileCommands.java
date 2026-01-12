@@ -7,6 +7,9 @@ import com.perforce.p4java.CharsetConverter;
 import com.perforce.p4java.CharsetDefs;
 import com.perforce.p4java.Log;
 import com.perforce.p4java.PropertyDefs;
+import com.perforce.p4java.client.BaseProgressReport;
+import com.perforce.p4java.client.ClientProgressReport;
+import com.perforce.p4java.client.IProgressReport;
 import com.perforce.p4java.exception.ConnectionException;
 import com.perforce.p4java.exception.FileDecoderException;
 import com.perforce.p4java.exception.FileEncoderException;
@@ -40,6 +43,9 @@ import com.perforce.p4java.impl.mapbased.rpc.sys.RpcPerforceFileType.RpcServerTy
 import com.perforce.p4java.impl.mapbased.rpc.sys.helper.AppleFileHelper;
 import com.perforce.p4java.impl.mapbased.rpc.sys.helper.SymbolicLinkHelper;
 import com.perforce.p4java.impl.mapbased.rpc.sys.helper.SysFileHelperBridge;
+import com.perforce.p4java.server.callback.progress.IProgress;
+import com.perforce.p4java.server.callback.progress.ProgressType;
+import com.perforce.p4java.server.callback.progress.ProgressUnit;
 import com.perforce.p4java.util.FilesHelper;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 
@@ -242,6 +248,9 @@ public class ClientSystemFileCommands {
 		RpcPerforceFileType fileType = RpcPerforceFileType.decodeFromServerString(fileTypeStr);
 		boolean fstSymlink = (fileType == RpcPerforceFileType.FST_SYMLINK);
 
+		//Progress fileSizeStr is sizeHint
+		String serverSize = (String) resultsMap.get(RpcFunctionMapKey.SERVERSIZE);
+
 		// clear syncTime
 		cmdEnv.setSyncTime(0);
 
@@ -418,6 +427,21 @@ public class ClientSystemFileCommands {
 				if (cfile.getFile().getFileType().isExecutable()) {
 					fileCommands.setExecutable(clientPath, true, true);
 				}
+
+				if (serverSize != null) {
+					long serverSizeLong = Long.parseLong(serverSize);
+					IProgress indicator = cmdEnv.getClientProgressCallback();
+					if (indicator != null && serverSizeLong >= 1024) {
+						indicator.init(ProgressType.RECEIVE_FILE);
+						ClientProgressReport clientProgressReport = new ClientProgressReport(indicator);
+						clientProgressReport.description(clientPath);
+						clientProgressReport.units(ProgressUnit.K_BYTES);
+						clientProgressReport.total(serverSizeLong / 1024);
+						cfile.setProgress(clientProgressReport);
+						handler.setProgress(clientProgressReport);
+					}
+
+				}
 			}
 
 			boolean useLocalDigester = digestType == null && digest != null && !cmdEnv.isNonCheckedSyncs() && !cfile.isSymlink();
@@ -539,9 +563,14 @@ public class ClientSystemFileCommands {
 			throw new P4JavaError("No open file stream in ClientSystemFileCommands.writeFile()");
 		}
 
+		BaseProgressReport progress = handler.getProgress();
+		byte[] data = (byte[]) resultsMap.get(RpcFunctionMapKey.DATA);
 		try {
 			if ((outStream.getFD() != null) && outStream.getFD().valid()) {
 				long bytesWritten = outStream.write(resultsMap);
+				if (progress != null) {
+					progress.increment(data.length / 1024, BaseProgressReport.CPP_NORMAL);
+				}
 
 				// Send back the data bytes written (accumulated)
 				// This is for the progress indicator
@@ -549,6 +578,9 @@ public class ClientSystemFileCommands {
 			} else {
 				Log.error("output stream unexpectedly closed in writeFile");
 				handler.setError(true);
+				if (progress != null) {
+					progress.increment(data.length / 1024, BaseProgressReport.CPP_FAILDONE);
+				}
 			}
 		} catch (FileDecoderException e) {
 			handler.setError(true);
@@ -596,7 +628,7 @@ public class ClientSystemFileCommands {
 
 	private void writeToStream(byte[] sourceBytes, int start, int length, RpcByteBufferOutput stream) throws IOException {
 		int remainingBytes = stream.getCapacity() - stream.getPosition();
-		if( remainingBytes < length ) {
+		if (remainingBytes < length) {
 			length = remainingBytes;
 		}
 		if (ClientLineEnding.CONVERT_TEXT) {
@@ -749,7 +781,7 @@ public class ClientSystemFileCommands {
 				}
 			}
 
-			if(cmdEnv.isBufferOutput()) {
+			if (cmdEnv.isBufferOutput()) {
 				RpcByteBufferOutput outStream = getBufferOutputStream(cmdEnv);
 
 				if (outStream == null) {
@@ -765,8 +797,7 @@ public class ClientSystemFileCommands {
 				} else if (len > 0) {
 					writeToStream(sourceBytes, start, len, outStream);
 				}
-			}
-			else {
+			} else {
 				RpcOutputStream outStream = getTempOutputStream(cmdEnv);
 
 				if (outStream == null) {
@@ -1128,6 +1159,15 @@ public class ClientSystemFileCommands {
 					// Set exec bit for Owner, Group and World.
 					fileCommands.setExecutable(cfile.getFile().getPath(), true, false);
 				}
+
+				BaseProgressReport progress = handler.getProgress();
+				if (progress != null) {
+					if (cfile.isError()) {
+						progress.increment(0, BaseProgressReport.CPP_FAILDONE);
+					}
+					progress.increment(0, BaseProgressReport.CPP_DONE);
+				}
+				handler.setProgress(null);
 			} finally {
 				try {
 					if (cfile.getTmpStream() != null) {
@@ -1320,12 +1360,26 @@ public class ClientSystemFileCommands {
 
 		File file = new File(clientPath);
 
+		//Progress New Changes
+		IProgress clientProgress = cmdEnv.getClientProgressCallback();
+		ClientProgressReport clientProgressReport = null;
+		if (clientProgress != null) {
+			clientProgressReport = new ClientProgressReport(clientProgress);
+			clientProgressReport.description(clientPath);
+			clientProgressReport.units(ProgressUnit.FILES);
+			clientProgressReport.total(1);
+		}
+
 		// Ignore non-existing files for the "client-DeleteFile" function
 		// See job074183
 		// Don't try to unlink a directory. It won't work, and it will be
 		// confusing. Worse, it might mess up directory permissions.
 		//
 		if (!RpcPerforceFile.fileExists(file, fstSymlink)) {
+			if (clientProgressReport != null) {
+				clientProgress.init(ProgressType.DELETE_FILE);
+				clientProgressReport.position(0, IProgressReport.CPP_FAILDONE);
+			}
 			return RpcPacketDispatcherResult.CONTINUE_LOOP;
 		}
 
@@ -1344,6 +1398,10 @@ public class ClientSystemFileCommands {
 
 				handler.setError(true);
 				cmdEnv.handleResult(new RpcMessage(ClientMessageId.NO_MODIFIED_FILE, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{"delete", clientPath}).toMap());
+				if (clientProgressReport != null) {
+					clientProgress.init(ProgressType.DELETE_FILE);
+					clientProgressReport.position(0, IProgressReport.CPP_FAILDONE);
+				}
 				return RpcPacketDispatcherResult.CONTINUE_LOOP;
 			}
 		}
@@ -1364,6 +1422,10 @@ public class ClientSystemFileCommands {
 
 			handler.setError(true);
 			cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CLOBBER, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{clientPath}).toMap());
+			if (clientProgressReport != null) {
+				clientProgress.init(ProgressType.DELETE_FILE);
+				clientProgressReport.position(0, IProgressReport.CPP_FAILDONE);
+			}
 			return RpcPacketDispatcherResult.CONTINUE_LOOP;
 		}
 
@@ -1389,6 +1451,10 @@ public class ClientSystemFileCommands {
 
 			cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_DELETE_FILE, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{clientPath}).toMap());
 
+			if (clientProgressReport != null) {
+				clientProgress.init(ProgressType.DELETE_FILE);
+				clientProgressReport.position(0, IProgressReport.CPP_FAILDONE);
+			}
 			return RpcPacketDispatcherResult.CONTINUE_LOOP;
 		}
 
@@ -1419,6 +1485,12 @@ public class ClientSystemFileCommands {
 					break;
 				}
 			} while (!dir.getAbsoluteFile().equals(clientRootDir));
+		}
+
+
+		if (clientProgressReport != null) {
+			clientProgress.init(ProgressType.DELETE_FILE);
+			clientProgressReport.position(1, IProgressReport.CPP_DONE);
 		}
 
 		return RpcPacketDispatcherResult.CONTINUE_LOOP;
@@ -1494,7 +1566,7 @@ public class ClientSystemFileCommands {
 		String checkLinksNs = (String) resultsMap.get(RpcFunctionMapKey.CHECKLINKSN);
 		String sendFileSize = (String) resultsMap.get(RpcFunctionMapKey.SEND_FILESIZE);
 
-		if(sendFileSize == null && fileSize != null) {
+		if (sendFileSize == null && fileSize != null) {
 			resultsMap.remove(RpcFunctionMapKey.FILESIZE);
 		}
 
@@ -1633,7 +1705,7 @@ public class ClientSystemFileCommands {
 			fstSymlink = (fileType == RpcPerforceFileType.FST_SYMLINK);
 			fileSize = String.valueOf(file.length());
 
-			if(fileType!=RpcPerforceFileType.FST_BINARY && sendFileSize!=null) {
+			if (fileType != RpcPerforceFileType.FST_BINARY && sendFileSize != null) {
 				digestResult = rpcConnection.getDigestAndSizeOfFile(fileType, file);
 				fileSize = String.valueOf(digestResult.getFileSize());
 			}

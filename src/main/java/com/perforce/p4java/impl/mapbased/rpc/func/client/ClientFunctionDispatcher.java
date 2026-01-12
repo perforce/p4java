@@ -22,6 +22,10 @@ import com.perforce.p4java.impl.mapbased.rpc.sys.RpcOutputStream;
 import com.perforce.p4java.impl.mapbased.server.cmd.ResultMapParser;
 import com.perforce.p4java.server.CmdSpec;
 import com.perforce.p4java.server.callback.IProgressCallback;
+import com.perforce.p4java.server.callback.progress.IProgress;
+import com.perforce.p4java.server.callback.progress.ProgressType;
+import com.perforce.p4java.server.callback.progress.ProgressUnit;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
 import java.util.Map;
@@ -328,6 +332,43 @@ public class ClientFunctionDispatcher {
 			case CLIENT_PROGRESS:
 
 				cmdEnv.clearLastResultMap();
+				IProgress callback = cmdEnv.getClientProgressCallback();
+				if (callback != null) {
+					String handleName = String.valueOf(resultsMap.get("handle")); // "progressCallback"
+					String type = String.valueOf(resultsMap.get("type"));
+					String desc = String.valueOf(resultsMap.get("desc"));
+					String units = String.valueOf(resultsMap.get("units"));
+					String total = String.valueOf(resultsMap.get("total"));
+
+					CommandEnv.RpcHandler handler1 = cmdEnv.getHandler(handleName);// To indicate if progress existing.
+					if (handler1 == null) {
+						handler1 = cmdEnv.new RpcHandler("progress", false, null);
+						cmdEnv.addHandler(handler1);
+						if (StringUtils.isNotEmpty(type) && !type.equals("null")) {
+							callback.init(ProgressType.getType(Integer.parseInt(type)));
+						}
+						if (StringUtils.isNotEmpty(desc) && (StringUtils.isNotEmpty(units) && !units.equals("null"))) {
+							callback.description(desc, ProgressUnit.getType(Integer.parseInt(units)));
+						}
+						if (StringUtils.isNotEmpty(total) && !total.equals("null")) {
+							callback.total(Long.parseLong(total));
+						}
+
+					} else {
+						String done = String.valueOf(resultsMap.get("done"));
+						String update = String.valueOf(resultsMap.get("update"));
+						if (StringUtils.isNotEmpty(update) && !update.equals("null")) {
+							callback.update(Long.parseLong(update));
+						}
+						if (StringUtils.isNotEmpty(done) && !done.equals("null")) {
+							int fail = Integer.parseInt(done);
+							callback.done(fail);
+						}
+
+					}
+				}
+
+
 				RpcOutputStream progressOutStream = this.fileCommands.getTempOutputStream(cmdEnv);
 				if (progressOutStream != null) {
 					// Compose the progress indicator message

@@ -233,6 +233,7 @@ import com.perforce.p4java.server.callback.ICommandCallback;
 import com.perforce.p4java.server.callback.IProgressCallback;
 import com.perforce.p4java.server.callback.ISSOCallback;
 import com.perforce.p4java.server.callback.IStreamingCallback;
+import com.perforce.p4java.server.callback.progress.IProgress;
 import com.perforce.p4java.server.delegator.IAttributeDelegator;
 import com.perforce.p4java.server.delegator.IBranchDelegator;
 import com.perforce.p4java.server.delegator.IBranchesDelegator;
@@ -458,6 +459,7 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	protected ICommandCallback commandCallback = null;
 	protected IProgressCallback progressCallback = null;
+	protected IProgress clientProgressCallback = null;
 	protected ISSOCallback ssoCallback = null;
 	protected IBrowserCallback browserCallback = new DefaultBrowserCallback();
 	protected String ssoKey = null;
@@ -979,6 +981,17 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 		IProgressCallback oldCallback = this.progressCallback;
 		this.progressCallback = progressCallback;
 		return oldCallback;
+	}
+
+	@Override
+	public IProgress registerProgressCallback(IProgress progressCallback) {
+		IProgress oldCallback = this.clientProgressCallback;
+		this.clientProgressCallback = progressCallback;
+		return oldCallback;
+	}
+
+	public IProgress getClientProgressCallback() {
+		return clientProgressCallback;
 	}
 
 	@Override
@@ -2146,13 +2159,17 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 
 	@Override
 	public String setKey(final String keyName, final String value, final KeyOptions opts) throws P4JavaException {
-
 		return keyDelegator.setKey(keyName, value, opts);
 	}
 
 	@Override
 	public String getKey(final String keyName) throws P4JavaException {
 		return keyDelegator.getKey(keyName);
+	}
+
+	@Override
+	public String setMultipleKeyValuePair(final String[] pairs) throws P4JavaException {
+		return keyDelegator.setMultipleKeyValuePair(pairs);
 	}
 
 	@Override

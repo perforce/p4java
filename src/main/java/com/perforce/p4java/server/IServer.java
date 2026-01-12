@@ -21,6 +21,7 @@ import com.perforce.p4java.server.callback.IParallelCallback;
 import com.perforce.p4java.server.callback.IProgressCallback;
 import com.perforce.p4java.server.callback.ISSOCallback;
 import com.perforce.p4java.server.callback.IStreamingCallback;
+import com.perforce.p4java.server.callback.progress.IProgress;
 import com.perforce.p4java.server.delegator.IAttributeDelegator;
 import com.perforce.p4java.server.delegator.IBranchDelegator;
 import com.perforce.p4java.server.delegator.IBranchesDelegator;
@@ -785,6 +786,13 @@ public interface IServer extends IHelixCommandExecutor, IAttributeDelegator, IBr
 	 * @return the previous progress callback, if it existed; null otherwise
 	 */
 	IProgressCallback registerProgressCallback(IProgressCallback callback);
+
+	/**
+	 *
+	 * @param callback IProgress object to be registered; if null, progress  callbacks are disabled.
+	 * @return registered IProgress callback; null if none was registered
+	 */
+	IProgress registerProgressCallback(IProgress callback);
 
 	/**
 	 * Register a Perforce Single Sign On (SSO) callback and key for this

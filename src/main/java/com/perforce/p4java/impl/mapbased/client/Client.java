@@ -107,6 +107,7 @@ public class Client extends ClientSummary implements IClient {
 	private ClientView clientView = null;
 	private ArrayList<String> changeView = null;
 	private ViewDepotType viewDepotType;
+	private ArrayList<String> limitView = null;
 
 	// The delegators for running perforce commands
 	private IWhereDelegator whereDelegator = null;
@@ -359,6 +360,23 @@ public class Client extends ClientSummary implements IClient {
 			}
 			this.changeView = changeViewImpl;
 
+			// Add limit view entries to list if found
+			ArrayList<String> limitViewImpl = new ArrayList<>();
+			pfx = MapKeys.LIMIT_VIEW_KEY;
+
+			for (int i = 0; map.containsKey(pfx + i); i++) {
+				String key = pfx + i;
+
+				String changeEntry = (String) map.get(key);
+
+				if (changeEntry == null || changeEntry.isEmpty()) {
+					throw new P4JavaError("null or empty limit view mapping string in Client constructor.");
+				}
+
+				limitViewImpl.add(changeEntry);
+			}
+			this.limitView = limitViewImpl;
+
 			// Description strings *sometimes* come back with a trailing newline (that wasn't
 			// there when we created the client description), which
 			// is annoying because we can't just simply use trim() -- there's no rule that
@@ -521,6 +539,7 @@ public class Client extends ClientSummary implements IClient {
 				setStream(refreshedClient.getStream());
 				setServerId(refreshedClient.getServerId());
 				setType(refreshedClient.getType());
+				setLimitView(refreshedClient.getLimitView());
 			}
 		}
 	}
@@ -573,6 +592,16 @@ public class Client extends ClientSummary implements IClient {
 	@Override
 	public void setChangeView(ArrayList<String> changeView) {
 		this.changeView = changeView;
+	}
+
+	@Override
+	public ArrayList<String> getLimitView() {
+		return this.limitView;
+	}
+
+	@Override
+	public void setLimitView(ArrayList<String> limitView) {
+		this.limitView = limitView;
 	}
 
 	/**

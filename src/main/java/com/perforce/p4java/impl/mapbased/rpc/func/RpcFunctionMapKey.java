@@ -85,6 +85,8 @@ public class RpcFunctionMapKey {
 	public static final String ENDFROMREV = "endFromRev";
 	public static final String FILE = "file";
 	public static final String FILESIZE = "fileSize";
+	public static final String SERVERSIZE = "serverSize";
+	public static final String COUNT = "count";
 	public static final String FLUSH_HWM = "himark";
 	public static final String FLUSH_RSEQ = "rseq";
 	public static final String FLUSH_SEQ = "fseq";

@@ -196,6 +196,17 @@ public class InputMapper {
 				}
 			}
 
+			ArrayList<String> limitView = client.getLimitView();
+			if (limitView != null && !limitView.isEmpty()) {
+				int i = 0;
+
+				for (String changeEntry : limitView) {
+					if (changeEntry != null) {
+						clientMap.put("LimitView" + i++, changeEntry);
+					}
+				}
+			}
+
 			if (opts != null) {
 				String optStr = ""
 						+ (opts.isAllWrite() ? "allwrite " : "noallwrite ")

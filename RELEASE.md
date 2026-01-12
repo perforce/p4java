@@ -1,7 +1,7 @@
                             Release Notes for
                          P4Java, P4 API for Java
 
-                              Version 2025.1
+                              Version 2025.2
 
 Introduction
 
@@ -33,7 +33,7 @@ Important Product Rebrand Notice
 
 Requirements
 
-	* This release of P4Java supports the 2025.1 P4 Server. Older releases 
+	* This release of P4Java supports the 2025.2 P4 Server. Older releases 
 	  might work but are not supported.
 
 	* Java: full standard JDK 11 or later.  Implementation as
@@ -136,6 +136,21 @@ Known Limitations
 	  <java-home>/lib/security/US_export_policy.jar
 	  
 	* P4Java would not support file operations on altsync enabled clients.
+
+-------------------------------------------
+Updates in 2025.2 (2025.2/2872146) (2025/12/18)
+
+	#2860533 (Job #129866)
+		Add support for new LimitView field in p4 client spec.
+	   	
+	#2860878 (Job #129860)
+		Add support for '-m' option with "p4 key" command. 
+
+	#2860121 (Job #121997)
+		Add retries option for commands if the network times out.
+
+	#2867620 (Job #127869)
+		Added support for client progress callback.
 
 -------------------------------------------
 Updates in 2025.1 (2025.1/2785811) (2025/06/24)

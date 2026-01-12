@@ -15,9 +15,9 @@ import java.util.List;
 public class KeyOptions extends Options {
 
 	/**
-	 * Options: -u, -d, -i
+	 * Options: -u, -d, -i, -m
 	 */
-	public static final String OPTIONS_SPECS = "b:u b:d b:i";
+	public static final String OPTIONS_SPECS = "b:u b:d b:i b:m";
 
 	protected boolean undocKey = false;
 
@@ -32,6 +32,11 @@ public class KeyOptions extends Options {
 	 * Corresponds to the -i flag.
 	 */
 	protected boolean incrementKey = false;
+
+	/**
+	 * Perform multiple key value operations in one command.
+	 */
+	protected boolean isMultiplePair = false;
 
 	/**
 	 * Default constructor.
@@ -79,7 +84,7 @@ public class KeyOptions extends Options {
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.isUndocKey(), this.isDelete(), this.isIncrementKey());
+		this.optionList = this.processFields(OPTIONS_SPECS, this.isUndocKey(), this.isDelete(), this.isIncrementKey(), this.isMultiplePair());
 
 		return this.optionList;
 	}
@@ -108,6 +113,15 @@ public class KeyOptions extends Options {
 
 	public KeyOptions setIncrementKey(boolean incrementKey) {
 		this.incrementKey = incrementKey;
+		return this;
+	}
+
+	public boolean isMultiplePair() {
+		return isMultiplePair;
+	}
+
+	public KeyOptions setMultiplePair(boolean isMultiplePair) {
+		this.isMultiplePair = isMultiplePair;
 		return this;
 	}
 }

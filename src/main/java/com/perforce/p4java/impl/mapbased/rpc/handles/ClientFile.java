@@ -1,5 +1,6 @@
 package com.perforce.p4java.impl.mapbased.rpc.handles;
 
+import com.perforce.p4java.client.BaseProgressReport;
 import com.perforce.p4java.impl.mapbased.rpc.CommandEnv.RpcHandler;
 import com.perforce.p4java.impl.mapbased.rpc.connection.RpcConnection;
 import com.perforce.p4java.impl.mapbased.rpc.sys.RpcOutputStream;
@@ -29,6 +30,15 @@ public class ClientFile extends AbstractHandle {
 	private static final String FILE_SYM_TARGET_KEY = "symTarget";
 
 	private String localDigest;
+	private BaseProgressReport progress;
+
+	public BaseProgressReport getProgress() {
+		return progress;
+	}
+
+	public void setProgress(BaseProgressReport progress) {
+		this.progress = progress;
+	}
 
 	@Override
 	public String getHandleType() {

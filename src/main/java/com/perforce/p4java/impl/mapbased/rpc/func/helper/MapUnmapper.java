@@ -404,6 +404,19 @@ public class MapUnmapper {
 				}
 			}
 
+			for (int i = 0; ; i++) {
+				String fileStr = (String) inMap.get(MapKeys.LIMIT_VIEW_KEY + i);
+
+				if (fileStr != null) {
+					if (i == 0) {
+						strBuf.append(MapKeys.LIMIT_VIEW_KEY + MapKeys.COLON_LF);
+					}
+					strBuf.append(MapKeys.TAB + inMap.get(MapKeys.LIMIT_VIEW_KEY + i) + MapKeys.LF);
+				} else {
+					break;
+				}
+			}
+
 			strBuf.append(MapKeys.LF);
 
 			if (inMap.containsKey(MapKeys.CLIENT_BACKUP_KEY)) {

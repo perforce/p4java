@@ -67,10 +67,6 @@ commons-io-2.17.0.jar
     LicenseText: License Text Under Appendix
 
   Copyrights:
-    Copyright:   Copyright 2002-2024 The Apache Software Foundation
-    Reference:   https://index.whitesourcesoftware.com/gri/app/reader/resource/content/asString/57a467f1-c18e-4293-807f-683b2ac78980
-    Author:      The Apache Software Foundation
-
     Copyright:   Copyright The Apache Software Foundation
     Reference:   https://commons.apache.org/proper/commons-io/
 
@@ -81,10 +77,6 @@ commons-lang3-3.12.0.jar
     LicenseText: License Text Under Appendix
 
   Copyrights:
-    Copyright:   Copyright 2001-2021 The Apache Software Foundation
-    Reference:   https://index.whitesourcesoftware.com/gri/app/reader/resource/content/asString/11239b3a-f2b6-4016-bd0c-c0ce1d0fa09e
-    Author:      The Apache Software Foundation
-
     Copyright:   Copyright The Apache Software Foundation
     Reference:   https://commons.apache.org/proper/commons-lang/
 

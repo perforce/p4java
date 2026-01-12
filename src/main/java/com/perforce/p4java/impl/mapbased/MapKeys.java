@@ -143,6 +143,7 @@ public class MapKeys {
 	public static final String VIEW_DEPOT_TYPE = "ViewDepotType";
 
 	public static final String CHANGE_VIEW_KEY = "ChangeView";
+	public static final String LIMIT_VIEW_KEY = "LimitView";
 	public static final String CLIENT_BACKUP_KEY = "Backup";
 
 	public static final String FIELDS_KEY = "Fields";

@@ -5,6 +5,8 @@ package com.perforce.p4java.impl.mapbased.rpc.func.client;
 
 import com.perforce.p4java.CharsetDefs;
 import com.perforce.p4java.Log;
+import com.perforce.p4java.client.ClientProgressReport;
+import com.perforce.p4java.client.IProgressReport;
 import com.perforce.p4java.exception.ConnectionException;
 import com.perforce.p4java.exception.MessageGenericCode;
 import com.perforce.p4java.exception.MessageSeverityCode;
@@ -24,6 +26,9 @@ import com.perforce.p4java.impl.mapbased.rpc.sys.RpcPerforceFile;
 import com.perforce.p4java.impl.mapbased.rpc.sys.RpcPerforceFileType;
 import com.perforce.p4java.impl.mapbased.rpc.sys.helper.SymbolicLinkHelper;
 import com.perforce.p4java.impl.mapbased.rpc.sys.helper.SysFileHelperBridge;
+import com.perforce.p4java.server.callback.progress.IProgress;
+import com.perforce.p4java.server.callback.progress.ProgressType;
+import com.perforce.p4java.server.callback.progress.ProgressUnit;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -63,10 +68,10 @@ public class ClientSendFile {
 		this.props = props;
 	}
 
-	private long sendStream(InputStream stream, RpcConnection connection, String handle, String write, MD5Digester digester, CommandEnv cmdEnv) throws ConnectionException, IOException {
+	private long sendStream(InputStream stream, RpcConnection connection, String handle, String write, MD5Digester digester, CommandEnv cmdEnv, ClientProgressReport clientProgressReport) throws ConnectionException, IOException {
 		long fileLength = 0;
 
-		Map<String, Object> sendMap = new HashMap<String, Object>();
+		Map<String, Object> sendMap = new HashMap<>();
 		byte[] bytes = new byte[1024 * 64];
 		int bytesRead;
 		while ((bytesRead = stream.read(bytes)) > 0) {
@@ -83,7 +88,14 @@ public class ClientSendFile {
 			connection.putRpcPacket(sendPacket);
 			digester.update(readBytes);
 
+			if(clientProgressReport != null ){
+				clientProgressReport.position(readBytes.length/1024, IProgressReport.CPP_NORMAL);
+			}
+
 			currentSize = sendBackWrittenDataBytes(cmdEnv, filePath, fileSize, currentSize, bytesRead);
+		}
+		if(clientProgressReport != null ){
+			clientProgressReport.position(fileLength / 1024, IProgressReport.CPP_DONE);
 		}
 		return fileLength;
 	}
@@ -278,6 +290,16 @@ public class ClientSendFile {
 				fileSize = file.length();
 				currentSize = 0;
 
+				IProgress clientProgress = cmdEnv.getClientProgressCallback();
+				ClientProgressReport clientProgressReport = null;
+				if (clientProgress != null && fileSize > 1024) {
+					clientProgress.init(ProgressType.SEND_FILE);
+					clientProgressReport = new ClientProgressReport(clientProgress);
+					clientProgressReport.description(clientPath);
+					clientProgressReport.units(ProgressUnit.K_BYTES);
+					clientProgressReport.total(fileSize / 1024);
+				}
+
 				if (!handler.isError()) {
 					// If everything's OK, send an open (lbr-Open) packet with passed-through
 					// map entries, then write the file to the server using looped
@@ -347,7 +369,7 @@ public class ClientSendFile {
 							inStream = symbolicLinkTarget == null ? new RpcInputStream(file, fileCharset) : new ByteArrayInputStream(symbolicLinkTarget.getBytes());
 						}
 
-						fileLength = sendStream(inStream, rpcConnection, handle, write, digester, cmdEnv);
+						fileLength = sendStream(inStream, rpcConnection, handle, write, digester, cmdEnv, clientProgressReport);
 
 						// All sent; now try to set the perms properly if
 						// appropriate:
@@ -357,6 +379,10 @@ public class ClientSendFile {
 							fileCommands.setWritable(clientPath, writable || symlink);
 						}
 					}
+				}
+
+				if(handler.isError() && clientProgressReport != null ){
+					clientProgressReport.increment(0,IProgressReport.CPP_FAILDONE);
 				}
 
 				// Now try to send a finalise message:
@@ -387,6 +413,7 @@ public class ClientSendFile {
 				// server as a client-side abort, but we need to let the server think
 				// everything went fine here and let it send its own error message(s) -- HR.
 				handler.setError(false);
+
 
 				// Clear data file info for progress indicator
 				filePath = null;

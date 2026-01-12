@@ -602,4 +602,20 @@ public interface IOptionsServer extends IServer {
      */
     List<Fingerprint> getTrusts(TrustOptions opts) throws P4JavaException;
 
+	/**
+	* Set Global Option for perforce commands
+	*
+	* @param s
+	* 			given global options as a list
+	* @since 2025.2
+	*/
+	void setGlobalOptions(List<String> s);
+
+	/**
+	 * Returns the list of all Global Option for a server
+	 *
+	 * @return non-null list of global options
+	 * @since 2025.2
+	 */
+	List<String> getGlobalOptions();
 }

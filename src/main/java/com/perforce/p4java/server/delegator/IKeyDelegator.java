@@ -48,4 +48,18 @@ public interface IKeyDelegator {
      */
     String getKey(String keyName)
             throws P4JavaException;
+
+	/**
+	 * It takes the pair list defining multiple set and delete operations to be performed.
+	 * Each operation is defined by a value pair in the pair list.
+	 * To set a key, use a name and value, to delete a key, use a - (hyphen) followed by the name.
+	 *
+	 * @param pairs List of multiple key name and value pairs
+	 * @return non-null (but possibly zero, if non-existing) key value
+	 * associated with keyName.
+	 * @throws P4JavaException if an error occurs processing this method and its parameters.
+	 * @since 2025.2
+	 */
+	String setMultipleKeyValuePair(String[] pairs)
+			throws P4JavaException;
 }
