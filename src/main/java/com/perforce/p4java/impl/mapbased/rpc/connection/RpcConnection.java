@@ -621,6 +621,7 @@ public abstract class RpcConnection {
 
 			case FST_UTF16:
 				digestCharset = CharsetDefs.UTF16;
+				convertLineEndings = true;
 				break;
 			case FST_UTF8:
 				digestCharset = CharsetDefs.UTF8;
@@ -663,6 +664,7 @@ public abstract class RpcConnection {
 				return new DigestResult(symlinkDigest, file.length());
 			case FST_UTF16:
 				digestCharset = CharsetDefs.UTF16;
+				convertLineEndings = true;
 				break;
 			case FST_UTF8:
 				digestCharset = CharsetDefs.UTF8;

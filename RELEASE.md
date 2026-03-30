@@ -138,6 +138,16 @@ Known Limitations
 	* P4Java would not support file operations on altsync enabled clients.
 
 -------------------------------------------
+Updates in 2025.2 Patch 1 (2025.2/2917314) (2026/03/27)
+
+	#2917145 (Job #131851)
+		Added support for line endings conversion for UTF16-LE and UTF16-BE files
+	   	
+	#2917177 (Job #129774)
+		Improved UTF-8 BOM handling during sync to prevent duplicate BOM insertion 
+		and align with filesys.utf8bom configuration.
+
+-------------------------------------------
 Updates in 2025.2 (2025.2/2872146) (2025/12/18)
 
 	#2860533 (Job #129866)

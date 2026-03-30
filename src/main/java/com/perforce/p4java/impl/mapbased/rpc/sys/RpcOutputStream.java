@@ -319,10 +319,11 @@ public class RpcOutputStream extends FileOutputStream {
 		len = sourceBytes.length;
 		start = 0;
 		int bom = 0;
+		boolean isGunZipType = isGunzipFileType(this.fileType);
 
-		if (writeUtf8Bom) {
-			this.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF}, 0, 3);
-			bom = 3;
+		if (!isGunZipType) {
+			bom = addUtf8BomIfNeeded(sourceBytes);
+			sourceBytes = removeUtf8BomIfNeeded(sourceBytes);
 			writeUtf8Bom = false;
 		}
 
@@ -392,6 +393,11 @@ public class RpcOutputStream extends FileOutputStream {
 			case FST_XTEXT_GUNZIP:
 			case FST_XUTF8_GUNZIP:
 				sourceBytes = decompressSourceBytes(sourceBytes);
+
+				bom = addUtf8BomIfNeeded(sourceBytes);
+				sourceBytes = removeUtf8BomIfNeeded(sourceBytes);
+				writeUtf8Bom = false;
+
 				if (this.lineEndStream != null) {
 					this.lineEndStream.write(sourceBytes, start, len);
 				} else {
@@ -438,6 +444,68 @@ public class RpcOutputStream extends FileOutputStream {
 		}
 
 		return bytesWritten;
+	}
+
+	/**
+	 * Writes the UTF-8 BOM if writeUtf8Bom is true and sourceBytes does / doesn't already have one.
+	 *
+	 * @param sourceBytes the source byte array to check
+	 * @return the number of BOM bytes written (3 if BOM was added, 0 otherwise)
+	 * @throws IOException on error
+	 */
+	private int addUtf8BomIfNeeded(byte[] sourceBytes) throws IOException {
+		// filesys.utf8bom = 1
+		if (writeUtf8Bom && !hasUtf8Bom(sourceBytes)) {
+			this.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF}, 0, 3);
+			return 3;
+		}
+		return 0;
+	}
+
+	/**
+	 * Removes 1 UTF-8 BOM from sourceBytes if writeUtf8Bom is false and sourceBytes has one/many.
+	 * Also updates the len field to reflect the new length.
+	 *
+	 * @param sourceBytes the source byte array to process
+	 * @return the sourceBytes
+	 */
+	private byte[] removeUtf8BomIfNeeded(byte[] sourceBytes) {
+		//filesys.utf8bom = 0
+		if (!writeUtf8Bom && hasUtf8Bom(sourceBytes)) {
+			byte[] newSourceBytes = new byte[sourceBytes.length - 3];
+			System.arraycopy(sourceBytes, 3, newSourceBytes, 0, sourceBytes.length - 3);
+			len = newSourceBytes.length;
+			return newSourceBytes;
+		}
+		return sourceBytes;
+	}
+
+	/**
+	 * Returns true when the first three bytes are BOM
+	 *
+	 * @param bytes
+	 * */
+	private boolean hasUtf8Bom(byte[] bytes) {
+		return bytes != null && bytes.length >= 3
+				&& bytes[0] == (byte) 0xEF
+				&& bytes[1] == (byte) 0xBB
+				&& bytes[2] == (byte) 0xBF;
+	}
+
+	/**
+	 * Returns true when the file type is GUNZIP type
+	 *
+	 * @param fileType
+	 * */
+	private boolean isGunzipFileType(RpcPerforceFileType fileType) {
+		return fileType == RpcPerforceFileType.FST_TEXT_GUNZIP
+				|| fileType == RpcPerforceFileType.FST_UTF8_GUNZIP
+				|| fileType == RpcPerforceFileType.FST_XTEXT_GUNZIP
+				|| fileType == RpcPerforceFileType.FST_XUTF8_GUNZIP
+				|| fileType == RpcPerforceFileType.FST_UNICODE_GUNZIP
+				|| fileType == RpcPerforceFileType.FST_UTF16_GUNZIP
+				|| fileType == RpcPerforceFileType.FST_XUTF16_GUNZIP
+				|| fileType == RpcPerforceFileType.FST_XUNICODE_GUNZIP;
 	}
 
 	/**
