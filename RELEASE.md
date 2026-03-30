@@ -36,7 +36,7 @@ Requirements
 	* This release of P4Java supports the 2025.2 P4 Server. Older releases 
 	  might work but are not supported.
 
-	* Java: full standard JDK 11 or later.  Implementation as
+	* Java: full standard JDK 8 or later.  Implementation as
 	  discussed in "Known Limitations" below.
 
 	* SSL: unlimited strength JCE (Java Cryptography Extension) package for
