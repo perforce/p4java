@@ -1,5 +1,6 @@
 package com.perforce.p4java.diff;
 
+import com.perforce.p4java.Log;
 import com.perforce.p4java.exception.FileEncoderException;
 
 import java.io.IOException;
@@ -33,15 +34,16 @@ public class DiffAnalyze {
         }
 
         void Dump(int d) {
-            System.out.print("index: ");
+            StringBuilder sb = new StringBuilder("index: ");
             int i;
             for (i = -d; i <= d; i += 2)
-                System.out.printf("%3d ", i);
-            System.out.print("\nline:  ");
+                sb.append(String.format("%3d ", i));
+            sb.append("\nline:  ");
             for (i = -d; i <= d; i += 2) {
-                System.out.printf("%3d ", Get(i));
+                sb.append(String.format("%3d ", Get(i)));
             }
-            System.out.print("\n");
+            sb.append("\n");
+            Log.info("%s", sb.toString());
         }
 
         private int halfSize;
@@ -117,7 +119,7 @@ public class DiffAnalyze {
         firstSnake = lastSnake = null;
 
         if (DEBUG_LEVEL > 0) {
-            System.out.printf("N %d M %d maxD %d\n", a.Lines(), b.Lines(), maxD);
+            Log.info(String.format("N %d M %d maxD %d", a.Lines(), b.Lines(), maxD));
         }
 
         // find the longest common subsequence - note that there will
@@ -284,7 +286,7 @@ public class DiffAnalyze {
         final boolean deltaEven = ((delta % 2) == 0);
 
         if (DEBUG_LEVEL > 2) {
-            System.out.printf("FindSnake(%d,%d,%d,%d)\n", startx, starty, endx, endy);
+            Log.info(String.format("FindSnake(%d,%d,%d,%d)", startx, starty, endx, endy));
             if (n <= 0 || m <= 0 || maxD <= 0) {
                 throw new RuntimeException("N<=0 or M<=0 or maxD<=0 - that's not good!");
             }
@@ -305,7 +307,7 @@ public class DiffAnalyze {
 
         if (s.u.get() > s.x.get()) {
             if (DEBUG_LEVEL > 2) {
-                System.out.printf("FindSnake returning with initial prefix %d to %d\n", s.x.get(), s.u.get());
+                Log.info(String.format("FindSnake returning with initial prefix %d to %d", s.x.get(), s.u.get()));
             }
             return;
         }
@@ -323,7 +325,7 @@ public class DiffAnalyze {
 
         if (s.u.get() > s.x.get()) {
             if (DEBUG_LEVEL > 2) {
-                System.out.printf("FindSnake returning with initial suffix %d to %d\n", s.x.get(), s.u.get());
+                Log.info(String.format("FindSnake returning with initial suffix %d to %d", s.x.get(), s.u.get()));
             }
             return;
         }
@@ -337,7 +339,7 @@ public class DiffAnalyze {
             int k;
 
             if (DEBUG_LEVEL > 3) {
-                System.out.printf("D=%d Forward min,max (%d,%d) Reverse min,max (%d,%d)\n", d, minkF, maxkF, minkR, maxkR);
+                Log.info(String.format("D=%d Forward min,max (%d,%d) Reverse min,max (%d,%d)", d, minkF, maxkF, minkR, maxkR));
             }
 
             // search from top left of edit graph ("forward")
@@ -368,12 +370,12 @@ public class DiffAnalyze {
                     final int pmaxkR = (dr <= m) ? dr : 2 * m - dr;
 
                     if (DEBUG_LEVEL > 3) {
-                        System.out.printf("DR=%d Reverse min,max (%d,%d)\n", dr, pminkR, pmaxkR);
+                        Log.info(String.format("DR=%d Reverse min,max (%d,%d)", dr, pminkR, pmaxkR));
                     }
 
                     if (k - delta >= pminkR && k - delta <= pmaxkR) {
                         if (DEBUG_LEVEL > 3) {
-                            System.out.printf("s.u %d rv[%d] %d\n", s.u.get(), k - delta, rV.Get(k - delta));
+                            Log.info(String.format("s.u %d rv[%d] %d", s.u.get(), k - delta, rV.Get(k - delta)));
                         }
                         if (s.u.get() >= rV.Get(k - delta)) {
                             // fill in the fields of s which haven't
@@ -381,7 +383,7 @@ public class DiffAnalyze {
 
                             s.y.set(mapxtoy(s.x.get(), k, startx, starty));
                             if (DEBUG_LEVEL > 2) {
-                                System.out.printf("FindSnake returning during forward search (%d,%d) to (%d,%d)\n", s.x.get(), s.y.get(), s.u.get(), s.v.get());
+                                Log.info(String.format("FindSnake returning during forward search (%d,%d) to (%d,%d)", s.x.get(), s.y.get(), s.u.get(), s.v.get()));
                             }
                             return; // finished!
                         }
@@ -392,7 +394,7 @@ public class DiffAnalyze {
             }
 
             if (DEBUG_LEVEL > 2) {
-                System.out.printf("Forward D=%d\n", d);
+                Log.info(String.format("Forward D=%d", d));
                 fV.Dump(d);
             }
 
@@ -416,14 +418,14 @@ public class DiffAnalyze {
 
                     if (k + delta >= minkF && k + delta <= maxkF) {
                         if (DEBUG_LEVEL > 3) {
-                            System.out.printf("s.x %d fV[%d] %d\n", s.x.get(), k + delta, fV.Get(k + delta));
+                            Log.info(String.format("s.x %d fV[%d] %d", s.x.get(), k + delta, fV.Get(k + delta)));
                         }
                         if (s.x.get() <= fV.Get(k + delta)) {
                             // fill in the fields of s which haven't
                             // already been filled in
                             s.v.set(mapxtoy(s.u.get(), k, endx, endy));
                             if (DEBUG_LEVEL > 2) {
-                                System.out.printf("FindSnake returning during reverse search (%d,%d) to (%d,%d)\n", s.x.get(), s.y.get(), s.u.get(), s.v.get());
+                                Log.info(String.format("FindSnake returning during reverse search (%d,%d) to (%d,%d)", s.x.get(), s.y.get(), s.u.get(), s.v.get()));
                             }
                             return; // finished!
                         }
@@ -433,7 +435,7 @@ public class DiffAnalyze {
             }
 
             if (DEBUG_LEVEL > 2) {
-                System.out.printf("Reverse D=%d\n", d);
+                Log.info(String.format("Reverse D=%d", d));
                 rV.Dump(d);
             }
         }
@@ -450,14 +452,14 @@ public class DiffAnalyze {
         s.y.set(s.v.get());
 
         if (DEBUG_LEVEL > 2) {
-            System.out.printf("exceeded maxD midpt (%d,%d)\n", s.x.get(), s.y.get());
+            Log.info(String.format("exceeded maxD midpt (%d,%d)", s.x.get(), s.y.get()));
         }
 
         FollowReverseDiagonal(s.x, s.y, startx, starty);
         FollowDiagonal(s.u, s.v, endx, endy);
 
         if (DEBUG_LEVEL > 2) {
-            System.out.printf("after extending: (%d,%d) to (%d,%d)\n", s.x.get(), s.y.get(), s.u.get(), s.v.get());
+            Log.info(String.format("after extending: (%d,%d) to (%d,%d)", s.x.get(), s.y.get(), s.u.get(), s.v.get()));
         }
     }
 
@@ -478,7 +480,7 @@ public class DiffAnalyze {
         if (s.x.get() > startx && s.y.get() > starty) {
 
             if (DEBUG_LEVEL > 0) {
-                System.out.printf("LCS %d , %d , %d , %d\n", startx, starty, s.x.get(), s.y.get());
+                Log.info(String.format("LCS %d , %d , %d , %d", startx, starty, s.x.get(), s.y.get()));
                 if (s.x.get() == endx && s.y.get() == endy) {
                     throw new RuntimeException("INFINITE RECURSION!");
                 }
@@ -490,7 +492,7 @@ public class DiffAnalyze {
 
             int snakes_added = 0;
             if (DEBUG_LEVEL > 1) {
-                System.out.printf("SNAKE (%d,%d) to (%d,%d)\n", s.x.get(), s.y.get(), s.u.get(), s.v.get());
+                Log.info(String.format("SNAKE (%d,%d) to (%d,%d)", s.x.get(), s.y.get(), s.u.get(), s.v.get()));
             }
             // verify actual sequence contents, splitting snake up if there 
             // are any pairs of lines which are ProbablyEqual() but not Equal()
@@ -516,7 +518,7 @@ public class DiffAnalyze {
 
                     if (DEBUG_LEVEL > 1) {
                         snakes_added++;
-                        System.out.printf("Adding snake (%d,%d) to (%d,%d)\n", toadd.x.get(), toadd.y.get(), toadd.u.get(), toadd.v.get());
+                        Log.info(String.format("Adding snake (%d,%d) to (%d,%d)", toadd.x.get(), toadd.y.get(), toadd.u.get(), toadd.v.get()));
                     }
 
                     // add snake to end of linked list
@@ -532,16 +534,16 @@ public class DiffAnalyze {
             }
             if (DEBUG_LEVEL > 1) {
                 if (snakes_added == 0)
-                    System.out.print("SNAKE WAS COMPLETELY BOGUS!!!\n");
+                    Log.info("SNAKE WAS COMPLETELY BOGUS!!!");
                 if (snakes_added > 1)
-                    System.out.printf("Snake was broken into %d parts!\n", snakes_added);
+                    Log.info(String.format("Snake was broken into %d parts!", snakes_added));
             }
         }
 
         if (endx > s.u.get() && endy > s.v.get()) {
 
             if (DEBUG_LEVEL > 0) {
-                System.out.printf("LCS %d , %d , %d , %d\n", s.u.get(), s.v.get(), endx, endy);
+                Log.info(String.format("LCS %d , %d , %d , %d", s.u.get(), s.v.get(), endx, endy));
                 if (s.u.get() == startx && s.v.get() == starty) {
                     throw new RuntimeException("INFINITE RECURSION!");
                 }

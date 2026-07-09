@@ -902,6 +902,16 @@ public abstract class Server extends HelixCommandExecutor implements IServerCont
 			} else {
 				setCharsetName(p4CharsetStr);
 			}
+		} else if (!serverInfo.isUnicodeEnabled() && (p4Charset == null || p4Charset.getCharset() == null)) {
+			// Honour a caller-configured P4CHARSET on non-Unicode servers so that depot
+			// paths containing non-ASCII (e.g. Chinese) characters are decoded with the
+			// specified charset rather than being silently mangled (P4JAVA-1566).
+			String p4CharsetStr = getP4Charset();
+			if (isNotBlank(p4CharsetStr) && !"none".equalsIgnoreCase(p4CharsetStr) && !"auto".equalsIgnoreCase(p4CharsetStr)) {
+				setCharsetName(p4CharsetStr);
+			}
+			// When no charset is configured, p4Charset remains null here; the RPC layer
+			// will fall back to the JVM default charset without throwing an exception.
 		}
 	}
 

@@ -53,4 +53,4 @@ public interface IStreamRemappedMapping extends IMapEntry {
 	 * @param rightRemapPath right remapped path
 	 */
 	void setRightRemapPath(String rightRemapPath);
-};
+}

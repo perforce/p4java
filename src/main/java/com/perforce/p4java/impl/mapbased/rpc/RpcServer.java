@@ -37,6 +37,8 @@ import com.perforce.p4java.server.ServerStatus;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.Validate;
 
+import com.perforce.p4java.impl.mapbased.rpc.sys.RpcOutputStream;
+
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -415,6 +417,10 @@ public abstract class RpcServer extends Server {
 	}
 
 	public boolean isServerUnicode() {
+		IServerInfo info = getCurrentServerInfo();
+		if (info != null) {
+			return info.isUnicodeEnabled();
+		}
 		return P4Charset.isUnicodeServer(p4Charset);
 	}
 
@@ -743,6 +749,27 @@ public abstract class RpcServer extends Server {
 	public void connect() throws ConnectionException, AccessException, RequestException, ConfigException {
 		connectionStart = System.currentTimeMillis();
 		super.connect();
+	}
+
+	/**
+	 * Closes the temp RPC output stream registered in the command env state map,
+	 * if any, so its file handle is released on Windows. Call from a {@code finally}
+	 * block to free the handle on every exit path.
+	 *
+	 * @param cmdEnv the command env whose temp output stream should be closed;
+	 *               ignored if {@code null} or it has no state map
+	 */
+	protected void closeTmpOutputStream(CommandEnv cmdEnv) {
+		if (cmdEnv != null && cmdEnv.getStateMap() != null) {
+			RpcOutputStream outStream = (RpcOutputStream) cmdEnv.getStateMap().get(RPC_TMP_OUTFILE_STREAM_KEY);
+			if (outStream != null) {
+				try {
+					outStream.close();
+				} catch (IOException e) {
+					Log.error("Failed to close RPC output stream: " + e.getLocalizedMessage());
+				}
+			}
+		}
 	}
 
 	/**

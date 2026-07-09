@@ -1,5 +1,8 @@
 package com.perforce.p4java.mapapi;
 
+import com.perforce.p4java.Log;
+import com.perforce.p4java.server.callback.ILogCallback.LogTraceLevel;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -68,12 +71,12 @@ public class MapItemArray extends ArrayList<MapWrap> {
 
     public void dump(String name ) {
         for( int i = 0; i < size(); i++ ) {
-            System.out.printf("%s %c%s <-> %s (slot %d)\n",
+            Log.trace(LogTraceLevel.FINE, String.format("%s %c%s <-> %s (slot %d)\n",
                     name,
                     " -+$@&    123456789".charAt(getItem(i).mapFlag.code),
                     getItem(i).lhs(),
                     getItem(i).rhs(),
-                    getItem(i).slot);
+                    getItem(i).slot));
         }
     }
 }

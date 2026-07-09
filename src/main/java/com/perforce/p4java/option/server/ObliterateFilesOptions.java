@@ -17,9 +17,9 @@ import java.util.List;
 public class ObliterateFilesOptions extends Options {
 
 	/**
-	 * Options: -y, -a, -b, -h
+	 * Options: -y, -a, -b, -h, -l, -H, -L
 	 */
-	public static final String OPTIONS_SPECS = "b:y b:a b:b b:h";
+	public static final String OPTIONS_SPECS = "b:y b:a b:b b:h b:l b:H b:L";
 
 	/**
 	 * If true, the '-y' flag executes the obliterate operation. By default,
@@ -62,6 +62,25 @@ public class ObliterateFilesOptions extends Options {
 	 * Note: this is an 'undoc' flag; use 'p4 help undoc' for more details
 	 */
 	protected boolean skipHaveSearch = false;
+
+	/**
+	 * If true, the '-l' flag instructs obliterate not to search db.label for all
+	 * possible matching records to delete. Like db.have, db.label can be a large
+	 * table, so skipping this search can speed up the operation.
+	 */
+	protected boolean skipLabelSearch = false;
+
+	/**
+	 * If true, the '-H' flag instructs obliterate to explicitly search db.have
+	 * for all possible matching records to delete.
+	 */
+	protected boolean searchHaveTable = false;
+
+	/**
+	 * If true, the '-L' flag instructs obliterate to explicitly search db.label
+	 * for all possible matching records to delete.
+	 */
+	protected boolean searchLabelTable = false;
 
 	/**
 	 * Default constructor.
@@ -110,10 +129,33 @@ public class ObliterateFilesOptions extends Options {
 	}
 
 	/**
+	 * Explicit-value constructor including the db.label opt-out ('-l') and the
+	 * db.have ('-H') / db.label ('-L') opt-in flags.
+	 *
+	 * @param executeObliterate        executeObliterate
+	 * @param skipArchiveSearchRemoval skipArchiveSearchRemoval
+	 * @param branchedFirstHeadRevOnly branchedFirstHeadRevOnly
+	 * @param skipHaveSearch           skipHaveSearch
+	 * @param skipLabelSearch          skipLabelSearch
+	 * @param searchHaveTable          searchHaveTable
+	 * @param searchLabelTable         searchLabelTable
+	 */
+	public ObliterateFilesOptions(boolean executeObliterate, boolean skipArchiveSearchRemoval, boolean branchedFirstHeadRevOnly, boolean skipHaveSearch, boolean skipLabelSearch, boolean searchHaveTable, boolean searchLabelTable) {
+		super();
+		this.executeObliterate = executeObliterate;
+		this.skipArchiveSearchRemoval = skipArchiveSearchRemoval;
+		this.branchedFirstHeadRevOnly = branchedFirstHeadRevOnly;
+		this.skipHaveSearch = skipHaveSearch;
+		this.skipLabelSearch = skipLabelSearch;
+		this.searchHaveTable = searchHaveTable;
+		this.searchLabelTable = searchLabelTable;
+	}
+
+	/**
 	 * @see com.perforce.p4java.option.Options#processOptions(com.perforce.p4java.server.IServer)
 	 */
 	public List<String> processOptions(IServer server) throws OptionsException {
-		this.optionList = this.processFields(OPTIONS_SPECS, this.executeObliterate, this.skipArchiveSearchRemoval, this.branchedFirstHeadRevOnly, this.skipHaveSearch);
+		this.optionList = this.processFields(OPTIONS_SPECS, this.executeObliterate, this.skipArchiveSearchRemoval, this.branchedFirstHeadRevOnly, this.skipHaveSearch, this.skipLabelSearch, this.searchHaveTable, this.searchLabelTable);
 
 		return this.optionList;
 	}
@@ -151,6 +193,33 @@ public class ObliterateFilesOptions extends Options {
 
 	public ObliterateFilesOptions setSkipHaveSearch(boolean skipHaveSearch) {
 		this.skipHaveSearch = skipHaveSearch;
+		return this;
+	}
+
+	public boolean isSkipLabelSearch() {
+		return skipLabelSearch;
+	}
+
+	public ObliterateFilesOptions setSkipLabelSearch(boolean skipLabelSearch) {
+		this.skipLabelSearch = skipLabelSearch;
+		return this;
+	}
+
+	public boolean isSearchHaveTable() {
+		return searchHaveTable;
+	}
+
+	public ObliterateFilesOptions setSearchHaveTable(boolean searchHaveTable) {
+		this.searchHaveTable = searchHaveTable;
+		return this;
+	}
+
+	public boolean isSearchLabelTable() {
+		return searchLabelTable;
+	}
+
+	public ObliterateFilesOptions setSearchLabelTable(boolean searchLabelTable) {
+		this.searchLabelTable = searchLabelTable;
 		return this;
 	}
 }

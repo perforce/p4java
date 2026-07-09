@@ -1,5 +1,8 @@
 package com.perforce.p4java.mapapi;
 
+import com.perforce.p4java.Log;
+import com.perforce.p4java.server.callback.ILogCallback.LogTraceLevel;
+
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -244,7 +247,7 @@ public class MapTable {
 				trace, count, joinError ? "true" : "false",
 				(emptyReason == null ? "NULL" : emptyReason));
 		if (buf == null)
-			System.out.print(out);
+			Log.trace(LogTraceLevel.FINE, out);
 		else
 			buf.append(out);
 
@@ -256,7 +259,7 @@ public class MapTable {
 						map.lhs().get(),
 						map.rhs().get());
 				if (buf == null)
-					System.out.print(out);
+					Log.trace(LogTraceLevel.FINE, out);
 				else
 					buf.append(out);
 			}
@@ -268,7 +271,7 @@ public class MapTable {
 						get(i).lhs().get(),
 						get(i).rhs().get());
 				if (buf == null)
-					System.out.print(out);
+					Log.trace(LogTraceLevel.FINE, out);
 				else
 					buf.append(out);
 			}

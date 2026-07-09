@@ -1,5 +1,8 @@
 package com.perforce.p4java.mapapi;
 
+import com.perforce.p4java.Log;
+import com.perforce.p4java.server.callback.ILogCallback.LogTraceLevel;
+
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -47,7 +50,7 @@ public class MapStrings extends ArrayList<MapStrings.MapString> {
 	public void dump(StringBuffer out) {
 
 		if (out == null) {
-			System.out.print("strings for map:\n");
+			Log.trace(LogTraceLevel.FINE, "strings for map:\n");
 		} else {
 			out.append("strings for map:\n");
 		}
@@ -57,7 +60,7 @@ public class MapStrings extends ArrayList<MapStrings.MapString> {
 					get(i).mapHalf.get().substring(0, get(i).mapHalf.getFixedLen()),
 					get(i).hasSubDirs ? "true" : "false");
 			if (out == null) {
-				System.out.print(fmt);
+				Log.trace(LogTraceLevel.FINE, fmt);
 			} else {
 				out.append(fmt);
 			}
@@ -77,5 +80,5 @@ public class MapStrings extends ArrayList<MapStrings.MapString> {
 		}
 		return strings.toArray(new String[0]);
 	}
-};
+}
 

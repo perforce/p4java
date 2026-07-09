@@ -2,14 +2,19 @@ plugins {
     id 'java-library'
     id 'maven-publish'
     id 'signing'
+    id 'jacoco'
     id "io.github.gradle-nexus.publish-plugin" version "2.0.0"
     }
 
 group = 'com.perforce'
 version = project.hasProperty('ver') ? project.ext.ver : 'PREP-TEST_ONLY'
 
-sourceCompatibility = 11
-targetCompatibility = 11
+java {
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
+    withSourcesJar()
+    withJavadocJar()
+}
 
 repositories {
     maven { url "https://repo.maven.apache.org/maven2" }
@@ -18,7 +23,7 @@ repositories {
 
 dependencies {
     api 'com.jcraft:jzlib:1.1.3'
-    api 'org.apache.commons:commons-lang3:3.12.0'
+    api 'org.apache.commons:commons-lang3:3.18.0'
     api 'commons-codec:commons-codec:1.15'
     api 'commons-io:commons-io:2.17.0'
     api 'com.google.code.findbugs:jsr305:3.0.2'
@@ -34,7 +39,7 @@ dependencies {
 
 jar {
     into("META-INF/maven/$project.group/$project.name") {
-        from { generatePomFileForMavenJavaPublication }
+        from { tasks.named("generatePomFileForMavenJavaPublication") }
         rename ".*", "pom.xml"
     }
     manifest {
@@ -127,10 +132,7 @@ nexusPublishing {
    }
 }
 
-java {
-    withSourcesJar()
-    withJavadocJar()
-}
+
 
 artifacts {
     archives jar
@@ -138,15 +140,31 @@ artifacts {
     archives sourcesJar
 }
 
-tasks.withType(Javadoc) {
+tasks.withType(Javadoc).configureEach {
     (options as StandardJavadocDocletOptions).addStringOption("Xmaxwarns", "500")
     (options as StandardJavadocDocletOptions).addStringOption("Xmaxerrs", "500")
 }
 
 // Report lint check details
-tasks.withType(JavaCompile) {
+tasks.withType(JavaCompile).configureEach {
     options.compilerArgs.add("-Xlint:deprecation")
     options.compilerArgs.add("-Xlint:unchecked")
+}
+
+jacoco {
+    toolVersion = "0.8.12"
+}
+
+test {
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
 }
 
 signing {

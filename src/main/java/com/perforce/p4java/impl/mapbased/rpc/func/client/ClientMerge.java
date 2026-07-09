@@ -202,6 +202,7 @@ public class ClientMerge {
 				mergeState.setShowAll(showAll != null);
 
 			} catch (IOException ioexc) {
+				mergeState.closeStreams();
 				handler.setError(true);
 				cmdEnv.handleResult(new RpcMessage(ClientMessageId.CANT_CREATE_FILE, MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT, new String[]{clientPath, ioexc.getLocalizedMessage()}).toMap());
 

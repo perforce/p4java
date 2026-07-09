@@ -1,7 +1,7 @@
                             Release Notes for
                          P4Java, P4 API for Java
 
-                              Version 2025.2
+                              Version 2026.1
 
 Introduction
 
@@ -36,7 +36,7 @@ Requirements
 	* This release of P4Java supports the 2025.2 P4 Server. Older releases 
 	  might work but are not supported.
 
-	* Java: full standard JDK 11 or later.  Implementation as
+	* Java: full standard JDK 17 or later.  Implementation as
 	  discussed in "Known Limitations" below.
 
 	* SSL: unlimited strength JCE (Java Cryptography Extension) package for
@@ -136,6 +136,39 @@ Known Limitations
 	  <java-home>/lib/security/US_export_policy.jar
 	  
 	* P4Java would not support file operations on altsync enabled clients.
+
+-------------------------------------------
+Updates in 2026.1 (2026.1/2989454) (2026/06/23)
+
+	#2951197 (Job #132275)
+    	P4JAVA-1565: Modifying Sysytem.out print statements to error log statements to
+    	fix breaking stdio communication of trigger with the server
+
+	#2955891 (Job #133664)
+    	Adding p4 server 2026.1 server support, Java 17 and gradle 8.7 support
+
+	#2959951 (Job #132588)
+    	Fixed file path decoding failure for non-ASCII filenames on non-Unicode server
+
+	#2970743 (Job #132763)
+    	Added p4 obliterate -H (search db.have) , -L (search db.label) opt-in flags, 
+    	and -l opt-out flag
+
+	#2973432 (Job #133322)
+    	Fixed UTF8+BOM sync regression for files stored before P4D 2015.2
+
+	#2980476 (Job #132905)
+    	Upgrade org.apache.commons:commons-lang3 from 3.12.0 to 3.18.0 to 
+    	resolve CVE-2025-48924
+
+	#2983889 (Job #132589)
+    	Fixed resource leak: close RpcStreamOutput to release file handles on Windows
+
+	#2986578 (Job #130094)
+    	Update GetPropertyOptions Javadoc for p4 property -l flag scoping and admin-access changes
+
+	#2987040 (Job #133747)
+    	Implement client-side system-ignore guard to block server-directed writes to P4TRUST / P4TICKET / P4CONFIG (CVE-class)
 
 -------------------------------------------
 Updates in 2025.2 Patch 1 (2025.2/2917314) (2026/03/27)

@@ -140,6 +140,20 @@ public class ClientSendFile {
 			cmdEnv.addHandler(handler);
 		}
 
+		// Block sending protected paths on submit (26.1 P4_<PORT>_SYSTEMIGNORE guard).
+		// The symlink-target boundary check is intentionally NOT applied on
+		// submit — it runs on sync only.
+		if (clientPath != null
+				&& SystemIgnoreHelper.isProtected(clientPath, cmdEnv.getServer(), rpcConnection)) {
+			handler.setError(true);
+			cmdEnv.handleResult(new RpcMessage(
+					ClientMessageId.PATH_PROTECTED,
+					MessageSeverityCode.E_FAILED,
+					MessageGenericCode.EV_CLIENT,
+					new String[]{clientPath}).toMap());
+			return RpcPacketDispatcherResult.CONTINUE_LOOP;
+		}
+
 		Map<String, Object> respMap = new HashMap<>();
 		InputStream inStream = null;
 		MD5Digester digester = null;

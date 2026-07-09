@@ -145,4 +145,4 @@ public interface IStreamViewMapping extends IMapEntry {
 	 * becomes "//depot/test/space test 01/..." "//depot/test/space test 02/...".
 	 */
 	String toString(String sepString, boolean quoteBlanks);
-};
+}

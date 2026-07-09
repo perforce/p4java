@@ -298,7 +298,7 @@ public abstract class AbstractAuthHelper {
 				try {
 					fileLock = lockFileChannel.tryLock();
 					if (isNull(fileLock)) {
-						System.out.println("did not get the lock");
+						Log.info("-----%s did not get the lock", currentThreadName);
 					}
 				} catch (IllegalStateException e) {
 					// ignore, means locked by other process at this moment

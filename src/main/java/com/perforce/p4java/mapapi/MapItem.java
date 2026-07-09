@@ -1,5 +1,8 @@
 package com.perforce.p4java.mapapi;
 
+import com.perforce.p4java.Log;
+import com.perforce.p4java.server.callback.ILogCallback.LogTraceLevel;
+
 import java.util.ArrayList;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -526,7 +529,7 @@ public class MapItem {
 		}
 
 		if (l == 0) {
-			if (buf == null) System.out.print("MapTree\n");
+			if (buf == null) Log.trace(LogTraceLevel.FINE, "MapTree\n");
 			else buf.append("MapTree\n");
 		}
 
@@ -535,7 +538,7 @@ public class MapItem {
 		}
 
 		String out = String.format("%s%s %c%s <-> %s%s (maxslot %d (%d))\n", indent, name, " -+$@&    123456789".charAt(mapFlag.code), ths(d).get(), ohs(d).get(), whole(d).hasands ? " (has &)" : "", whole(d).maxSlot, whole(d).maxSlotNoAnds);
-		if (buf == null) System.out.print(out);
+		if (buf == null) Log.trace(LogTraceLevel.FINE, out);
 		else buf.append(out);
 
 		if (whole(d).center != null) {

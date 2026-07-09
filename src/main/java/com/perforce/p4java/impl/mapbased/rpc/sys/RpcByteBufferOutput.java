@@ -3,6 +3,7 @@
  */
 package com.perforce.p4java.impl.mapbased.rpc.sys;
 
+import com.perforce.p4java.Log;
 import com.perforce.p4java.exception.FileDecoderException;
 import com.perforce.p4java.exception.FileEncoderException;
 import com.perforce.p4java.exception.NullPointerError;
@@ -94,10 +95,10 @@ public class RpcByteBufferOutput {
 			this.byteBuffer.put(b);
 		}
 		catch (BufferOverflowException e) {
-			System.out.println("Byte Buffer OverFlow Exception throws : " + e);
+			Log.error("Byte Buffer OverFlow Exception throws : %s", e.getLocalizedMessage());
 		}
 		catch (ReadOnlyBufferException e) {
-			System.out.println("Byte Buffer ReadOnly Buffer Exception throws : " + e);
+			Log.error("Byte Buffer ReadOnly Buffer Exception throws : %s", e.getLocalizedMessage());
 		}
 	}
 

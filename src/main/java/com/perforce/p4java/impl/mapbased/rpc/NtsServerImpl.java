@@ -169,6 +169,11 @@ public class NtsServerImpl extends RpcServer {
 		Log.info("RPC connection to Perforce server " + serverHost + ":" + serverPort + " established");
 
 		super.connect();
+		// Override the unicodeServer flag derived from the charset proxy with the
+		// authoritative value from the server info populated by super.connect().
+		// This ensures non-Unicode servers with a configured client charset do not
+		// incorrectly decode wire bytes as UTF-8.
+		this.rpcConnection.setUnicodeServer(this.isServerUnicode());
 	}
 
 	/**
@@ -197,6 +202,8 @@ public class NtsServerImpl extends RpcServer {
 	public boolean setCharsetName(String charsetName) throws UnsupportedCharsetException {
 		boolean retVal = super.setCharsetName(charsetName);
 		this.rpcConnection.setClientCharset(this.p4Charset);
+		// Keep the unicodeServer flag in sync if the caller changes the charset after connect().
+		this.rpcConnection.setUnicodeServer(this.isServerUnicode());
 		return retVal;
 	}
 
@@ -392,6 +399,7 @@ public class NtsServerImpl extends RpcServer {
 				}
 				throw exec;
 			} finally {
+				closeTmpOutputStream(cmdEnv);
 				// Handle user cancelled command
 				if (cmdEnv != null && cmdEnv.isUserCanceled()) {
 					if (rpcConnection != null) {
@@ -588,6 +596,7 @@ public class NtsServerImpl extends RpcServer {
 			Log.exception(ioexc);
 			throw new RequestException("I/O error encountered in stream command: " + ioexc.getLocalizedMessage(), ioexc);
 		} finally {
+			closeTmpOutputStream(cmdEnv);
 			// Handle user cancelled command
 			if (cmdEnv != null && cmdEnv.isUserCanceled()) {
 				if (rpcConnection != null) {

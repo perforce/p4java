@@ -9,7 +9,7 @@ P4Java is a Java-native API for accessing Perforce SCM services from within Java
 
 ## Requirements
 * Perforce server at Release 2015.1 or higher.
-* Java: full standard JDK 1.8 or later.  Implementation as discussed in "Known Limitations" below.
+* Java: full standard JDK 17 or later.
 * SSL: unlimited strength JCE (Java Cryptography Extension) package for 256-bit encryption level SSL connection to a secure Perforce server.
 
 ### SSL and Trust

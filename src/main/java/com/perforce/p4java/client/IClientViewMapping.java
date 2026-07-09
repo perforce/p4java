@@ -19,4 +19,4 @@ public interface IClientViewMapping extends IMapEntry {
 	String getClient(boolean quoteBlanks);
 	void setDepotSpec(String depotSpec);
 	void setClient(String client);
-};
+}

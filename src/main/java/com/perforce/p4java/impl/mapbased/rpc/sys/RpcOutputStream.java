@@ -323,7 +323,13 @@ public class RpcOutputStream extends FileOutputStream {
 
 		if (!isGunZipType) {
 			bom = addUtf8BomIfNeeded(sourceBytes);
-			sourceBytes = removeUtf8BomIfNeeded(sourceBytes);
+			// Only strip the BOM for explicit UTF-8 file types (FST_UTF8 / FST_XUTF8) where
+			// filesys.utf8bom=0 means "do not write a BOM".  Legacy unicode files
+			// (FST_UNICODE / FST_XUNICODE) stored before P4D 2015.2 carry the BOM as part
+			// of the stored content.
+			if (isUtf8BomManagedType(this.fileType)) {
+				sourceBytes = removeUtf8BomIfNeeded(sourceBytes);
+			}
 			writeUtf8Bom = false;
 		}
 
@@ -395,7 +401,9 @@ public class RpcOutputStream extends FileOutputStream {
 				sourceBytes = decompressSourceBytes(sourceBytes);
 
 				bom = addUtf8BomIfNeeded(sourceBytes);
-				sourceBytes = removeUtf8BomIfNeeded(sourceBytes);
+				if (isUtf8BomManagedType(this.fileType)) {
+					sourceBytes = removeUtf8BomIfNeeded(sourceBytes);
+				}
 				writeUtf8Bom = false;
 
 				if (this.lineEndStream != null) {
@@ -454,7 +462,6 @@ public class RpcOutputStream extends FileOutputStream {
 	 * @throws IOException on error
 	 */
 	private int addUtf8BomIfNeeded(byte[] sourceBytes) throws IOException {
-		// filesys.utf8bom = 1
 		if (writeUtf8Bom && !hasUtf8Bom(sourceBytes)) {
 			this.write(new byte[]{(byte) 0xEF, (byte) 0xBB, (byte) 0xBF}, 0, 3);
 			return 3;
@@ -466,11 +473,15 @@ public class RpcOutputStream extends FileOutputStream {
 	 * Removes 1 UTF-8 BOM from sourceBytes if writeUtf8Bom is false and sourceBytes has one/many.
 	 * Also updates the len field to reflect the new length.
 	 *
+	 * Only applies to UTF-8 family file types (FST_UTF8 / FST_XUTF8 and their _GUNZIP siblings),
+	 * where a leading BOM is a charset marker the server expects the client to manage. For all
+	 * other types (including FST_TEXT / FST_XTEXT used by pre-2015.2 legacy storage of UTF8+BOM
+	 * files), a leading BOM is user content and must be preserved.
+	 *
 	 * @param sourceBytes the source byte array to process
 	 * @return the sourceBytes
 	 */
 	private byte[] removeUtf8BomIfNeeded(byte[] sourceBytes) {
-		//filesys.utf8bom = 0
 		if (!writeUtf8Bom && hasUtf8Bom(sourceBytes)) {
 			byte[] newSourceBytes = new byte[sourceBytes.length - 3];
 			System.arraycopy(sourceBytes, 3, newSourceBytes, 0, sourceBytes.length - 3);
@@ -506,6 +517,22 @@ public class RpcOutputStream extends FileOutputStream {
 				|| fileType == RpcPerforceFileType.FST_UTF16_GUNZIP
 				|| fileType == RpcPerforceFileType.FST_XUTF16_GUNZIP
 				|| fileType == RpcPerforceFileType.FST_XUNICODE_GUNZIP;
+	}
+
+	/**
+	 * Returns true iff this file type is an explicit UTF-8 type for which BOM
+	 * removal is appropriate.
+	 * Legacy unicode files stored before P4D 2015.2 carry the BOM as part of the
+	 * stored file content and saved as a text file.
+	 *
+	 * @param fileType the file type to test
+	 * @return true for FST_UTF8, FST_XUTF8, FST_UTF8_GUNZIP, FST_XUTF8_GUNZIP
+	 */
+	private boolean isUtf8BomManagedType(RpcPerforceFileType fileType) {
+		return fileType == RpcPerforceFileType.FST_UTF8
+				|| fileType == RpcPerforceFileType.FST_XUTF8
+				|| fileType == RpcPerforceFileType.FST_UTF8_GUNZIP
+				|| fileType == RpcPerforceFileType.FST_XUTF8_GUNZIP;
 	}
 
 	/**

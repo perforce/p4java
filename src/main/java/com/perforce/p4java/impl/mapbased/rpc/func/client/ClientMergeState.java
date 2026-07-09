@@ -235,6 +235,7 @@ public class ClientMergeState {
 					break;
 			}
 		} finally {
+			closeStreams();
 			try {
 				// Try not to delete the target file here...
 
@@ -482,6 +483,32 @@ public class ClientMergeState {
 
 	protected void setResultTmpFileStream(RpcOutputStream resultTmpFileStream) {
 		this.resultTmpFileStream = resultTmpFileStream;
+	}
+
+	/**
+	 * Closes an RpcOutputStream, swallowing any IOException. Null-safe.
+	 *
+	 * @param stream the stream to close; may be null
+	 */
+	private static void closeQuietly(RpcOutputStream stream) {
+		if (stream != null) {
+			try {
+				stream.close();
+			} catch (IOException e) {
+				Log.warn("unexpected exception closing RpcOutputStream: " + e.getLocalizedMessage());
+				Log.exception(e);
+			}
+		}
+	}
+
+	/**
+	 * Closes all merge tmp-file streams, swallowing any IOException. Null-safe
+	 * and idempotent, so it is safe to call from every cleanup path.
+	 */
+	protected void closeStreams() {
+		closeQuietly(this.baseTmpFileStream);
+		closeQuietly(this.theirTmpFileStream);
+		closeQuietly(this.resultTmpFileStream);
 	}
 
 	private boolean checkStream(RpcOutputStream stream) {

@@ -48,4 +48,4 @@ public class RpcFunctionMetadata {
 	public void setEncoding(String encoding) {
 		this.encoding = encoding;
 	}
-};
+}

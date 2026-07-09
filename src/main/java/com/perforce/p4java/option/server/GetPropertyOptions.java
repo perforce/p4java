@@ -11,11 +11,27 @@ import java.util.List;
 
 /**
  * Options class for IOptionsServer's getPropertyValues methods.
+ * <p>
+ * Usage:
+ *
+ * <pre>
+ * p4 property -l [-A] [-n name [-s sequence]] [-u user | -g group]
+ * </pre>
+ * <p>
+ * The -A flag specifies that properties for all users and groups should
+ * be listed, including the sequence number of each property value.
+ * When combined with -g or -u, the output is limited to properties set
+ * explicitly on the group or user; omitting the -A with either flag will
+ * output all properties that would apply to the specified user or a user
+ * of the specified group.
+ * <p>
+ * The -a, -A, -d, -g and -u flags require that the user have 'admin'
+ * access granted by 'p4 protect'.
  */
 public class GetPropertyOptions extends Options {
 
 	/**
-	 * Options: [-A] [-n name [-s sequence] [-u user | -g group]] [-F filter -T taglist -m max]
+	 * Options: [-A] [-n name [-s sequence]] [-u user | -g group] [-F filter -T taglist -m max]
 	 */
 	public static final String OPTIONS_SPECS = "b:A s:n i:s:gtz s:u s:g s:F s:T i:m:gtz";
 

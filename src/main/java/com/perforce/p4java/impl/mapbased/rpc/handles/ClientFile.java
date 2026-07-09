@@ -70,22 +70,26 @@ public class ClientFile extends AbstractHandle {
 	}
 
 	public void Close() {
-		try {
-			if (getTmpStream() != null) {
-				if (getTmpStream().getLocalDigester() != null) {
-					localDigest = getTmpStream().getLocalDigester().digestAs32ByteHex();
-				}
+		if (getTmpStream() != null) {
+			if (getTmpStream().getLocalDigester() != null) {
+				localDigest = getTmpStream().getLocalDigester().digestAs32ByteHex();
+			}
+			try {
 				getTmpStream().close();
+			} catch (IOException e) {
+				setError(true);
 			}
+		}
 
-			if (getStream() != null) {
-				if (getStream().getLocalDigester() != null) {
-					localDigest = getStream().getLocalDigester().digestAs32ByteHex();
-				}
-				getStream().close();
+		if (getStream() != null) {
+			if (getStream().getLocalDigester() != null) {
+				localDigest = getStream().getLocalDigester().digestAs32ByteHex();
 			}
-		} catch (IOException e) {
-			setError(true);
+			try {
+				getStream().close();
+			} catch (IOException e) {
+				setError(true);
+			}
 		}
 	}
 

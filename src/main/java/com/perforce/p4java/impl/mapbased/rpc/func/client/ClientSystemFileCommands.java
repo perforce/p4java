@@ -120,6 +120,31 @@ public class ClientSystemFileCommands {
 	}
 
 	/**
+	 * Returns true, if the write may proceed; false, if the path
+	 * is protected. On block, surfaces a PATH_PROTECTED error via
+	 * cmdEnv and marks the handler as errored (if non-null).
+	 */
+	private boolean checkSystemIgnore(
+			RpcConnection rpcConnection,
+			CommandEnv cmdEnv,
+			CommandEnv.RpcHandler handler,
+			String path) {
+
+		if (path != null && SystemIgnoreHelper.isProtected(path, server, rpcConnection)) {
+			if (handler != null) {
+				handler.setError(true);
+			}
+			cmdEnv.handleResult(new RpcMessage(
+					ClientMessageId.PATH_PROTECTED,
+					MessageSeverityCode.E_FAILED,
+					MessageGenericCode.EV_CLIENT,
+					new String[]{path}).toMap());
+			return false;
+		}
+		return true;
+	}
+
+	/**
 	 * Change the r/w (etc.) mode of a file locally.
 	 *
 	 * @param rpcConnection rpcConnection
@@ -150,6 +175,11 @@ public class ClientSystemFileCommands {
 
 		try {
 			cmdEnv.newHandler();    // As per C++ API...
+
+			// Block writes to protected paths (26.1 guard).
+			if (!checkSystemIgnore(rpcConnection, cmdEnv, null, path)) {
+				return RpcPacketDispatcherResult.CONTINUE_LOOP;
+			}
 
 			File targetFile = new RpcPerforceFile(path, fileTypeStr);
 
@@ -270,6 +300,12 @@ public class ClientSystemFileCommands {
 			} else {
 				handler.setFile(new RpcPerforceFile(clientPath, fileTypeStr));
 				handler.getMap().clear();
+			}
+
+			// Block writes to protected paths (26.1 guard). openFile is the
+			// chokepoint for sync, shelve, resolve and symlink writes.
+			if (!checkSystemIgnore(rpcConnection, cmdEnv, handler, clientPath)) {
+				return RpcPacketDispatcherResult.CONTINUE_LOOP;
 			}
 
 			if (digestType != null) {
@@ -1241,6 +1277,12 @@ public class ClientSystemFileCommands {
 		}
 		handler.setError(false);
 
+		// Block moves whose target is a protected path (26.1 guard).
+		// moveFile does not pass through openFile, so it must be checked here too.
+		if (!checkSystemIgnore(rpcConnection, cmdEnv, handler, targetPath)) {
+			return RpcPacketDispatcherResult.CONTINUE_LOOP;
+		}
+
 		if (!RpcPerforceFile.fileExists(fromFile, fromFstSymlink)) {
 			cmdEnv.handleResult(new RpcMessage(ClientMessageId.FILE_NONEXISTENT, MessageSeverityCode.E_INFO, MessageGenericCode.EV_CLIENT, new String[]{clientPath}).toMap());
 
@@ -2060,6 +2102,17 @@ public class ClientSystemFileCommands {
 
 		// file to verify
 		String file = cfile.getFile().getAbsolutePath();
+
+		// 26.1 system-ignore guard: on sync, refuse to write through a symlink
+		// whose target is protected by P4_<PORT>_SYSTEMIGNORE.
+		if (cfile.isSymlink() && cfile.getSymTarget() != null
+				&& SystemIgnoreHelper.isProtected(cfile.getSymTarget(), server, rpcConnection)) {
+			cfile.setError(true);
+			cmdEnv.handleResult(new RpcMessage(ClientMessageId.PATH_PROTECTED,
+					MessageSeverityCode.E_FAILED, MessageGenericCode.EV_CLIENT,
+					new String[]{cfile.getSymTarget()}).toMap());
+			return false;
+		}
 
 		// or symlink
 		if (cfile.isSymlink() && rpcConnection.getFilesysRestrictedSymlinks() == 1) {

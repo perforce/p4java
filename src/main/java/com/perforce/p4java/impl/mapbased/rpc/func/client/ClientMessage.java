@@ -90,7 +90,8 @@ public class ClientMessage {
 		FILE_ENCODER_ERROR,  // 17.3 UTF16 encoder
 		NO_MODIFIED_FILE,
 		NOT_UNDER_CLIENT_PATH,
-		DIR_NOT_EMPTY
+		DIR_NOT_EMPTY,
+		PATH_PROTECTED
 	}
 
 	;
@@ -216,6 +217,10 @@ public class ClientMessage {
 					93,
 					"Directory %directory% is not empty.",
 					new String[]{"directory"}),
+			new ClientMessage(ClientMessageId.PATH_PROTECTED,
+					106,
+					"File %clientFile% is protected by 'P4_SYSTEMIGNORE'",
+					new String[]{"clientFile"}),
 	};
 
 	/**

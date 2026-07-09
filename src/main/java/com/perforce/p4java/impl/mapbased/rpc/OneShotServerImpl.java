@@ -291,6 +291,7 @@ public class OneShotServerImpl extends RpcServer {
 		while (attempt <= maxRetries) {
 			RpcPacketDispatcher dispatcher = null;
 			RpcConnection rpcConnection = null;
+			CommandEnv cmdEnv = null;
 
 			try {
 				attempt++;
@@ -298,6 +299,10 @@ public class OneShotServerImpl extends RpcServer {
 				long startTime = System.currentTimeMillis();
 				dispatcher = new RpcPacketDispatcher(props, this);
 				rpcConnection = new RpcStreamConnection(serverHost, serverPort, props, this.serverStats, this.p4Charset, null, this.socketPool, this.secure, this.rsh);
+				// Override the unicodeServer flag with the authoritative value from the
+				// server info so non-Unicode servers with a configured charset decode
+				// non-ASCII filenames correctly rather than mangling them as UTF-8.
+				rpcConnection.setUnicodeServer(this.isServerUnicode());
 				ProtocolCommand protocolSpecs = new ProtocolCommand();
 
 				if (inMap != null && ClientLineEnding.CONVERT_TEXT) {
@@ -305,7 +310,7 @@ public class OneShotServerImpl extends RpcServer {
 				}
 
 				ExternalEnv env = setupCmd(dispatcher, rpcConnection, protocolSpecs, cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, inMap, ignoreCallbacks, cmdCallBackKey, false);
-				CommandEnv cmdEnv = new CommandEnv(this, new RpcCmdSpec(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, getAuthTicket(), inMap, inString, env), rpcConnection, protocolSpecs, this.serverProtocolMap, this.progressCallback, cmdCallBackKey, writeInPlace(cmdName), this.isNonCheckedSyncs());
+				cmdEnv = new CommandEnv(this, new RpcCmdSpec(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, getAuthTicket(), inMap, inString, env), rpcConnection, protocolSpecs, this.serverProtocolMap, this.progressCallback, cmdCallBackKey, writeInPlace(cmdName), this.isNonCheckedSyncs());
 				cmdEnv.setDontWriteTicket(isDontWriteTicket(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs));
 				cmdEnv.setFieldRule(getRpcPacketFieldRule(inMap, CmdSpec.getValidP4JCmdSpec(cmdName)));
 				cmdEnv.setStreamingCallback(callback);
@@ -387,6 +392,7 @@ public class OneShotServerImpl extends RpcServer {
 			}
 
 			finally {
+				closeTmpOutputStream(cmdEnv);
 				if (rpcConnection != null) {
 					rpcConnection.disconnect(dispatcher);
 				}
@@ -517,6 +523,7 @@ public class OneShotServerImpl extends RpcServer {
 	protected InputStream execStreamCmd(String cmdName, String[] cmdArgs, Map<String, Object> inMap, String inString, boolean ignoreCallbacks) throws ConnectionException, RequestException, AccessException {
 		RpcPacketDispatcher dispatcher = null;
 		RpcConnection rpcConnection = null;
+		CommandEnv cmdEnv = null;
 		if (cmdName == null) {
 			throw new NullPointerError("Null command name passed to execStreamCmd");
 		}
@@ -530,12 +537,16 @@ public class OneShotServerImpl extends RpcServer {
 			long startTime = System.currentTimeMillis();
 			dispatcher = new RpcPacketDispatcher(props, this);
 			rpcConnection = new RpcStreamConnection(serverHost, serverPort, props, this.serverStats, this.p4Charset, null, this.socketPool, this.secure, this.rsh);
+			// Override the unicodeServer flag with the authoritative value from the
+			// server info so non-Unicode servers with a configured charset decode
+			// non-ASCII filenames correctly rather than mangling them as UTF-8.
+			rpcConnection.setUnicodeServer(this.isServerUnicode());
 			ProtocolCommand protocolSpecs = new ProtocolCommand();
 			if (inMap != null && ClientLineEnding.CONVERT_TEXT) {
 				ClientLineEnding.convertMap(inMap);
 			}
 			ExternalEnv env = setupCmd(dispatcher, rpcConnection, protocolSpecs, cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, inMap, ignoreCallbacks, cmdCallBackKey, true);
-			CommandEnv cmdEnv = new CommandEnv(this, new RpcCmdSpec(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, getAuthTicket(), inMap, inString, env), rpcConnection, protocolSpecs, this.serverProtocolMap, this.progressCallback, cmdCallBackKey, writeInPlace(cmdName), this.isNonCheckedSyncs());
+			cmdEnv = new CommandEnv(this, new RpcCmdSpec(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs, getAuthTicket(), inMap, inString, env), rpcConnection, protocolSpecs, this.serverProtocolMap, this.progressCallback, cmdCallBackKey, writeInPlace(cmdName), this.isNonCheckedSyncs());
 			cmdEnv.setDontWriteTicket(isDontWriteTicket(cmdName.toLowerCase(Locale.ENGLISH), cmdArgs));
 			cmdEnv.setFieldRule(getRpcPacketFieldRule(inMap, CmdSpec.getValidP4JCmdSpec(cmdName)));
 			cmdEnv.setStreamCmd(true);
@@ -578,6 +589,7 @@ public class OneShotServerImpl extends RpcServer {
 			Log.exception(ioexc);
 			throw new RequestException("I/O error encountered in stream command: " + ioexc.getLocalizedMessage(), ioexc);
 		} finally {
+			closeTmpOutputStream(cmdEnv);
 			if (rpcConnection != null) {
 				rpcConnection.disconnect(dispatcher);
 			}
@@ -615,6 +627,10 @@ public class OneShotServerImpl extends RpcServer {
 			long startTime = System.currentTimeMillis();
 			dispatcher = new RpcPacketDispatcher(props, this);
 			rpcConnection = new RpcStreamConnection(serverHost, serverPort, props, this.serverStats, this.p4Charset, null, this.socketPool, this.secure, this.rsh);
+			// Override the unicodeServer flag with the authoritative value from the
+			// server info so non-Unicode servers with a configured charset decode
+			// non-ASCII filenames correctly rather than mangling them as UTF-8.
+			rpcConnection.setUnicodeServer(this.isServerUnicode());
 			ProtocolCommand protocolSpecs = new ProtocolCommand();
 			if (inMap != null && ClientLineEnding.CONVERT_TEXT) {
 				ClientLineEnding.convertMap(inMap);
